@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "scope": "Isolation overlay after accepted P4; prior stage records retained unchanged",
+  "production_files": 22,
+  "protected_files": 17,
+  "files": [
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "b135cb1c5483ef9e9423c8fff7e98cd632dfc4e9",
+      "source_sha256": "d45e4e44ce89acc6705c531979190b79755014e6830985b03853325c8f6af01f",
+      "release_sha256": "fc831dd9ed9a6b5a080ed80d5a3c2a51a175125493932a9f51f390547072cc0b",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "b135cb1c5483ef9e9423c8fff7e98cd632dfc4e9",
+      "source_sha256": "aa297fefb18924d64a6f0d21277b742745826be374c05bdfc14d6d0b2290c1b0",
+      "release_sha256": "12a77de156a9a41a43b0204ea584efa80001886cd160b52ee782d97e5d7307f9",
+      "reason": "Independent configuration/resource orchestration, explicit dataset paths, namespace acceptance, synthetic tests and distribution exclusion; no business module changes"
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "b135cb1c5483ef9e9423c8fff7e98cd632dfc4e9",
+      "source_sha256": "92f04f9b1ca4437702eae390d21bc5494d97a98f9abc7ea568dc96467db96729",
+      "release_sha256": "e7caee90e5eb558273f82ff13203eb668e2d025d6da167c0e62bae7592386eb7",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "b135cb1c5483ef9e9423c8fff7e98cd632dfc4e9",
+      "source_sha256": "4d21c7f4e303c0465434d379ac74487d7aac3d5870a2a2654584a629c3c808d8",
+      "release_sha256": "a162d341f1ff74dba80945b94c72a5b185b656d7ee4a1e2a61e93f50f60e0d5d",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "provenance/evaluation-lock.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+      "reason": "Independent configuration/resource orchestration, explicit dataset paths, namespace acceptance, synthetic tests and distribution exclusion; no business module changes"
+    },
+    {
+      "destination": "provenance/isolation.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "ee1fe5f7a4d1d574b12bed935fb297c26973fe149ca57a9913996663752d4939",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "scripts/check_task33.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "ae2e0f84df53ce45be2f604d0ef2668dd6dd55b3f52418c0520efbeb33333ba3",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "tests/test_standalone.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "b48be1c024e7e7833ab8fc392d67f4dbde5eb51591018de80d5c4676704d1e1f",
+      "reason": "Independent configuration/resource orchestration, explicit dataset paths, namespace acceptance, synthetic tests and distribution exclusion; no business module changes"
+    },
+    {
+      "destination": "tests/test_task33_terminal.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "590bacd4dc88472db35e691d1e02f1fa7890279afa45b072d64115c645c2976d",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "tools/check_task33.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "0bf5e4025d26610614907539e90130829ba45a524ff0728546150c68ed3a5c03",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    },
+    {
+      "destination": "tools/standalone.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4de109f1223d24ae574088e28ad06416befb338ee93e794d7e725aee2985a5a4",
+      "reason": "Independent configuration/resource orchestration, explicit dataset paths, namespace acceptance, synthetic tests and distribution exclusion; no business module changes"
+    },
+    {
+      "destination": "tools/verify_isolation.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "1758ec69f77b803eb48e2a1d1654bd9e1ea742d3473e8e1e6333a86b8eb570ff",
+      "reason": "Independent configuration/resource orchestration, explicit dataset paths, namespace acceptance, synthetic tests and distribution exclusion; no business module changes"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "b135cb1c5483ef9e9423c8fff7e98cd632dfc4e9",
+      "source_sha256": "377e47f044292cd035215a977c7e372b7a55a6188ec722428c8aa50702a1aaf9",
+      "release_sha256": "5c94714b6b9571589dc3ea573d5ba50dd80989273e5a8a4f54b5593e0c9025c3",
+      "reason": "Independent resource/configuration and user-invoked terminal task-33 three-trial check; bounded fresh sessions, original frozen runner and scoring, offline orchestration tests; no production module changes"
+    }
+  ],
+  "self_sha256": "recorded externally in acceptance and package hashes"
+}

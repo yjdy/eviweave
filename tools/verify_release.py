@@ -22,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--archive-root', type=Path, help='explicit project-local directory containing one wheel and sdist')
     parser.add_argument('--git-scope', choices=['staged','head','worktree'], default='staged', help='explicit Git content scope; empty scopes fail')
     args = parser.parse_args()
     root = args.project.resolve()
@@ -33,12 +34,13 @@ def main():
             raise ValueError(detail)
         checks.append(detail)
     def inspect(names, label):
-        forbidden = {'docs','.docs','.audit','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent'}
+        forbidden = {'docs','.docs','.audit','.local','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent'}
         for name in names:
             path = PurePosixPath(name)
             require(not path.name.startswith('eviweave-v0.1.0-v6-evidence') and not path.name.endswith('.zip'),label+': no experimental attachment '+name)
             require(not any(part in forbidden or part.startswith('.venv') for part in path.parts),label+': clean path '+name)
             require(not (path.name == '.env' or path.name.startswith('.env.') or path.suffix in {'.pyc','.env'}),label+': no local config '+name)
+            require(not (path.parent.name == 'configs' and path.name.startswith('local')),label+': no private config '+name)
     if args.git_scope == 'staged':
         command = ['git','-C',str(root),'diff','--cached','--name-only','--diff-filter=ACMR','-z']
     elif args.git_scope == 'head':
@@ -59,7 +61,9 @@ def main():
             entry = next(e for e in expected.values() if e['destination'] == name)
             require(digest(git_content(name)) == entry['release_sha256'],'git digest '+name)
     archives = []
-    wheel = list((root/'dist').glob('*.whl'));sdist = list((root/'dist').glob('*.tar.gz'))
+    archive_root = (args.archive_root or root/'dist').resolve()
+    require(archive_root.is_relative_to(root), 'archives remain inside project')
+    wheel = list(archive_root.glob('*.whl'));sdist = list(archive_root.glob('*.tar.gz'))
     require(len(wheel)==len(sdist)==1,'exactly one wheel and sdist')
     for artifact in [*wheel,*sdist]:
         if artifact.suffix == '.whl':
@@ -86,6 +90,12 @@ def main():
             require(required_p3.issubset(members), 'sdist contains all P3 suites, diagnostic tools, provenance and CI workflow')
             required_p4={'tools/package_evidence.py','tools/evidence_support.py','tools/evidence_verify.py','tests/test_evidence_packaging.py','provenance/evidence-baseline.json','provenance/evidence.zh-CN.md'}
             require(required_p4.issubset(members), 'sdist contains P4 evidence tools, tests and provenance')
+            required_isolation = {'tools/standalone.py','tools/verify_isolation.py','tests/test_standalone.py',
+                'provenance/evaluation-lock.json','provenance/isolation.zh-CN.md','provenance/isolation-baseline.json',
+                'scripts/check_task33.sh','tools/check_task33.py','tests/test_task33_terminal.py'}
+            require(required_isolation.issubset(members), 'sdist contains independent resource and isolation tools')
+            for name in required_isolation:
+                require(members[name] == (root/name).read_bytes(), 'sdist current isolation content '+name)
             for name in required_p4:
                 require(members[name] == (root/name).read_bytes(), 'sdist current P4 content '+name)
             for name in required_p3:

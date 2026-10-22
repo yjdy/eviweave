@@ -6,6 +6,68 @@ Historical `relation-v6 + simple-fixes-v1 + Codex` baseline, prepared by **Ë¢ÅÁè
 
 P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4 provides local experiment-attachment preparation, selected-trace redaction and frozen offline scoring; public release remains P5 work. The formal technical report is deferred.
 
+## Independent configuration and resources
+
+Use the historical V6 Responses endpoint and `qwen3.8-flash` model with an EviWeave-dedicated API key. **Users must set `EVIWEAVE_API_KEY` themselves**; never store it in YAML or borrow DataSpace's credential file. The standalone wrapper accepts only that key variable, with no provider-key fallback. The public offline template keeps its invalid placeholder endpoint; the actual endpoint belongs in a private configuration.
+
+Obtain the dataset separately from the [official Hugging Face release](https://huggingface.co/datasets/HKUSTDial/DataSpace), following the [upstream download instructions](https://github.com/HKUSTDial/DataSpace#dataset). Use a project-local optional downloader and cache, pin the chosen full repository revision, check the supplied SHA-256, and extract locally:
+
+```sh
+mkdir -p .local/download .audit/tmp .audit/cache
+export TMPDIR="$PWD/.audit/tmp"
+export PIP_CACHE_DIR="$PWD/.audit/cache/pip"
+export HF_HOME="$PWD/.local/hf-cache"
+python3 -m venv .local/download-env
+.local/download-env/bin/python -m pip install huggingface_hub
+export DATA_REVISION='<full Hugging Face dataset commit ID>'
+.local/download-env/bin/hf download HKUSTDial/DataSpace \
+  release/DataSpace-Benchmark.zip release/DataSpace-Benchmark.zip.sha256 \
+  --repo-type dataset --revision "$DATA_REVISION" --local-dir "$PWD/.local/download"
+(cd .local/download/release && sha256sum --check DataSpace-Benchmark.zip.sha256)
+unzip .local/download/release/DataSpace-Benchmark.zip -d data
+```
+
+The dataset root must contain `input/task_N/task.json` and `context/`. There is no neighbouring-directory discovery or fallback. The current private settings explicitly use the project-local `data/DataSpace-Benchmark/`, with no reference to the neighbouring DataSpace project. The `data/` directory is excluded from Git and Python distributions. Reconfigure to a fresh output directory to change the dataset location:
+
+```sh
+export EVIWEAVE_DATASET_ROOT="$PWD/data/DataSpace-Benchmark"
+export EVIWEAVE_BASE_URL='<the V6 Responses endpoint>'
+export EVIWEAVE_API_KEY='<your EviWeave-only API key>'
+.venv/bin/python -B tools/standalone.py configure \
+  --dataset-root "$EVIWEAVE_DATASET_ROOT" --base-url "$EVIWEAVE_BASE_URL" \
+  --model qwen3.8-flash --output-root .local/config
+# This command invokes a real model; run it only for an intended experiment:
+.venv/bin/python -B tools/standalone.py run --settings .local/config/settings.json \
+  --task 33 --output-root .audit/independent-task33
+```
+
+The local frozen evaluator, 60 configs and 60 references are managed separately in `.local/evaluation-v6-public60/`, locked by [121 per-file hashes](provenance/evaluation-lock.json). Necessary historical evidence is an independent copy of the accepted P4 archive in `.local/evidence-v6/`. These resources are private and excluded from Git and both Python distributions. On a new machine, explicitly import matching frozen material; do not substitute a newer evaluator:
+
+```sh
+python3 -B tools/standalone.py import-evaluation \
+  --source /path/to/frozen-evaluation --output-root .local/evaluation-v6-public60
+python3 -B tools/standalone.py verify-evaluation --evaluation-root .local/evaluation-v6-public60
+python3 -B tools/standalone.py score --evaluation-root .local/evaluation-v6-public60 \
+  --prediction-root /path/to/predictions --output-root .audit/independent-score
+```
+
+The import source contains `evaluate.py`, `configs/` and `output/`; every filename and hash must match. Scoring strips credentials and user Python paths, executes a local evaluator copy, and has a 300-second outer timeout. Add `--task 33` to score only that public task. Use Python 3.12.3 for formal historical revalidation. Successful evaluator execution does not mean all answers passed.
+
+With build/pip installed, independent runtimes prepared and the P4 archive available:
+
+```sh
+python3 -B tools/verify_isolation.py --block-path /absolute/path/to/DataSpace \
+  --evaluation-root .local/evaluation-v6-public60 \
+  --archive .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip \
+  --config configs/codex.example.yaml --output-root .audit/isolation-check
+```
+
+This masks the specified directory with an unreadable filesystem in new mount/PID namespaces, without changing the real source. It builds and installs independently, tests, runs offline doctor and synthetic sandbox tasks, checks lossless export, and scores synthetic predictions and historical evidence. No real credentials or model calls are used. Live authentication and independently acquired real inputs require separate acceptance. The tools/tests ship in the source archive; the wheel retains the same 22 business modules and PyYAML dependency. See [isolation provenance and boundaries](provenance/isolation.zh-CN.md).
+
+For three serial task-33 trials, run `./scripts/check_task33.sh` in a terminal with your dedicated `EVIWEAVE_API_KEY` exported. The optional `--check-only` checks key visibility, inputs and local runtime without contacting a model; it cannot authenticate the key. Defaults are `.local/config-v6/settings.json`, `.local/evaluation-v6-public60/` and `.venv/bin/python`; override the interpreter with `EVIWEAVE_PYTHON` if needed. Verified source is used directly, so PyYAML is required but a wheel installation is not. Every trial has a new HOME/session and the unchanged V6 30-minute limit. Three trials can take 90 minutes plus checking/scoring and incur inference charges. Infrastructure/authentication/missing-output failures stop; wrong answers continue through the three planned trials. Ctrl+C cancels the active task.
+
+Each invocation writes a fresh private `.audit/task33-three-runs-*/` with logs, original predictions, recorded usage, frozen single-task scores and `summary.json`/`summary.csv`. Inputs/config/source/evaluation hashes are checked before and after trials. Key values are not deliberately printed or saved, and previous predictions/gold/feedback are never given to the model. The summary distinguishes readable credentials from recorded completed model turns and compares pass counts, row counts and CSV SHA-256. Exit 0 means all trials were executed/scored (or check-only passed), even if answers failed. Three trials can reveal output differences but cannot establish purely random causation or an immutable backend model identity.
+
 ## Official evaluation
 
 EviWeave V6 achieved **333/410 correct tasks (81.22% Task Accuracy)** on the official DataSpace benchmark, **tied for first place** with Jitto Build + Claude Opus 5.5 as of **2026-10-22**. See the [official leaderboard](https://dataspace-bench.github.io/#leaderboard).

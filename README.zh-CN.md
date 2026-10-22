@@ -39,7 +39,7 @@ python3 -m venv .venv
 
 系统缺少 `ensurepip` 时，可使用已安装的 uv：`UV_CACHE_DIR="$PWD/.audit/cache/uv" uv --offline venv --python python3 .venv`，然后执行 `UV_CACHE_DIR="$PWD/.audit/cache/uv" uv pip install --python .venv/bin/python .`。
 
-配置模板为 `configs/codex.example.yaml`。其中端点为不可用占位值，需要自行填写兼容 Responses 的端点，通过环境变量 `EVIWEAVE_API_KEY` 提供凭据，不将密钥写入 YAML。工作台和 Codex 运行时宿主路径均相对配置文件解析，支持空格和 runtime_path 的 `{version}` 占位符。Codex 不使用的 `anthropic_base_url` 可省略，提供时保留原值。
+配置模板为 `configs/codex.example.yaml`。其中端点为不可用占位值，实际配置使用与历史V6一致的Responses端点和模型 `qwen3.8-flash`。用户须自行设置环境变量 `EVIWEAVE_API_KEY`，使用EviWeave专用API key；不将密钥写入YAML，不读取DataSpace的api.env，也不回退到DASHSCOPE_API_KEY或OPENAI_API_KEY。下文独立配置工具可生成私有配置。工作台和Codex运行时宿主路径均相对配置文件解析，支持空格和runtime_path的 `{version}` 占位符。
 
 ```sh
 .venv/bin/eviweave doctor --config configs/codex.example.yaml
@@ -120,3 +120,74 @@ python3 -B tools/package_evidence.py verify \
 ```
 
 输出目录须为项目内全新或空目录。附件含410份原字节预测、414条摘要和33、328、35、391、23的**精选轨迹**（23含失败与恢复）；完整原始trace私下保留。仅复制冻结评估器，对既有预测离线重评45/60；首轮44/60作为历史记录，没有新推理或benchmark任务执行。工具独立扫描残留并拒绝缺失/变更材料；verify只用标准库，不需要历史来源、安装包或runtime。来源和附件不进入Git/wheel/sdist；当前未上传附件，线上发布留P5。详见[来源和证据边界](provenance/evidence.zh-CN.md)。
+
+## 独立配置、数据下载与评分
+
+完整数据由[官方Hugging Face发布库](https://huggingface.co/datasets/HKUSTDial/DataSpace)单独提供，下载方式参见[上游README](https://github.com/HKUSTDial/DataSpace#dataset)。下载器是可选准备工具，不是EviWeave运行依赖。所有下载、缓存和解包都放在本项目内；下载后先校验官方SHA-256。为可重复获取，请将 `DATA_REVISION` 设为发布库中选择的完整提交ID并保留该值。
+
+```sh
+mkdir -p .local/download .audit/tmp .audit/cache
+export TMPDIR="$PWD/.audit/tmp"
+export PIP_CACHE_DIR="$PWD/.audit/cache/pip"
+export HF_HOME="$PWD/.local/hf-cache"
+python3 -m venv .local/download-env
+.local/download-env/bin/python -m pip install huggingface_hub
+export DATA_REVISION='<完整的Hugging Face发布提交ID>'
+.local/download-env/bin/hf download HKUSTDial/DataSpace \
+  release/DataSpace-Benchmark.zip release/DataSpace-Benchmark.zip.sha256 \
+  --repo-type dataset --revision "$DATA_REVISION" --local-dir "$PWD/.local/download"
+(cd .local/download/release && sha256sum --check DataSpace-Benchmark.zip.sha256)
+unzip .local/download/release/DataSpace-Benchmark.zip -d data
+```
+
+数据路径必须显式配置，根目录含 `input/task_N/task.json` 和 `context/`。工具不会寻找相邻仓库或自动回退到其他数据源。本机当前私有设置使用项目内的 `data/DataSpace-Benchmark/`，不再指向相邻DataSpace项目；更换数据目录时重新生成配置到全新输出目录即可。`data/` 不进入Git或发行包。
+
+```sh
+export EVIWEAVE_DATASET_ROOT="$PWD/data/DataSpace-Benchmark"
+export EVIWEAVE_BASE_URL='<与V6一致的Responses端点>'
+# 用户自行设置，勿提交或写入配置文件：
+export EVIWEAVE_API_KEY='<你的EviWeave专用API key>'
+.venv/bin/python -B tools/standalone.py configure \
+  --dataset-root "$EVIWEAVE_DATASET_ROOT" --base-url "$EVIWEAVE_BASE_URL" \
+  --model qwen3.8-flash --output-root .local/config
+# 以下会调用真实模型，仅在计划运行该题时执行：
+.venv/bin/python -B tools/standalone.py run --settings .local/config/settings.json \
+  --task 33 --output-root .audit/independent-task33
+```
+
+本机已验证的冻结评分副本位于 `.local/evaluation-v6-public60/`，必要历史证据独立保存在 `.local/evidence-v6/`；这些私有资源不随代码发行。在其他机器需自行提供符合 [121项冻结摘要锁](provenance/evaluation-lock.json) 的评分材料，通过显式路径导入。来源必须含 `evaluate.py`、`configs/` 和 `output/`，既可来自历史冻结评分包，也可自行整理官方下载的公开材料，摘要不符则拒绝；不自动从当前上游评估器替换冻结版本。
+
+```sh
+python3 -B tools/standalone.py import-evaluation \
+  --source /path/to/frozen-evaluation --output-root .local/evaluation-v6-public60
+python3 -B tools/standalone.py verify-evaluation --evaluation-root .local/evaluation-v6-public60
+python3 -B tools/standalone.py score --evaluation-root .local/evaluation-v6-public60 \
+  --prediction-root /path/to/predictions --output-root .audit/independent-score
+# 仅评一道公开题时显式添加 --task 33；正式历史复核使用Python 3.12.3。
+```
+
+安装build和pip的Python可执行独立隔离验收：
+
+```sh
+python3 -B tools/verify_isolation.py --block-path /absolute/path/to/DataSpace \
+  --evaluation-root .local/evaluation-v6-public60 \
+  --archive .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip \
+  --config configs/codex.example.yaml --output-root .audit/isolation-check
+```
+
+工具用系统挂载和PID命名空间使指定目录不可读取，不改动原目录；无真实凭据，执行构建、独立安装、测试、offline doctor、合成沙箱任务及导出、合成评分和历史附件评分。合成执行不调用真实模型；真实凭据和真实数据的独立运行需单独验收。工具和测试进入源码包，`.local/`、数据、答案、历史附件及审计全部排除。详见[隔离来源与边界](provenance/isolation.zh-CN.md)。
+
+### 第33题三次终端验证
+
+在已 `export EVIWEAVE_API_KEY` 的终端执行。默认读取 `.local/config-v6/settings.json` 和 `.local/evaluation-v6-public60/`，使用 `.venv/bin/python` 与已核验冻结源码；可用 `EVIWEAVE_PYTHON` 指定其他含PyYAML的解释器。脚本从自身位置定位项目，可从任意目录启动。
+
+```sh
+# 可选：只检查key可读性、输入及本地运行环境，无模型调用，不验证服务端鉴权。
+./scripts/check_task33.sh --check-only
+# 实际调用模型：串行跑33题三次，每次独立会话/HOME，沿用V6的30分钟单题时限。
+./scripts/check_task33.sh
+```
+
+会产生推理费用，三次任务时限合计最多90分钟，另加检查及评分时间。每次启动创建新的 `.audit/task33-three-runs-*/`；三次原始日志、预测、用量、单题冻结评分及 `summary.json`/`summary.csv` 均私下保留，不覆盖旧结果。输入、源码、配置和评分材料在运行前后核对摘要。脚本不主动输出或存储key值，也不向模型提供历史答案或评分反馈。环境/鉴权/缺预测失败会停止；答案未通过会继续完成既定三次。Ctrl+C取消当前任务，不启动后续任务。
+
+汇总分别记录环境变量是否可读、是否记录到模型完成事件、正确次数、行数和预测SHA-256。退出码0表示三次完整执行并评分（或check-only通过），不表示答案通过；基础设施失败返回非零。即使观测到预测差异，也不能仅凭三次证明是纯随机模型波动，模型别名背后的版本和服务端采样尚未锁定。

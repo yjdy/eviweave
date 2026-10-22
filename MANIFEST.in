@@ -1,6 +1,7 @@
 include LICENSE README.md README.zh-CN.md AGENTS.md pyproject.toml MANIFEST.in .gitignore
 recursive-include src *.py
 recursive-include configs *.yaml
+exclude configs/local* configs/*.local.*
 recursive-include provenance *.json *.md
 recursive-include tests *.py
 recursive-include tools *.py
@@ -10,6 +11,7 @@ include docker/Dockerfile.workbench docker/.dockerignore
 recursive-include docker/workbench *.md *.json *.txt
 recursive-include examples/synthetic *.json *.csv *.md
 prune .audit
+prune .local
 prune docs
 prune .docs
 prune .git
