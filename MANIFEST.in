@@ -1,0 +1,14 @@
+include LICENSE README.md README.zh-CN.md AGENTS.md pyproject.toml MANIFEST.in .gitignore
+recursive-include src *.py
+recursive-include configs *.yaml
+recursive-include provenance *.json *.md
+recursive-include tests *.py
+recursive-include tools *.py
+prune .audit
+prune docs
+prune .docs
+prune .git
+prune .venv
+prune dist
+prune build
+global-exclude __pycache__ *.py[cod] .env *.env

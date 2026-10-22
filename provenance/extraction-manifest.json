@@ -1,0 +1,207 @@
+{
+  "baseline": "relation_v6_full410_20261019T074114Z",
+  "source_policy": "Historical frozen_src only; adjacent DataSpace is read-only",
+  "python_files": 22,
+  "runtime_dependencies": [
+    "PyYAML>=6,<7"
+  ],
+  "allowed_changes": [
+    "package metadata",
+    "CLI",
+    "harness registry",
+    "configuration path resolution",
+    "doctor"
+  ],
+  "excluded": [
+    "dataspace_agent",
+    "smolagents",
+    "claude_code",
+    "grok_build",
+    "relays",
+    "controlled"
+  ],
+  "files": [
+    {
+      "source": "frozen_src/dataspace_baselines/__init__.py",
+      "destination": "src/dataspace_baselines/__init__.py",
+      "source_sha256": "bb1eb3406c22fe972f4d6d3aa79a9b0f05569ac03b3297f40f9d2f220e9c76f9",
+      "policy": "adapt",
+      "reason": "EviWeave project metadata and version 0.1.0",
+      "release_sha256": "7c54986cae477cc88ebf5ae205ce4b139a6decf879c145232ace4486f80d5397"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/__main__.py",
+      "destination": "src/dataspace_baselines/__main__.py",
+      "source_sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "935a1c1166b0c1ea35a82256345000bf2c73ded718d77773bc27a71ecce28f7d"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/cli.py",
+      "destination": "src/dataspace_baselines/cli.py",
+      "source_sha256": "17808edec405c8d6765fa3a0f1fabd9a31a53ccb3d412e597e80cd7b32c84381",
+      "policy": "adapt",
+      "reason": "EviWeave command name, version flag, default Codex selection",
+      "release_sha256": "61d60c842b28c81e9c527358aa9df22fb34a208186bf98771f620c30f08881d6"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/config.py",
+      "destination": "src/dataspace_baselines/config.py",
+      "source_sha256": "842d98208249cace9e30521eab89595aefd1ff411adb584f91cf39b99fcb267d",
+      "policy": "adapt",
+      "reason": "Config-relative runtime paths; optional unused Anthropic URL retained verbatim; skip disabled legacy adapters, reject enabled unsupported adapters",
+      "release_sha256": "27efacb41799ac9c8581fbb3beb01f86ca7f0a5baf5d55a50aaa45d2f835c970"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/doctor.py",
+      "destination": "src/dataspace_baselines/doctor.py",
+      "source_sha256": "2578b3df1f288e50c803578a723e1348e21702182ab7073b90cf74895f02d694",
+      "policy": "adapt",
+      "reason": "Codex-only checks and shared runtime path resolution; missing Docker yields a diagnostic even when rootfs exists",
+      "release_sha256": "669af85dad7fb5c4b91d3ba89c22d8ab77c67b378c2a9303f8ca1bfa36b3e159"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/workbench.py",
+      "destination": "src/dataspace_baselines/workbench.py",
+      "source_sha256": "fd98f6b607dc2d072a14850e4005443970222c4f104d26861459ff49ca759571",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "fd98f6b607dc2d072a14850e4005443970222c4f104d26861459ff49ca759571"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/__init__.py",
+      "destination": "src/dataspace_baselines/core/__init__.py",
+      "source_sha256": "c16674a3f4e1a92d6ba04bad47cc25b05d033d3b79764d2ed1228ea114f0db7b",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "c16674a3f4e1a92d6ba04bad47cc25b05d033d3b79764d2ed1228ea114f0db7b"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/batch.py",
+      "destination": "src/dataspace_baselines/core/batch.py",
+      "source_sha256": "e7b3c2f546254f141e9e97cb3bd8f0c76c24fb59560ad4ec344b3584d86df49c",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "e7b3c2f546254f141e9e97cb3bd8f0c76c24fb59560ad4ec344b3584d86df49c"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/export_prediction.py",
+      "destination": "src/dataspace_baselines/core/export_prediction.py",
+      "source_sha256": "253efd78bf633b76d45b0df557e77acc92bc1c7cf493f18343e666b2977c7451",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "253efd78bf633b76d45b0df557e77acc92bc1c7cf493f18343e666b2977c7451"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/interfaces.py",
+      "destination": "src/dataspace_baselines/core/interfaces.py",
+      "source_sha256": "05cb7e7be5ef4d3d4be1043a6f30233c85a5dbae7ffab5990d501534801ab041",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "05cb7e7be5ef4d3d4be1043a6f30233c85a5dbae7ffab5990d501534801ab041"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/logging.py",
+      "destination": "src/dataspace_baselines/core/logging.py",
+      "source_sha256": "f8af8d158cbbd105a7fa94b141d50db5171e986141d5ce99d1d79be295c9d2bd",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "f8af8d158cbbd105a7fa94b141d50db5171e986141d5ce99d1d79be295c9d2bd"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/prediction.py",
+      "destination": "src/dataspace_baselines/core/prediction.py",
+      "source_sha256": "30038d1cd98f70e47bd2477c54777003a09ae3df91cafa242ea5ca0ed2a28975",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "30038d1cd98f70e47bd2477c54777003a09ae3df91cafa242ea5ca0ed2a28975"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/prompt.py",
+      "destination": "src/dataspace_baselines/core/prompt.py",
+      "source_sha256": "4bab40eb222464c180108395b461ca8bd1b4792c5503f69741648a4b5deb74d7",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "4bab40eb222464c180108395b461ca8bd1b4792c5503f69741648a4b5deb74d7"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/task.py",
+      "destination": "src/dataspace_baselines/core/task.py",
+      "source_sha256": "6c667010f46523348716c4d0a13bfefb0143ae00b94cb847711704cfb1c243f6",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "6c667010f46523348716c4d0a13bfefb0143ae00b94cb847711704cfb1c243f6"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/core/types.py",
+      "destination": "src/dataspace_baselines/core/types.py",
+      "source_sha256": "dabe63d3d045ff98936d4db5112cec02f8a6ea9cdc21dcd73d27f8fd1eb5de6d",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "dabe63d3d045ff98936d4db5112cec02f8a6ea9cdc21dcd73d27f8fd1eb5de6d"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/harnesses/__init__.py",
+      "destination": "src/dataspace_baselines/harnesses/__init__.py",
+      "source_sha256": "7abfa84dd4f8459d3688356646db4f5341236ca73dfe04e909a63c529482d613",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "7abfa84dd4f8459d3688356646db4f5341236ca73dfe04e909a63c529482d613"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/harnesses/codex.py",
+      "destination": "src/dataspace_baselines/harnesses/codex.py",
+      "source_sha256": "12415a49a60ed9fda915bc23829ee588938adb29c388db72fd602d5da6b30128",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "12415a49a60ed9fda915bc23829ee588938adb29c388db72fd602d5da6b30128"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/harnesses/native_common.py",
+      "destination": "src/dataspace_baselines/harnesses/native_common.py",
+      "source_sha256": "b05c3067fc848ab6fa16f5212e67911224e1f0f694fe6f29a12924ed07cbd99e",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "b05c3067fc848ab6fa16f5212e67911224e1f0f694fe6f29a12924ed07cbd99e"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/harnesses/registry.py",
+      "destination": "src/dataspace_baselines/harnesses/registry.py",
+      "source_sha256": "5237d4de68ca7f169f28780e8fdcecb61b5a45c08da5a78755ab01da2153ed08",
+      "policy": "adapt",
+      "reason": "Codex-only imports and explicit rejection of unsupported harnesses",
+      "release_sha256": "9e0d0604c688ff5495996732eb9e917b3d257ae655786e4b387234265f708a0b"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/runners/__init__.py",
+      "destination": "src/dataspace_baselines/runners/__init__.py",
+      "source_sha256": "c8ac5773ec35912126c2f69544e8bc2ff3eb80bbe3a9cbcaaa4c4dd100aeb222",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "c8ac5773ec35912126c2f69544e8bc2ff3eb80bbe3a9cbcaaa4c4dd100aeb222"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/runners/filesystem_jail.py",
+      "destination": "src/dataspace_baselines/runners/filesystem_jail.py",
+      "source_sha256": "5f7126d37676c7fcc4bc2b344cc97a6430e4f936d952d43a7b478c63f4a42d50",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "5f7126d37676c7fcc4bc2b344cc97a6430e4f936d952d43a7b478c63f4a42d50"
+    },
+    {
+      "source": "frozen_src/dataspace_baselines/runners/native_cli.py",
+      "destination": "src/dataspace_baselines/runners/native_cli.py",
+      "source_sha256": "f46ee151fbdc75575550c70f3e9d4c83592e349ccd659b6616d8d22d70bfc12f",
+      "policy": "verbatim",
+      "reason": "Preserve historical V6 behavior byte-for-byte",
+      "release_sha256": "f46ee151fbdc75575550c70f3e9d4c83592e349ccd659b6616d8d22d70bfc12f"
+    }
+  ],
+  "license_source": {
+    "origin": "DataSpace root LICENSE (legal notice, outside frozen Python snapshot)",
+    "upstream_sha256": "fb073ba3a631d11c29b5ae5d52f1bf97428214535990ab99383e483fd4e0fde0",
+    "release_sha256": "9650b7acf94d387e7983d2ff353f05022fbcccbc076035e2d78197a6c0f8dbb0",
+    "change": "Retain upstream MIT notice and add EviWeave contributor copyright"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "manifest_sha256": "bd031c52e3f7322d551d105dfe03f78e847ad8e2e5984e5b16c51632af907236",
+  "experiment_fingerprint": "367c7815e55b02c3b33ecd4422faddfdc24cc042767a87726b3547052584d396",
+  "prompt_contract": "relation-v6",
+  "output_safeguards": {
+    "export_helper_sha256": "253efd78bf633b76d45b0df557e77acc92bc1c7cf493f18343e666b2977c7451",
+    "prediction_recovery_policy": "unique-exact-name-v1",
+    "prompt_sha256": "9a8623841439e27ae2db15db12884a8e71db702253735e3e74436aa26a261766",
+    "version": "simple-fixes-v1"
+  },
+  "file_counts": {
+    "pass": 8016
+  },
+  "input_count": 7849,
+  "non_input_count": 167,
+  "attempt_count": 414,
+  "prediction_count": 410,
+  "attempt_status_counts": {
+    "submitted": 410,
+    "runtime_error": 3,
+    "no_prediction": 1
+  },
+  "missing_usage": [
+    [
+      "task_22",
+      "run_1"
+    ],
+    [
+      "task_23",
+      "run_1"
+    ],
+    [
+      "task_207",
+      "run_1"
+    ]
+  ],
+  "date_local": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "difference_count": 0,
+  "selected_run_1": 406,
+  "selected_run_2": [
+    22,
+    23,
+    207,
+    273
+  ],
+  "fault_tests": 7,
+  "source_policy": "Read-only historical frozen baseline; no model calls",
+  "input_mapping": "Historical input/ maps to existing benchmark input/ without copying data"
+}

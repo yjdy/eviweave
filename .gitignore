@@ -1,0 +1,42 @@
+# Private audit evidence, local configuration and credentials
+.audit/
+.env
+.env.*
+*.env
+!.env.example
+configs/local*
+configs/*.local.*
+*credentials*
+*secret*
+# Environments, runtimes, datasets and execution artifacts
+.venv*/
+.runtime*/
+runtimes/
+data/
+input/
+output/
+runs/
+/run/
+/config.yaml
+/config.yml
+/.local/
+.cache/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+# Packaging and editor files
+build/
+dist/
+*.egg-info/
+.coverage
+htmlcov/
+.idea/
+.vscode/
+.DS_Store
+.docs/
+
+# Local plans and handoff notes
+/docs/
+# Editor swap files
+*.swp
+*.swo
