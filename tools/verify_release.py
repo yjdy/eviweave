@@ -22,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--git-scope', choices=['staged','head','worktree'], default='staged', help='explicit Git content scope; empty scopes fail')
     args = parser.parse_args()
     root = args.project.resolve()
     manifest = json.loads((root/'provenance/extraction-manifest.json').read_text())
@@ -37,10 +38,25 @@ def main():
             path = PurePosixPath(name)
             require(not any(part in forbidden or part.startswith('.venv') for part in path.parts),label+': clean path '+name)
             require(not (path.name == '.env' or path.name.startswith('.env.') or path.suffix in {'.pyc','.env'}),label+': no local config '+name)
-    staged = subprocess.check_output(['git','-C',str(root),'diff','--cached','--name-only','-z']).decode().split('\0')
-    staged = [n for n in staged if n]
-    require(bool(staged),'staged files present')
-    inspect(staged,'git')
+    if args.git_scope == 'staged':
+        command = ['git','-C',str(root),'diff','--cached','--name-only','--diff-filter=ACMR','-z']
+    elif args.git_scope == 'head':
+        command = ['git','-C',str(root),'ls-tree','-r','--name-only','-z','HEAD']
+    else:
+        command = ['git','-C',str(root),'ls-files','--cached','--others','--exclude-standard','-z']
+    staged = sorted(set(n for n in subprocess.check_output(command).decode().split('\0') if n))
+    require(bool(staged),args.git_scope+' files present')
+    inspect(staged,'git '+args.git_scope)
+    def git_content(name):
+        if args.git_scope == 'worktree': return (root/name).read_bytes()
+        spec = ':'+name if args.git_scope == 'staged' else 'HEAD:'+name
+        return subprocess.check_output(['git','-C',str(root),'show',spec])
+    if args.git_scope != 'staged':
+        require({e['destination'] for e in expected.values()}.issubset(staged),'Git scope contains all 22 modules')
+    for name in staged:
+        if name in {e['destination'] for e in expected.values()}:
+            entry = next(e for e in expected.values() if e['destination'] == name)
+            require(digest(git_content(name)) == entry['release_sha256'],'git digest '+name)
     archives = []
     wheel = list((root/'dist').glob('*.whl'));sdist = list((root/'dist').glob('*.tar.gz'))
     require(len(wheel)==len(sdist)==1,'exactly one wheel and sdist')
@@ -59,6 +75,12 @@ def main():
             with tarfile.open(artifact) as archive:
                 members = {str(PurePosixPath(m.name).relative_to(PurePosixPath(m.name).parts[0])):archive.extractfile(m).read() for m in archive.getmembers() if m.isfile()}
             source = {n.removeprefix('src/'):data for n,data in members.items() if n.startswith('src/dataspace_baselines/') and n.endswith('.py')}
+            required = {'scripts/install_codex_runtime.sh','scripts/install_codex_runtime.py','scripts/prepare_workbench.sh',
+                'scripts/prepare_workbench.py','scripts/runtime_support.py','scripts/project_docker.py',
+                'docker/Dockerfile.workbench','docker/workbench/python-packages.txt','docker/workbench/system-packages.txt',
+                'tools/smoke_runtime.py','tools/synthetic_executor.py','examples/synthetic/tasks/task_1/task.json',
+                'examples/synthetic/tasks/task_2/task.json','examples/synthetic/expected/task_1.csv','examples/synthetic/expected/task_2.csv'}
+            require(required.issubset(members), 'sdist contains all P2 preparation and synthetic inputs')
         inspect(members,artifact.name)
         require(set(source)==set(expected),artifact.name+': exactly 22 whitelisted Python modules')
         for name,data in source.items():
@@ -86,7 +108,7 @@ def main():
         require(digest(installed.read_bytes())==entry['release_sha256'],'installed digest '+name)
         if entry['policy']=='verbatim':
             require(entry['release_sha256']==entry['source_sha256'],'frozen digest '+name)
-    result = {'status':'PASS','checks':len(checks),'staged_file_count':len(staged),'archives':archives,'installed_module_count':len(imports)+1,'verbatim_file_count':sum(e['policy']=='verbatim' for e in expected.values()),'runtime_dependencies':importlib.metadata.requires('eviweave')}
+    result = {'status':'PASS','checks':len(checks),'git_scope':args.git_scope,'git_file_count':len(staged),'archives':archives,'installed_module_count':len(imports)+1,'verbatim_file_count':sum(e['policy']=='verbatim' for e in expected.values()),'runtime_dependencies':importlib.metadata.requires('eviweave')}
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))

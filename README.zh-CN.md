@@ -4,7 +4,7 @@
 
 [English](README.md) · [来源](provenance/README.zh-CN.md)
 
-本轮仅实施 P0 基线核验和 P1 独立代码提取。完整运行环境、合成任务贯通、行为回归、实验附件和公开发布留在 P2–P5；当前不代表正式开源发布完成。正式技术报告延后。
+P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 行为回归、P4–P5 实验附件及公开发布尚未实施。正式技术报告延后。
 
 ## 官方评估
 
@@ -26,6 +26,9 @@ EviWeave V6 在 DataSpace 官方全量评估中答对 **333/410 题，Task Accur
 需要 Python 3.10+，唯一 Python 运行依赖为 `PyYAML>=6,<7`。在项目根目录安装，也可安装 `dist/` 内构建的 wheel：
 
 ```sh
+mkdir -p .audit/tmp .audit/cache
+export TMPDIR="$PWD/.audit/tmp"
+export PIP_CACHE_DIR="$PWD/.audit/cache/pip"
 python3 -m venv .venv
 .venv/bin/python -m pip install .
 .venv/bin/eviweave --version
@@ -34,7 +37,7 @@ python3 -m venv .venv
 .venv/bin/eviweave batch --help
 ```
 
-系统缺少 `ensurepip` 时，可使用已安装的 uv：`uv venv .venv`，然后执行 `uv pip install --python .venv/bin/python .`。
+系统缺少 `ensurepip` 时，可使用已安装的 uv：`UV_CACHE_DIR="$PWD/.audit/cache/uv" uv --offline venv --python python3 .venv`，然后执行 `UV_CACHE_DIR="$PWD/.audit/cache/uv" uv pip install --python .venv/bin/python .`。
 
 配置模板为 `configs/codex.example.yaml`。其中端点为不可用占位值，需要自行填写兼容 Responses 的端点，通过环境变量 `EVIWEAVE_API_KEY` 提供凭据，不将密钥写入 YAML。工作台和 Codex 运行时宿主路径均相对配置文件解析，支持空格和 runtime_path 的 `{version}` 占位符。Codex 不使用的 `anthropic_base_url` 可省略，提供时保留原值。
 
@@ -42,7 +45,38 @@ python3 -m venv .venv
 .venv/bin/eviweave doctor --config configs/codex.example.yaml
 ```
 
-`doctor` 不调用模型；凭据、Docker、Bubblewrap、Data Workbench 1.0 或 Codex CLI 0.145.0 缺失时返回非零并给出诊断。运行时安装与合成任务在 P2 完成。`run`、`batch` 默认使用 Codex，也接受显式 `--harness codex`，其他代理明确拒绝；兼容 `dataspace-baselines` 入口。实际执行 run/batch 需要完整环境，可能产生推理费用，本轮未执行此类实验。
+`doctor` 不调用模型；凭据、Docker、Bubblewrap、Data Workbench 1.0 或 Codex CLI 0.145.0 缺失时返回非零并给出诊断。`run`、`batch` 默认使用 Codex，也接受显式 `--harness codex`，其他代理明确拒绝；兼容 `dataspace-baselines` 入口。实际执行 run/batch 需要完整环境，可能产生推理费用，本轮未执行此类实验。
+
+## 运行时准备与离线合成验收
+
+需要 Linux x86_64、GNU `cp`/`tar`、Docker、Bubblewrap 和 Python。准备脚本与人工合成样例进入源码发行包；wheel 仅包含 Python 包，因此请保留仓库或源码包。
+
+```sh
+scripts/install_codex_runtime.sh --help
+scripts/install_codex_runtime.sh
+python3 -B scripts/project_docker.py start
+scripts/prepare_workbench.sh build --docker-host "unix://$PWD/.runtimes/build/docker.sock"
+scripts/prepare_workbench.sh export --docker-host "unix://$PWD/.runtimes/build/docker.sock" \
+  --runtime-root .runtimes/data-workbench-rebuilt
+```
+
+Codex 安装器只下载 `0.145.0`，解包前核验 npm SHA-512；也支持 `--from-dir` 加 `--manifest` 导入，或 `--from-archive` 加 `--sha256`。运行时、缓存与临时目录默认均在项目内，可在项目内自定义。重复导入复用已核验副本，内容冲突时失败且不覆盖。准备过程仅执行真实 `codex --version`。
+
+独立 Docker 和 containerd 的持久数据均位于项目内，需要已有 `sudo -n` 权限。构建沿用历史基础镜像摘要，并锁定全部记录的 Python/系统包版本；无法获取锁定版本时失败，不自动升级。重建标签为 `eviweave-workbench:p2-rebuilt`。使用重建导出时，需相应修改配置中的工作台 image 和 rootfs，doctor 通过 `DOCKER_HOST="unix://$PWD/.runtimes/build/docker.sock"` 选择本地实例。使用完执行 `python3 -B scripts/project_docker.py stop`。准备脚本拒绝向系统 daemon 构建或导出。
+
+历史移植与重建分别记录。取得独立的历史运行时和可信文件清单后，使用 `prepare_workbench.sh import --from-dir ... --manifest ...`；归档导入要求 `--from-archive`、`--sha256` 及 `--manifest`。可通过 `python3 -B scripts/runtime_support.py --root ... --output .audit/runtime-files.json` 采集现存目录清单，但新采集不等于历史认证。`prepare_workbench.sh verify` 逐项验证。历史 binary/rootfs 不随代码发行，目前尚无公开附件下载入口，身份与重建差异见[运行时来源说明](provenance/runtime-changes.zh-CN.md)。
+
+示例配置指向已核验的历史运行时副本后：
+
+```sh
+.venv/bin/eviweave doctor --offline --config configs/codex.example.yaml
+.venv/bin/python -B tools/smoke_runtime.py --config configs/codex.example.yaml \
+  --output-root .audit/synthetic-smoke
+```
+
+输出目录必须全新。离线 doctor 将凭据显示为 `[skip]`，其他必要检查失败仍返回非零；默认 doctor 继续在缺少凭据时失败。两种模式都不认证服务、不发送推理请求。检查实际包版本、完整文件清单、英/中文 OCR 数据、只读资料/运行时/导出器挂载及可写输出。
+
+合成工具只接受占位端点，子进程仅提供无效测试 key，额外禁用网络，通过原始 Bubblewrap、运行器、导出器和批次链路运行确定性的本地 Python 程序，验证单题、两题归集、导出字节摘要及续跑不新增尝试。预期 CSV 不挂载到沙箱。这证明离线链路可用，不代表真实 Codex 推理或官方成绩复现。
 
 离线验收及构建（构建工具需安装在本地环境内）：
 

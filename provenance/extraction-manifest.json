@@ -42,8 +42,8 @@
       "destination": "src/dataspace_baselines/cli.py",
       "source_sha256": "17808edec405c8d6765fa3a0f1fabd9a31a53ccb3d412e597e80cd7b32c84381",
       "policy": "adapt",
-      "reason": "EviWeave command name, version flag, default Codex selection",
-      "release_sha256": "61d60c842b28c81e9c527358aa9df22fb34a208186bf98771f620c30f08881d6"
+      "reason": "EviWeave command name, version flag, default Codex selection; P2 explicit offline credential skip and project-local doctor temp directory",
+      "release_sha256": "ba0a710d932d81724911e021bfeadadabe2a5e90e6af89d675bd70266b18092b"
     },
     {
       "source": "frozen_src/dataspace_baselines/config.py",
@@ -58,8 +58,8 @@
       "destination": "src/dataspace_baselines/doctor.py",
       "source_sha256": "2578b3df1f288e50c803578a723e1348e21702182ab7073b90cf74895f02d694",
       "policy": "adapt",
-      "reason": "Codex-only checks and shared runtime path resolution; missing Docker yields a diagnostic even when rootfs exists",
-      "release_sha256": "669af85dad7fb5c4b91d3ba89c22d8ab77c67b378c2a9303f8ca1bfa36b3e159"
+      "reason": "P2 Codex-only offline doctor: real version/tools/read-only mounts, pinned metadata digests and complete runtime inventories; credential presence distinct from authentication",
+      "release_sha256": "83cc96233ded5a36effff3991259476266105275f5c4b0b13d5e9c0d6e058742"
     },
     {
       "source": "frozen_src/dataspace_baselines/workbench.py",

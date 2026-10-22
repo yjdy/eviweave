@@ -92,13 +92,13 @@ class ExtractionTests(unittest.TestCase):
     def test_doctor_missing_dependencies(self):
         config = load_harness_experiment_config(self.path)
         with patch('shutil.which',return_value=None), patch('subprocess.run',side_effect=FileNotFoundError('missing tool')), patch.dict(os.environ,{},clear=True):
-            checks = run_doctor(config)
+            checks = run_doctor(config, temp_dir=self.root/"doctor-tmp")
         self.assertTrue(checks)
-        self.assertTrue(all(not c.ok for c in checks))
+        self.assertTrue(all(not c.ok for c in checks if c.name != "platform"))
         self.assertIn('inference credential',[c.name for c in checks])
         with patch('dataspace_baselines.doctor._jailed_version') as version, patch('dataspace_baselines.doctor._command_check'), patch('dataspace_baselines.doctor._workbench_rootfs_check'), patch('dataspace_baselines.doctor._workbench_tools_check'):
             version.return_value.ok = False
-            run_doctor(config)
+            run_doctor(config, temp_dir=self.root/"doctor-tmp")
             self.assertEqual(version.call_args.args[2],configured_runtime_binds(config.harnesses['codex']))
 
     def test_doctor_existing_rootfs_without_docker(self):

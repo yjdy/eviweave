@@ -1,0 +1,4 @@
+{
+  "task_id": "task_2",
+  "question": "Synthetic offline task: join records.group with rules.groups, sort by id, and export id,note,value preserving source text."
+}

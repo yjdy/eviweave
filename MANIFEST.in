@@ -4,6 +4,10 @@ recursive-include configs *.yaml
 recursive-include provenance *.json *.md
 recursive-include tests *.py
 recursive-include tools *.py
+recursive-include scripts *.py *.sh
+include docker/Dockerfile.workbench docker/.dockerignore
+recursive-include docker/workbench *.md *.json *.txt
+recursive-include examples/synthetic *.json *.csv *.md
 prune .audit
 prune docs
 prune .docs

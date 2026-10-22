@@ -1,0 +1,4 @@
+*
+!Dockerfile.workbench
+!workbench/
+!workbench/**

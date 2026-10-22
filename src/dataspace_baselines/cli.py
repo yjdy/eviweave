@@ -28,6 +28,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "doctor", help="validate local harness dependencies and isolation runtimes"
     )
     doctor_parser.add_argument("--config", required=True, type=Path)
+    doctor_parser.add_argument("--offline", action="store_true", help="skip credentials; validate all local runtime checks")
+    doctor_parser.add_argument("--temp-dir", type=Path, help="project-local temporary directory; default: config parent/../.audit/tmp")
 
     run_parser = subparsers.add_parser("run", help="run one task")
     run_parser.add_argument("--harness", default="codex", choices=available_harnesses())
@@ -75,9 +77,9 @@ def _run(args: argparse.Namespace) -> int:
 
 def _doctor(args: argparse.Namespace) -> int:
     config = load_harness_experiment_config(args.config)
-    checks = run_doctor(config)
+    checks = run_doctor(config, offline=args.offline, temp_dir=args.temp_dir or args.config.resolve().parent.parent/".audit/tmp")
     for check in checks:
-        print(f"[{'ok' if check.ok else 'fail'}] {check.name}: {check.detail}")
+        print(f"[{'skip' if check.skipped else 'ok' if check.ok else 'fail'}] {check.name}: {check.detail}")
     return 0 if all(check.ok for check in checks) else 1
 
 

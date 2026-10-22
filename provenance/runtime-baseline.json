@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "recorded_date": "2026-10-22",
+  "historical_identity": {
+    "workbench_version": "1.0",
+    "image": "dataspace-workbench:1.0",
+    "image_id": "sha256:6d982582df67775ad78193d54a0e54e2809373bacf73551b9baaad0ef3f893b5",
+    "tools_sha256": "71faab0935ae2f9740c2a797816bae4d31c94065349519f5b80a9f7a20141c17",
+    "capabilities_sha256": "4a0c3bed49e0227533694f8dbf96007a02b23626cc590423bfbed5976297aba0",
+    "codex_version": "0.145.0",
+    "codex_platform": "linux-x86_64",
+    "codex_binary_sha256": "a2a05dafaa1acb002a45eaec0a462de5b13694fcfcd7bc43305f14781ce7be14"
+  },
+  "first_recorded_in_P2": {
+    "workbench_inventory_sha256": "0a21f2b5072a7cd4b6e0bc6a8dc640acd1a2b0d821bdd8a094debc1ab8d8e182",
+    "codex_inventory_sha256": "66d2ff93e36525f73eaee35c55411ba2b09a67a5626a95821b2b7bacd27b7957",
+    "workbench_entries": 18516,
+    "codex_entries": 16,
+    "python_packages_sha256": "3c562d1857234a304df875f9fb7b18cd7724e3d50260b1e3494aa6326e1bcbfe",
+    "system_packages_sha256": "965604c7db2b4e43d68c35734a060eaf67b1020fc787225051543afebe607935",
+    "python_packages": 21,
+    "system_packages": 329
+  },
+  "rebuild": {
+    "image": "eviweave-workbench:p2-rebuilt",
+    "image_id": "sha256:a8b3c06e832031d971d4947f8bf74c371282f488dfc9e5e523fd6329caaf19ca",
+    "base_image": "python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba",
+    "entries": 18527,
+    "differences": 2476,
+    "categories": {
+      "metadata_changed": 18,
+      "added": 11,
+      "content_changed": 2447
+    },
+    "content_categories": {
+      "python_bytecode": 2427,
+      "wheel_RECORD": 8,
+      "other_content": 7,
+      "installation_logs": 5
+    },
+    "package_manifests_identical": true,
+    "historically_identical": false
+  },
+  "verification_boundary": "Source-to-copy equality and offline sandbox execution only. No new model inference or benchmark evaluation; complete inventories are private and were not frozen by the original experiment.",
+  "files": [
+    {
+      "destination": "docker/.dockerignore",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "96c8bff8c264c85f5501517e774c2141c2cd5f2c56da194c65f9ace1b11be678",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "docker/Dockerfile.workbench",
+      "source": "baseline/docker/Dockerfile.workbench",
+      "source_git_commit": "59ed446",
+      "source_sha256": "b66e4756dbfd6a6af783bf9c543ddf8ada71ac12cfa285fbf3ae6879c6517737",
+      "release_sha256": "177f755d01c91b9db0ab54897216ea8dcbdaa7f75f25e88f0cbf356a75f61325",
+      "reason": "Historical base image/toolset; adapt build context and lock all recorded dependency versions"
+    },
+    {
+      "destination": "docker/workbench/TOOLS.md",
+      "source": "baseline/docker/workbench/TOOLS.md",
+      "source_git_commit": "59ed446",
+      "source_sha256": "71faab0935ae2f9740c2a797816bae4d31c94065349519f5b80a9f7a20141c17",
+      "release_sha256": "71faab0935ae2f9740c2a797816bae4d31c94065349519f5b80a9f7a20141c17",
+      "reason": "Verbatim historical tooling description"
+    },
+    {
+      "destination": "docker/workbench/capabilities.json",
+      "source": "baseline/docker/workbench/capabilities.json",
+      "source_git_commit": "59ed446",
+      "source_sha256": "4a0c3bed49e0227533694f8dbf96007a02b23626cc590423bfbed5976297aba0",
+      "release_sha256": "4a0c3bed49e0227533694f8dbf96007a02b23626cc590423bfbed5976297aba0",
+      "reason": "Verbatim historical capabilities"
+    },
+    {
+      "destination": "docker/workbench/python-packages.txt",
+      "source": "historical-runtime/opt/dataspace/python-packages.txt",
+      "source_sha256": "3c562d1857234a304df875f9fb7b18cd7724e3d50260b1e3494aa6326e1bcbfe",
+      "release_sha256": "3c562d1857234a304df875f9fb7b18cd7724e3d50260b1e3494aa6326e1bcbfe",
+      "reason": "Verbatim package inventory; SHA-256 first recorded during P2, not historically frozen"
+    },
+    {
+      "destination": "docker/workbench/system-packages.txt",
+      "source": "historical-runtime/opt/dataspace/system-packages.txt",
+      "source_sha256": "965604c7db2b4e43d68c35734a060eaf67b1020fc787225051543afebe607935",
+      "release_sha256": "965604c7db2b4e43d68c35734a060eaf67b1020fc787225051543afebe607935",
+      "reason": "Verbatim package inventory; SHA-256 first recorded during P2, not historically frozen"
+    },
+    {
+      "destination": "examples/synthetic/README.md",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "498e4f7cb1910c867dcdb6a9682ef2e7d37197a8cc9ffec2aae790ff89707455",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/expected/task_1.csv",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "faa3b744c8fe15021a58974ccb09f93f5fa56ed96c843d0d292e052cf1173749",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/expected/task_2.csv",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "8a8e9cfd2479c80950fd7e6ed5634bc5487a8545f2d5043cfbcbdd9b09400142",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_1/context/records.csv",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "ba32f5258bf0fa74427a406c38252168f75d74d93a8cfc4bffcf6466b4d8218d",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_1/context/rules.json",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "8eddc1b413fe0cad621d31d4d0441e168c7597b60960d1e9542d4a7d2c943ee1",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_1/task.json",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "76c0c1b1d79652e19777a9ea60a5cb8d1a95f7ab5fb12e662dff1d6ea26d8b21",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_2/context/records.csv",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "ba32f5258bf0fa74427a406c38252168f75d74d93a8cfc4bffcf6466b4d8218d",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_2/context/rules.json",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "6f06466a7e63eb1a240974abb4f8b261d2592f3791b9700cdf1b22e5d0d45ecb",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "examples/synthetic/tasks/task_2/task.json",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "4913e219fc9ba3be477bdf6d0ef4a0f6c515f5ece478f3bce50690ecd3a7e3e9",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "scripts/install_codex_runtime.py",
+      "source": "baseline/scripts/install_harness_runtimes.sh",
+      "source_git_commit": "59ed446",
+      "source_sha256": "8ec4f8d762b5d7607de2e9ed1e2bb8456cae1d1bba9350bcb2777c727b5e7f0b",
+      "release_sha256": "13c1baaef78be4814714ef7c02627c7cd68714e9872ca3c5104065378cf30087",
+      "reason": "Codex-only standard-library import/download/integrity checks; project-local caches and state; no inference"
+    },
+    {
+      "destination": "scripts/install_codex_runtime.sh",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "68eb2a843bb8891e143e22427b60512c31fe4dd79a30e2be0584fc3e43c844d5",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "scripts/prepare_workbench.py",
+      "source": "baseline/scripts/build_harness_images.sh",
+      "source_git_commit": "59ed446",
+      "source_sha256": "ed65d8b572abb0e9c2d5df7e551a862e46bb1af4c45d5e0f22aeb8d4cbeab321",
+      "release_sha256": "f414394e25d34a913780add5f14a7040f8f80073b07e1d6511926638f179b078",
+      "reason": "Separate verified import/build/export; explicit project-local Docker and containerd; refuse replacement"
+    },
+    {
+      "destination": "scripts/prepare_workbench.sh",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "d08f55494b52ea768b80ddd54f5bb875fbbba08cdb71e30fdcacd50b47cc703d",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "scripts/project_docker.py",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "eb84827b75f8019164fd6268419852434f22786edbb9082816554c1dad527aa2",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "scripts/runtime_support.py",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "ac0622c2040815d259cc1ad42ef10e20fcfc498d5d6ffaf244e8b62f7a6b2471",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "tests/test_runtime_preparation.py",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "e64f6b2c73654602ddc8dca5fa567b39fc9fe65764dfbc3cfd98470ebc375949",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "tools/smoke_runtime.py",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "2ee5b0e856f7a97116d4d3e370b11737b8aae9409e1549c4fb54f15ce2af3eba",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "tools/synthetic_executor.py",
+      "source": "EviWeave P2 original",
+      "source_sha256": null,
+      "release_sha256": "aa946b384f6fd68c626b24f57d6d2424480a478488a29084fb4cc6ba12ccf377",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source": "EviWeave P1 HEAD",
+      "source_sha256": "744c2c4441b4e70279caa5e5544ffb672e482a62b06c899bb6632ad5f0748d7c",
+      "release_sha256": "f7c9cc84f25c740e368ad1dce075180f8224e1200728e8fc70e44cf5c1d84ea5",
+      "reason": "Offline runtime preparation, verification or handwritten synthetic fixture; no benchmark material"
+    }
+  ]
+}
