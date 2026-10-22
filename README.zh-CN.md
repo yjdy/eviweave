@@ -4,7 +4,7 @@
 
 [English](README.md) · [来源](provenance/README.zh-CN.md)
 
-P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 提供离线行为回归、冻结参考对照和历史沙箱检查；P4–P5 实验附件及公开发布尚未实施。正式技术报告延后。
+P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 提供离线行为回归、冻结参考对照和历史沙箱检查；P4 提供本地实验附件整理、精选轨迹脱敏和冻结离线评分；公开发布留在 P5。正式技术报告延后。
 
 ## 官方评估
 
@@ -103,3 +103,20 @@ TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m build
 `tools/verify_baseline.py` 使用标准库，依次接收历史实验目录、现有 benchmark 目录、私有输出目录；四线程核对摘要，缺失、变更、无法解析或证据不一致均失败。新增输出必须放在本项目内，不能指向只读来源。数据、预测、凭据和私有原始审计不随代码发行。
 
 代码及说明文档采用 MIT，保留 DataSpace 上游声明，见 [LICENSE](LICENSE)。逐文件来源和改动记录保存在 `provenance/`。数据集按原发布条款另行获取。
+
+## 历史实验附件
+
+从源码检出或源码包运行，正式冻结评分使用 Python 3.12.3：
+
+```sh
+python3 -B tools/package_evidence.py build \
+  --experiment-root /path/to/historical-experiment \
+  --baseline-report /path/to/private-P0-result.json \
+  --official-evidence-root /path/to/verified-official-snapshot \
+  --output-root .audit/evidence-build
+python3 -B tools/package_evidence.py verify \
+  --archive .audit/evidence-build/eviweave-v0.1.0-v6-evidence.zip \
+  --output-root .audit/evidence-check
+```
+
+输出目录须为项目内全新或空目录。附件含410份原字节预测、414条摘要和33、328、35、391、23的**精选轨迹**（23含失败与恢复）；完整原始trace私下保留。仅复制冻结评估器，对既有预测离线重评45/60；首轮44/60作为历史记录，没有新推理或benchmark任务执行。工具独立扫描残留并拒绝缺失/变更材料；verify只用标准库，不需要历史来源、安装包或runtime。来源和附件不进入Git/wheel/sdist；当前未上传附件，线上发布留P5。详见[来源和证据边界](provenance/evidence.zh-CN.md)。

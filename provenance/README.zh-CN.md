@@ -19,3 +19,5 @@ EviWeave — Evidence-Guided Data Agents，作者袁珺 / Jun Yuan（https://git
 后续完整重评、精选轨迹、脱敏发布附件及线上发布留在 P4–P5；正式技术报告延后。
 
 P3 的逐文件测试来源、覆盖范围、沙箱与 trusted 诊断边界见 [离线行为回归](regression.zh-CN.md)及[摘要清单](regression-baseline.json)。
+
+P4的本地附件、固定选择、精选轨迹、纯离线评分和公开校验边界见[实验证据说明](evidence.zh-CN.md)与[逐文件来源](evidence-baseline.json)。

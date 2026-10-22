@@ -1,0 +1,145 @@
+{
+  "schema": 1,
+  "date": "2026-10-22",
+  "author": "袁珺 / Jun Yuan",
+  "license": "MIT; retain DataSpace attribution",
+  "scope": "P4 overlay supersedes prior stage release hashes for listed files; original baseline source hashes unchanged",
+  "production_files": 22,
+  "protected_files": 17,
+  "prediction_count": 410,
+  "attempt_count": 414,
+  "selected_run_2_tasks": [
+    22,
+    23,
+    207,
+    273
+  ],
+  "selected_trace_attempts": [
+    [
+      33,
+      1
+    ],
+    [
+      328,
+      1
+    ],
+    [
+      35,
+      1
+    ],
+    [
+      391,
+      1
+    ],
+    [
+      23,
+      1
+    ],
+    [
+      23,
+      2
+    ]
+  ],
+  "scoring": {
+    "mode": "frozen offline scoring of existing predictions only",
+    "evaluator_source": "historical-experiment/evaluation/evaluate.py",
+    "evaluator_sha256": "9eeb1edcc72d963610f497ebf98287887659f52656092ada0a55290a066bfbc8",
+    "config_set_sha256": "0efe57a7a9ea4bf82a2ac994b5ec1d29ba9997882b0403e744cccb8d5e40ce54",
+    "reference_files": 121,
+    "expected_result": "45/60",
+    "first_pass": "44/60; historical record only",
+    "model_calls": 0,
+    "benchmark_tasks_executed": 0
+  },
+  "trace_source_hash_boundary": "Selected raw log SHA-256 values first recorded during P4; not claimed to have been frozen at experiment time",
+  "official_snapshot": {
+    "date": "2026-10-22",
+    "entry_id": "yjdy-codex-controlled-qwen38-flash",
+    "html_sha256": "0238a2fc1d7d543bcdd28b6fb60a7f2e8369b71454627e4969bdebe105c9cd35",
+    "javascript_sha256": "15c1c031394b92fc474757d0e206ce9be7be7004632a3ecb371d72f364d9bc27"
+  },
+  "files": [
+    {
+      "destination": "AGENTS.md",
+      "source": "EviWeave P3 HEAD",
+      "source_commit": "22c25687384398c5e9131af134681ecb50f6c62d",
+      "source_sha256": "6d84ae6b1a0c77c17c54c1e48b3fb69117ea464605ad73b36160cde0e630ba85",
+      "release_sha256": "d45e4e44ce89acc6705c531979190b79755014e6830985b03853325c8f6af01f",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "README.md",
+      "source": "EviWeave P3 HEAD",
+      "source_commit": "22c25687384398c5e9131af134681ecb50f6c62d",
+      "source_sha256": "1ff5ef3316e9669371990968b4dd6e6d0c9ce0f68eada372488130363b1af892",
+      "release_sha256": "92f04f9b1ca4437702eae390d21bc5494d97a98f9abc7ea568dc96467db96729",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source": "EviWeave P3 HEAD",
+      "source_commit": "22c25687384398c5e9131af134681ecb50f6c62d",
+      "source_sha256": "fb6688095e611cc8d13cae5d81399d2d6c1cd256581c6b667d572c7bb2202b55",
+      "release_sha256": "4d21c7f4e303c0465434d379ac74487d7aac3d5870a2a2654584a629c3c808d8",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "provenance/README.zh-CN.md",
+      "source": "EviWeave P3 HEAD",
+      "source_commit": "22c25687384398c5e9131af134681ecb50f6c62d",
+      "source_sha256": "fdaa5b9a1fd5b5fe94a3ea7bfd30147fe989a5f60b2feac22e249dc472883607",
+      "release_sha256": "1d1389cf44d099171f5b0f30cb7a945ca93ee860a900acca6f38d96e69263316",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "provenance/evidence.zh-CN.md",
+      "source": "EviWeave P4 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "86e1a59b89cf8da776db2ac170c08ebe5e25a27ea62af0136b892744db02b4eb",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "tests/test_evidence_packaging.py",
+      "source": "EviWeave P4 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "93a5f8b8aaccb149bf73d6d07904d147ebf506db8d684eb9768e7f6ddb1cdbf0",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "tools/evidence_support.py",
+      "source": "EviWeave P4 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "6db9d5473436e85aee88eae7d85fc5f3add52cb749dc6decbe6da9889d3d0992",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "tools/evidence_verify.py",
+      "source": "EviWeave P4 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4baa807a7641a48a4a31ed84cf5d77b7d9a1c1a4b2a06721e21688e5625d7f68",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "tools/package_evidence.py",
+      "source": "EviWeave P4 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "d90d633460958069f35ff8e9fc4865ab8902af079726857e0ecbba3e4540fffa",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source": "EviWeave P3 HEAD",
+      "source_commit": "22c25687384398c5e9131af134681ecb50f6c62d",
+      "source_sha256": "1763b50ce9756dcd9ee6d1fcc79b1b61541104d2be993ab44b20b8937c1af30f",
+      "release_sha256": "377e47f044292cd035215a977c7e372b7a55a6188ec722428c8aa50702a1aaf9",
+      "reason": "Offline evidence packaging, independent verification, handwritten synthetic tests, provenance, stage authorization or minimal bilingual documentation; no production module change"
+    }
+  ],
+  "index_self_sha256": "recorded externally in private candidate inventory and distribution hashes",
+  "publication": "not uploaded; P5 pending"
+}

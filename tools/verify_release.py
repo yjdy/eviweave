@@ -36,6 +36,7 @@ def main():
         forbidden = {'docs','.docs','.audit','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent'}
         for name in names:
             path = PurePosixPath(name)
+            require(not path.name.startswith('eviweave-v0.1.0-v6-evidence') and not path.name.endswith('.zip'),label+': no experimental attachment '+name)
             require(not any(part in forbidden or part.startswith('.venv') for part in path.parts),label+': clean path '+name)
             require(not (path.name == '.env' or path.name.startswith('.env.') or path.suffix in {'.pyc','.env'}),label+': no local config '+name)
     if args.git_scope == 'staged':
@@ -83,6 +84,10 @@ def main():
             require(required.issubset(members), 'sdist contains all P2 preparation and synthetic inputs')
             required_p3 = {'.github/workflows/offline.yml','tools/run_regression.py','tools/regression_cases.py','tools/runtime_regression.py','tools/config_lifecycle.py','tools/sandbox_probe.py','tools/ci_check.py','tools/check_installation.py','tools/unit_worker.py','tests/test_native_cli.py','tests/test_batch_identity.py','tests/test_codex_history.py','tests/test_regression.py','tests/test_jail_contract.py','tests/integration/test_historical_runtime.py','provenance/regression-baseline.json','provenance/regression.zh-CN.md'}
             require(required_p3.issubset(members), 'sdist contains all P3 suites, diagnostic tools, provenance and CI workflow')
+            required_p4={'tools/package_evidence.py','tools/evidence_support.py','tools/evidence_verify.py','tests/test_evidence_packaging.py','provenance/evidence-baseline.json','provenance/evidence.zh-CN.md'}
+            require(required_p4.issubset(members), 'sdist contains P4 evidence tools, tests and provenance')
+            for name in required_p4:
+                require(members[name] == (root/name).read_bytes(), 'sdist current P4 content '+name)
             for name in required_p3:
                 require(members[name] == (root/name).read_bytes(), 'sdist current P3 content '+name)
         inspect(members,artifact.name)

@@ -4,7 +4,7 @@ Historical `relation-v6 + simple-fixes-v1 + Codex` baseline, prepared by **袁�
 
 [中文说明](README.zh-CN.md) · [Provenance](provenance/README.zh-CN.md)
 
-P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4–P5 experiment attachments/public release remain pending. The formal technical report is deferred.
+P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4 provides local experiment-attachment preparation, selected-trace redaction and frozen offline scoring; public release remains P5 work. The formal technical report is deferred.
 
 ## Official evaluation
 
@@ -103,3 +103,20 @@ The original outer jail is tested without an added network namespace; no externa
 The read-only baseline verifier is `tools/verify_baseline.py`. It takes historical experiment, existing benchmark and private output directories as three positional arguments. All new audit outputs must stay inside this project; never point output at a source directory. It hashes files in four threads and fails on missing, changed, unparseable or inconsistent evidence. No datasets, predictions, credentials or private audit records are distributed.
 
 MIT licensed, including documentation. See [LICENSE](LICENSE) for retained DataSpace copyright and EviWeave contributions. Source hashes and allowed changes are recorded under `provenance/`. Datasets retain their original distribution terms and are obtained separately.
+
+## Historical experiment attachment
+
+From a checkout or source distribution, use Python 3.12.3 for the formal frozen offline score:
+
+```sh
+python3 -B tools/package_evidence.py build \
+  --experiment-root /path/to/historical-experiment \
+  --baseline-report /path/to/private-P0-result.json \
+  --official-evidence-root /path/to/verified-official-snapshot \
+  --output-root .audit/evidence-build
+python3 -B tools/package_evidence.py verify \
+  --archive .audit/evidence-build/eviweave-v0.1.0-v6-evidence.zip \
+  --output-root .audit/evidence-check
+```
+
+Use fresh project-local output directories. The attachment contains 410 unchanged predictions, 414 attempt summaries and **selected traces** for tasks 33, 328, 35, 391 and 23 (both failure and recovery for 23). Complete original traces remain private. A copied frozen evaluator scores existing predictions only: 45/60; the first-pass 44/60 is a historical record. No new inference or benchmark task execution occurs. The tool performs independent residual scanning and rejects incomplete or changed evidence. Verify uses only the standard library and can run without the historical source, installed package or runtime. Source inputs and the attachment are separate from Git/wheel/sdist. No attachment has been uploaded; publication remains P5. See [evidence provenance and limits](provenance/evidence.zh-CN.md).
