@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "date": "2026-10-22",
+  "author": "袁珺 / Jun Yuan",
+  "license": "MIT; retain DataSpace attribution",
+  "protected_production_files": 17,
+  "production_python_files": 22,
+  "historical_tests": [
+    {
+      "source": "baseline/tests/test_native_cli.py",
+      "sha256": "5b25a79970e5acc4aa1691d8d13bd356d0db7cee0339d2a4d96bc2985743c16d"
+    },
+    {
+      "source": "baseline/tests/test_batch_identity.py",
+      "sha256": "e665c4d4cd3396e22d0f2b8a186ae3fcb120000633415f7fb6e1fe38cc0d0162"
+    },
+    {
+      "source": "baseline/tests/test_filesystem_jail.py",
+      "sha256": "c038f50c142e3e6acf39048f565879df435a8adbbb3b1fb884f7f51efb0fa2be"
+    },
+    {
+      "source": "baseline/tests/test_harness_adapters.py",
+      "sha256": "a49d195764be577859f1afb9aed3e355f07cb5f9e4c917bb7538a8dacbb33d20"
+    }
+  ],
+  "files": [
+    {
+      "destination": ".github/workflows/offline.yml",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "f35332a594c96139106d7ae00d0a0202564610c4f0bb9fee31fd5bbfb1a4aaea",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "AGENTS.md",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "8cea184af2c6a2e2f329e53e4871b4a09877826681d07bad6d1c8210ab0d6d6f",
+      "release_sha256": "6d84ae6b1a0c77c17c54c1e48b3fb69117ea464605ad73b36160cde0e630ba85",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "770135912bd3a003872c27378123c6dbf5013e1947b975fc6d5601ceaccd709b",
+      "release_sha256": "aa297fefb18924d64a6f0d21277b742745826be374c05bdfc14d6d0b2290c1b0",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "README.md",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "4d2f0ea5ec59a6570f3a2e50408c7bd879aa768fe29005f8c3462b9a62256f72",
+      "release_sha256": "1ff5ef3316e9669371990968b4dd6e6d0c9ce0f68eada372488130363b1af892",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "3c487eeb024ee5389b95475f856de54f24242f1697b5a004c64e88a37d9f1204",
+      "release_sha256": "fb6688095e611cc8d13cae5d81399d2d6c1cd256581c6b667d572c7bb2202b55",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "provenance/README.zh-CN.md",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "43f1aa8467f957936f3b97b58f6a8ecb58365e86fbc46239c06019684a3232bd",
+      "release_sha256": "fdaa5b9a1fd5b5fe94a3ea7bfd30147fe989a5f60b2feac22e249dc472883607",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "provenance/regression.zh-CN.md",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "f55cb6806c794d3626e62818d4276d519362054be2f00b37921852a2a06423d4",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tests/integration/test_historical_runtime.py",
+      "source": "baseline/tests/test_filesystem_jail.py",
+      "source_commit": "59ed446d74dd496572d027878925ff04d1315db2",
+      "source_sha256": "c038f50c142e3e6acf39048f565879df435a8adbbb3b1fb884f7f51efb0fa2be",
+      "release_sha256": "391c37d08b0ed82baf4cfca4a6ed350b3493424e342739ea22d272853dd32bb6",
+      "reason": "Extend released-chain isolation scenarios against verified historical rootfs; original outer, local config lifecycle and additional-network smoke separated"
+    },
+    {
+      "destination": "tests/test_batch_identity.py",
+      "source": "baseline/tests/test_batch_identity.py",
+      "source_commit": "59ed446d74dd496572d027878925ff04d1315db2",
+      "source_sha256": "e665c4d4cd3396e22d0f2b8a186ae3fcb120000633415f7fb6e1fe38cc0d0162",
+      "release_sha256": "64f0bc52ca5512f27b2e0e24ea0c8d84d03024a3eef0be6bda493a313be6282f",
+      "reason": "Historical identity/finalization tests; project-local temporary directories and formatting"
+    },
+    {
+      "destination": "tests/test_codex_history.py",
+      "source": "baseline/tests/test_harness_adapters.py",
+      "source_commit": "59ed446d74dd496572d027878925ff04d1315db2",
+      "source_sha256": "a49d195764be577859f1afb9aed3e355f07cb5f9e4c917bb7538a8dacbb33d20",
+      "release_sha256": "9e183c5ca1774e398d44e023108f72e349d4b6f30b64e91be0358ab68d89b65e",
+      "reason": "Only Codex methods and necessary helpers; remove other-agent imports; mock tool lookup for structural unit tests; project-local temp and formatting"
+    },
+    {
+      "destination": "tests/test_jail_contract.py",
+      "source": "baseline/tests/test_filesystem_jail.py",
+      "source_commit": "59ed446d74dd496572d027878925ff04d1315db2",
+      "source_sha256": "c038f50c142e3e6acf39048f565879df435a8adbbb3b1fb884f7f51efb0fa2be",
+      "release_sha256": "574de51b69f72cb6d7d84c4594d2de7c8e2405eb01dcb5e8d2c072476b939eed",
+      "reason": "Adapt historical tty, readonly/runtime/rootfs mount scenarios into dependency-free structural tests; execution is separately mandatory in integration"
+    },
+    {
+      "destination": "tests/test_native_cli.py",
+      "source": "baseline/tests/test_native_cli.py",
+      "source_commit": "59ed446d74dd496572d027878925ff04d1315db2",
+      "source_sha256": "5b25a79970e5acc4aa1691d8d13bd356d0db7cee0339d2a4d96bc2985743c16d",
+      "release_sha256": "6fee798ec50395601a393bde355e8c69fbc6ee658e1589836182864b949ba646",
+      "reason": "Historical runner tests; project-local temporary directories, ready-file cancellation and formatting"
+    },
+    {
+      "destination": "tests/test_regression.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "b1715f6467a016aca04d246fe5d68b24d8eb320303ea9f02d954181a5e60a73d",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/check_installation.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "c794b7b9c75f4ecadb7d797309182db88ee0e6ed5b182558107ac2f996e2bfac",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/ci_check.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "d0a7a278a96072de1a8bae2cacec640d9b013d91a988c4f9f23eb6ad74f538c3",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/config_lifecycle.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "5476f513e362a05ab8f03d2ed34b443766d4a13f5e2255c0e088053258e16455",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/regression_cases.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "c3a8d8e4eb1154efa62cf13761401898a4075190348d4df27650eb89da78babf",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/run_regression.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "2a2bc1f6ce575634307f36835c99753bb787d27438de11a2d456b59594007f4b",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/runtime_regression.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "db04fd821898f3ecad46761c7d7459bbaabae71173d98aff9c1cf0e685d18dfc",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/sandbox_probe.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "a552877dd85785294ba5f3e2816795a4bd504a899e369d006351254ac647accb",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/unit_worker.py",
+      "source": "EviWeave P3 original",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "2411285833292dd4ac8066be5c339ccdd44ae57ea541f26c33b2890021df68b8",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source": "EviWeave P2 HEAD",
+      "source_commit": "62518755c468968cadec334cb4c17e918cd4df3e",
+      "source_sha256": "f7c9cc84f25c740e368ad1dce075180f8224e1200728e8fc70e44cf5c1d84ea5",
+      "release_sha256": "1763b50ce9756dcd9ee6d1fcc79b1b61541104d2be993ab44b20b8937c1af30f",
+      "reason": "P3 regression tooling, handwritten synthetic cases, CI, packaging, authorization or minimal coverage documentation; no protected production changes"
+    }
+  ],
+  "index_self_hash": "Recorded externally in package and private worktree inventories; no recursive self-hash",
+  "action_refs": {
+    "actions/checkout@v4.2.2": "11bd71901bbe5b1630ceea73d27597364c9af683",
+    "actions/setup-python@v5.6.0": "a26af69be951a213d495a4c3e4e4022e16d87065"
+  },
+  "reference_normalization": [
+    "OSError type, errno and stable reason; original message remains private",
+    "selected stable event fields; timestamp, PID, elapsed and temporary prefixes retained in raw records"
+  ],
+  "boundaries": {
+    "real_codex_exec": "NOT_RUN",
+    "model_calls": 0,
+    "benchmark_rerun": "NOT_RUN",
+    "historical_trusted_writer": "NOT_PROVEN",
+    "hosted_ci": "NOT_RUN",
+    "local_python_310": "NOT_RUN",
+    "formal_report": "DEFERRED"
+  }
+}

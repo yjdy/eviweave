@@ -81,6 +81,10 @@ def main():
                 'tools/smoke_runtime.py','tools/synthetic_executor.py','examples/synthetic/tasks/task_1/task.json',
                 'examples/synthetic/tasks/task_2/task.json','examples/synthetic/expected/task_1.csv','examples/synthetic/expected/task_2.csv'}
             require(required.issubset(members), 'sdist contains all P2 preparation and synthetic inputs')
+            required_p3 = {'.github/workflows/offline.yml','tools/run_regression.py','tools/regression_cases.py','tools/runtime_regression.py','tools/config_lifecycle.py','tools/sandbox_probe.py','tools/ci_check.py','tools/check_installation.py','tools/unit_worker.py','tests/test_native_cli.py','tests/test_batch_identity.py','tests/test_codex_history.py','tests/test_regression.py','tests/test_jail_contract.py','tests/integration/test_historical_runtime.py','provenance/regression-baseline.json','provenance/regression.zh-CN.md'}
+            require(required_p3.issubset(members), 'sdist contains all P3 suites, diagnostic tools, provenance and CI workflow')
+            for name in required_p3:
+                require(members[name] == (root/name).read_bytes(), 'sdist current P3 content '+name)
         inspect(members,artifact.name)
         require(set(source)==set(expected),artifact.name+': exactly 22 whitelisted Python modules')
         for name,data in source.items():

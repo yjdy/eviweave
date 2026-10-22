@@ -17,3 +17,5 @@ EviWeave — Evidence-Guided Data Agents，作者袁珺 / Jun Yuan（https://git
 22、23、207、273 固定采用 run_2，其余采用 run_1；不按预测内容或分数重选。三次最终 usage 缺失指 22、23、207 的 run_1 最终用量记录缺失，并非三个被采用的最终预测缺失；保持缺失，不补零。历史模型别名未记录不可变快照。
 
 后续完整重评、精选轨迹、脱敏发布附件及线上发布留在 P4–P5；正式技术报告延后。
+
+P3 的逐文件测试来源、覆盖范围、沙箱与 trusted 诊断边界见 [离线行为回归](regression.zh-CN.md)及[摘要清单](regression-baseline.json)。

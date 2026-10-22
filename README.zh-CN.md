@@ -4,7 +4,7 @@
 
 [English](README.md) · [来源](provenance/README.zh-CN.md)
 
-P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 行为回归、P4–P5 实验附件及公开发布尚未实施。正式技术报告延后。
+P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 提供离线行为回归、冻结参考对照和历史沙箱检查；P4–P5 实验附件及公开发布尚未实施。正式技术报告延后。
 
 ## 官方评估
 
@@ -85,6 +85,20 @@ mkdir -p .audit/tmp
 TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m unittest discover -s tests -v
 TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m build
 ```
+
+## 离线行为回归
+
+在保留源码检出或源码发行包、并已安装 Python 包的环境中执行：
+
+```sh
+.venv/bin/python -B tools/run_regression.py --suite unit --output-root .audit/unit
+.venv/bin/python -B tools/run_regression.py --suite all --output-root .audit/regression \
+  --frozen-source /path/to/frozen_src --config configs/codex.example.yaml
+```
+
+输出目录必须全新或为空。unit 不依赖历史材料；reference 必须显式提供冻结来源，使用独立子进程并各自断言人工预期；runtime 必须有已核验历史运行时和占位端点配置，缺材料直接失败。见[测试来源及证据边界](provenance/regression.zh-CN.md)。
+
+原始外层检查不附加禁网，只观察网络命名空间，不发起外部连接。独立的固定 CLI config/read 诊断无推理地比较初始/trusted 配置；P2 合成诊断另加禁网。真实 Codex 内层命令执行仍未验证。轻量 CI 配置 Python 3.10/3.12/3.13，托管执行留首次公开推送时确认。在项目内环境安装 build、pip 后，可用 `python -B tools/ci_check.py --output-root .audit/ci-result` 执行同一套本地构建安装及 unit 检查。
 
 `tools/verify_baseline.py` 使用标准库，依次接收历史实验目录、现有 benchmark 目录、私有输出目录；四线程核对摘要，缺失、变更、无法解析或证据不一致均失败。新增输出必须放在本项目内，不能指向只读来源。数据、预测、凭据和私有原始审计不随代码发行。
 

@@ -4,7 +4,7 @@ Historical `relation-v6 + simple-fixes-v1 + Codex` baseline, prepared by **袁�
 
 [中文说明](README.zh-CN.md) · [Provenance](provenance/README.zh-CN.md)
 
-P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 behavior regression and P4–P5 experiment attachments/public release remain pending. The formal technical report is deferred.
+P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4–P5 experiment attachments/public release remain pending. The formal technical report is deferred.
 
 ## Official evaluation
 
@@ -45,7 +45,7 @@ Use `configs/codex.example.yaml` as a template. The endpoint is a non-working pl
 .venv/bin/eviweave doctor --config configs/codex.example.yaml
 ```
 
-`doctor` checks dependencies without model calls and returns a nonzero status while credentials, Docker, Bubblewrap, Data Workbench 1.0 or Codex CLI 0.145.0 are unavailable. Both `run` and `batch` default to Codex; explicit `--harness codex` is accepted. Other harnesses are rejected. `dataspace-baselines` remains a compatible command. Actual `run`/`batch` execution needs a prepared runtime and can incur inference charges; no such experiments were executed during P0–P2.
+`doctor` checks dependencies without model calls and returns a nonzero status while credentials, Docker, Bubblewrap, Data Workbench 1.0 or Codex CLI 0.145.0 are unavailable. Both `run` and `batch` default to Codex; explicit `--harness codex` is accepted. Other harnesses are rejected. `dataspace-baselines` remains a compatible command. Actual `run`/`batch` execution needs a prepared runtime and can incur inference charges; no such experiments were executed during P0–P3.
 
 ## Runtime preparation and offline diagnostic
 
@@ -85,6 +85,20 @@ mkdir -p .audit/tmp
 TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m unittest discover -s tests -v
 TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m build
 ```
+
+## Offline regression
+
+From a checkout or source distribution with the package installed:
+
+```sh
+.venv/bin/python -B tools/run_regression.py --suite unit --output-root .audit/unit
+.venv/bin/python -B tools/run_regression.py --suite all --output-root .audit/regression \
+  --frozen-source /path/to/frozen_src --config configs/codex.example.yaml
+```
+
+Each output directory must be fresh. `unit` needs no historical source/runtime. `reference` requires the explicitly supplied frozen source; `runtime` requires verified historical runtime copies and the placeholder endpoint. Missing required material fails. The reference comparison runs separate processes and checks independent synthetic expectations. See [regression provenance and limits](provenance/regression.zh-CN.md).
+
+The original outer jail is tested without an added network namespace; no external connection is attempted. A separate fixed-CLI config/read diagnostic compares initial and trusted configuration without inference, while the P2 smoke adds network isolation. Real Codex inner command execution remains untested. The lightweight CI matrix covers Python 3.10/3.12/3.13; hosted execution remains pending until publication. To run its local equivalent, install `build` and `pip` in a project-local environment, then run `python -B tools/ci_check.py --output-root .audit/ci-result`.
 
 The read-only baseline verifier is `tools/verify_baseline.py`. It takes historical experiment, existing benchmark and private output directories as three positional arguments. All new audit outputs must stay inside this project; never point output at a source directory. It hashes files in four threads and fails on missing, changed, unparseable or inconsistent evidence. No datasets, predictions, credentials or private audit records are distributed.
 
