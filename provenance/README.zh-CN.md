@@ -1,5 +1,7 @@
 # 来源与提取边界
 
+当前 P5 文档与待发布材料入口见 [P5.3 来源说明](p5-documentation.md)、[候选资产清单](release-assets.json)及[新增来源覆盖层](p5-documentation-baseline.json)。v0.1.0 尚未发布；下文既有来源表和阶段记录保留原历史口径，当前使用方法以根目录双语 README 为准。
+
 EviWeave — Evidence-Guided Data Agents，作者袁珺 / Jun Yuan（https://github.com/yjdy）。
 
 本项目按历史实验 `relation_v6_full410_20261019T074114Z` 的 `frozen_src/` 提取首版 `relation-v6 + simple-fixes-v1 + Codex`，内部包名保留 `dataspace_baselines`。相邻 DataSpace 工作区只读，不使用其当前源码中的后续 Controlled 实现。源码来自 DataSpace；上游 MIT 声明保留在根目录 LICENSE，EviWeave 独立化整理与说明亦采用 MIT。数据通过原发布入口获取，不随代码打包。

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "version": "0.1.0",
+  "status": "pending-publication",
+  "release_date": null,
+  "final_commit": null,
+  "final_build_binding": "pending-stage-four",
+  "intended_repository": "https://github.com/yjdy/eviweave",
+  "repository_public_access": "anonymous API 404 on 2026-10-24; existence/visibility not established",
+  "assets": [
+    {
+      "name": "eviweave-0.1.0-py3-none-any.whl",
+      "role": "software wheel; business modules and metadata only",
+      "status": "pending-final-build",
+      "size": null,
+      "sha256": null
+    },
+    {
+      "name": "eviweave-0.1.0.tar.gz",
+      "role": "source distribution including outer tools and public documentation",
+      "status": "pending-final-build",
+      "size": null,
+      "sha256": null
+    },
+    {
+      "name": "eviweave-v0.1.0-v6-evidence.zip",
+      "role": "original P4 historical predictions, summaries, fixed selection and selected redacted traces",
+      "status": "local-verified-not-uploaded",
+      "size": 1980385,
+      "sha256": "3e40cd0e0154f9c81f643dffc5eced748e9bed2ab376200ff49b921ee4c27b39",
+      "preserve_original_bytes": true
+    },
+    {
+      "name": "eviweave-v0.1.0-v6-evidence.zip.sha256",
+      "role": "original external evidence ZIP checksum",
+      "status": "local-verified-not-uploaded",
+      "size": 98,
+      "sha256": "e2ba1b335fe770d777bd4216edc0d70b1ae5ea7680f9c004661bc5dd171eb780",
+      "preserve_original_bytes": true
+    },
+    {
+      "name": "SHA256SUMS",
+      "role": "aggregate checksums after final commit/build binding",
+      "status": "pending-stage-four",
+      "size": null,
+      "sha256": null
+    }
+  ],
+  "evidence_scope": {
+    "files": 445,
+    "predictions": 410,
+    "attempt_summaries": 414,
+    "selection_rows": 410,
+    "selected_trace_tasks": [
+      33,
+      328,
+      35,
+      391,
+      23
+    ],
+    "selected_trace_attempts": 6,
+    "missing_usage_attempts": [
+      "22/run_1",
+      "23/run_1",
+      "207/run_1"
+    ],
+    "full_trace_collection": false
+  },
+  "excluded": [
+    "complete original traces",
+    "private runtimes and inventories",
+    "reference answers and original datasets",
+    "newer real-experiment logs and predictions",
+    "private redaction mappings and source audit indexes",
+    "local docs, credentials, configuration, caches and build storage"
+  ],
+  "licensing": "MIT for project code/documentation with DataSpace and Jun Yuan attribution; data, predictions and third-party runtime components retain original source terms",
+  "release_body": "RELEASE_NOTES.md"
+}

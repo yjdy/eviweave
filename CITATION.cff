@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: >-
+  Please cite EviWeave when using this software. Version 0.1.0 is prepared
+  but unreleased; the repository-code URL is the intended publication location,
+  not a claim that a public repository or release already exists.
+type: software
+title: 'EviWeave — Evidence-Guided Data Agents'
+version: 0.1.0
+authors:
+  - family-names: Yuan
+    given-names: Jun
+    alias: 袁珺
+repository-code: 'https://github.com/yjdy/eviweave'
+license: MIT
+abstract: >-
+  Frozen historical relation-v6 and simple-fixes-v1 data agent baseline,
+  with explicit resource preparation, environment profiles, experiment
+  run/resume, offline verification and offline cost analysis.
+keywords:
+  - data agents
+  - reproducibility
+  - DataSpace

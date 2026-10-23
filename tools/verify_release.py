@@ -24,11 +24,14 @@ def effective_provenance(members):
     history = ('extraction-manifest', 'runtime-baseline', 'regression-baseline', 'evidence-baseline',
                'isolation-baseline', 'unified-baseline', 'observability-baseline', 'bugfix-baseline')
     retained = newest['retained_provenance']
-    p5_name = 'provenance/p5-baseline.json'
-    p5 = json.loads(members[p5_name]) if p5_name in members else None
-    additions = {e['destination'] for e in p5['files'] if e['source_sha256'] is None} if p5 else set()
+    overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json')
+    overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
+    if overlay_names[1] in members and overlay_names[0] not in members:
+        raise ValueError('documentation provenance requires retained P5 preparation overlay')
+    additions = {e['destination'] for _, layer in overlays for e in layer['files']
+                 if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
-                        and name not in {'provenance/config-rounding-baseline.json', p5_name} and name not in additions}
+                        and name not in {'provenance/config-rounding-baseline.json', *overlay_names} and name not in additions}
     if set(retained) != historical_names or any(digest(members[name]) != sha for name, sha in retained.items()):
         raise ValueError('retained provenance set/digest mismatch')
     latest = {}
@@ -45,21 +48,23 @@ def effective_provenance(members):
             raise ValueError('provenance override source mismatch: ' + name)
         seen.add(name)
         latest[name] = entry['release_sha256']
-    if p5:
-        previous_names = historical_names | {'provenance/config-rounding-baseline.json'}
-        if (set(p5['retained_provenance']) != previous_names
-                or any(digest(members[name]) != value for name, value in p5['retained_provenance'].items())):
-            raise ValueError('retained provenance set/digest mismatch in P5 overlay')
+    previous_names = historical_names | {'provenance/config-rounding-baseline.json'}
+    for overlay_name, layer in overlays:
+        if (set(layer['retained_provenance']) != previous_names
+                or any(digest(members[name]) != value for name, value in layer['retained_provenance'].items())):
+            raise ValueError('retained provenance set/digest mismatch in ' + overlay_name)
         seen = set()
-        for entry in p5['files']:
+        for entry in layer['files']:
             name = entry['destination']
-            if name in seen or name.startswith('src/') or name in previous_names or name == p5_name:
+            if name in seen or name.startswith('src/') or name in previous_names or name in overlay_names:
                 raise ValueError('invalid or duplicate P5 provenance override')
             if (entry['source_sha256'] != latest.get(name) or
-                    entry['source_commit'] != (p5['source_commit'] if name in latest else None)):
+                    entry['source_commit'] != (layer['source_commit'] if name in latest else None)):
                 raise ValueError('P5 provenance source mismatch: ' + name)
             seen.add(name)
             latest[name] = entry['release_sha256']
+        previous_names |= {overlay_name} | {name for name in seen
+                                            if name.startswith('provenance/') and name.endswith('.json')}
     return latest
 
 
@@ -190,6 +195,13 @@ def main():
             require(required_p5.issubset(members), 'sdist contains public preparation tools, locks and source overlay')
             for name in required_p5:
                 require(members[name] == (root/name).read_bytes(), 'sdist current P5 preparation content '+name)
+            required_documentation = {'README.md', 'README.zh-CN.md', 'EXPERIMENTS.md', 'EXPERIMENTS.zh-CN.md',
+                                      'CITATION.cff', 'CHANGELOG.md', 'RELEASE_NOTES.md', 'ROADMAP.md',
+                                      'provenance/p5-documentation.md', 'provenance/release-assets.json',
+                                      'provenance/p5-documentation-baseline.json', 'tests/test_release_documentation.py'}
+            require(required_documentation.issubset(members), 'sdist contains public documentation, citation and pending release materials')
+            for name in required_documentation:
+                require(members[name] == (root/name).read_bytes(), 'sdist current public documentation '+name)
             for name, expected_sha in effective_provenance(members).items():
                 require(name in members and members[name] == (root/name).read_bytes(), 'sdist current effective content '+name)
                 require(digest(members[name]) == expected_sha, 'effective provenance digest '+name)

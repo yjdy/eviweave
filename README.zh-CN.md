@@ -1,290 +1,226 @@
 # EviWeave — Evidence-Guided Data Agents
 
-EviWeave 是用于运行和评估数据分析智能体的实验框架。模型以任务资料为依据，在隔离的 Linux 工作台中调查数据、编写并执行分析代码，最终输出 `prediction.csv`。框架负责校验和归集预测、保留执行证据，并对具备参考答案的任务进行离线评分。
+[English](README.md)
 
-[English](README.md) · [数据格式与自定义数据集](DATA_FORMAT.md) · [来源](provenance/README.zh-CN.md)
+EviWeave 面向异构本地资料执行数据分析：检查证据、在沙箱内运行分析，并以无损 CSV 提交结果。首版保留历史 **relation-v6 + simple-fixes-v1** 基线，使用 **Codex 0.145.0**、**Qwen3.8-Flash** 与 **Responses** 协议，提供显式资源准备、环境档案、实验运行/续跑、离线验证和离线费用分析。
 
-项目提供以下能力：
+**v0.1.0 待发布。** 文档材料已准备，最终干净检出验收、最终提交/构建绑定和线上发布仍待完成。见[实验说明](EXPERIMENTS.zh-CN.md)、[发布说明](RELEASE_NOTES.md)、[候选资产](provenance/release-assets.json)和[路线图](ROADMAP.md)。EviWeave Controlled 属于后续工作，不在首版范围。
 
-- 统一实验流程：指定任务、独立重复运行、中断续跑和离线验证。
-- 任务级隔离：独立会话和可写输出，任务资料及运行时以只读方式挂载。
-- 可核对的实验记录：环境版本锁、冻结评分资源、源码摘要和版本化报告。
-- 离线用量与费用分析：显式导入请求证据和账单，分别核算不同来源的金额。
+## 支持与发行范围
 
-当前 `0.1.0` 版本保留 DataSpace 历史冻结的 `relation-v6 + simple-fixes-v1 + Codex` 基线，适用于基线复现、数据分析智能体评估，以及失败或不一致结果的调查。模型服务、数据集和历史运行时需单独配置；完整逐请求在线用量与费用采集尚不支持。
+| 范围 | 支持或验收边界 |
+|---|---|
+| 完整沙箱流程 | Linux x86_64；需 Docker/dockerd、containerd、Bubblewrap 及必要 namespace/挂载权限；Docker 存储在项目内，不接系统 socket |
+| 独立宿主档案 | CPython 3.12 / 3.13；测量并校验实际补丁版本、解释器字节、ABI、OS/内核及宿主工具 |
+| 本地验收 | 同一物理宿主的 CPython 3.12.3 和 3.13.16；P5.2 每版源码 228 项、安装后 228 项测试通过 |
+| 包元数据 | Python >=3.10、PyYAML>=6,<7；Python 3.10 实测与托管 CI 仍未验证；配置了 CI 不等于托管运行通过 |
+| 其他平台 | macOS、Windows、ARM 和任意内核尚未验收 |
+| Wheel | 22 个白名单业务模块、元数据和两个 CLI 别名：`eviweave`、`dataspace-baselines` |
+| 源码检出 / sdist | 另含 `scripts/`、`tools/`、锁、合成样例及公开文档；下述流程需要这些内容 |
+
+仅安装 wheel 不会取得仓库工具、数据或运行时。只需业务包的用户可在项目内 venv 中以 `python -m pip install /project/path/eviweave-0.1.0-py3-none-any.whl` 安装自行取得的 wheel，再使用 `eviweave --help`；复现使用下述锁定源码流程。不宣称已发布 PyPI。
+
+两个原[精确档案](locks/README.md)登记的是 2026-10-23 核验的宿主，不是历史 V6 主机。公开独立重建具有独立的全树清单和身份。329 个系统包、21 个 Python 包和 TOOLS 相同不能证明历史 rootfs 相同。历史运行时导入仍是可选路径，须提供原清单；不提供私有 binary/rootfs 下载。
+
+## 安装与资源准备
+
+从源码根目录执行，采集和安装引导全程使用目标 CPython 3.12 或 3.13 作为 `python3`。初始准备仅需 Python 标准库和上述宿主工具。下载、临时文件、HOME、环境和 Docker/containerd 状态均须留在项目内。目标目录须全新且互不重叠；为制品、Docker vfs 层和导出 rootfs 预留空间。数据 ZIP 为 2,878,651,222 字节，解包内容合计 15,010,873,064 字节，另需运行时和构建空间。
+
+以下命令下载公共资源并独立构建工作台，不调用模型。`workbench` 需要项目内 daemon 启动器所需的免密权限，不会安装缺少的宿主系统工具。
+
+```sh
+mkdir -p .audit/tmp .audit/cache .local/profiles
+export TMPDIR="$PWD/.audit/tmp"
+export XDG_CACHE_HOME="$PWD/.audit/cache"
+export PYTHONDONTWRITEBYTECODE=1
+python3 -B tools/public_resources.py codex --target .runtimes/public
+python3 -B tools/public_resources.py workbench --target .runtimes/public/workbench \
+  --storage .runtimes/public-build
+python3 -B tools/public_resources.py evaluation --target .local/evaluation-v6-public60
+python3 -B tools/host_profile.py collect --name public-host \
+  --codex-root .runtimes/public/codex-0.145.0/platform-package \
+  --workbench-root .runtimes/public/workbench --output .local/profiles/public-host.json
+python3 -B tools/host_profile.py check --profile .local/profiles/public-host.json \
+  --output .audit/public-profile-check
+./scripts/install.sh --python "$PWD/.venv-experiment/bin/python" \
+  --environment-profile .local/profiles/public-host.json
+.venv-experiment/bin/eviweave --help
+.venv-experiment/bin/dataspace-baselines --help
+```
+
+安装器先认证精确依赖 wheel 和内容，再执行锁定 pip 并安装包；引导解释器不需要预装 PyYAML。重复安装校验同一档案，不升级或覆盖冲突 venv。已有 `.local/config-v6/codex.yaml` 保留；全新安装会按所选运行时路径生成该文件，端点为 `https://example.invalid/v1`。
+
+资源 URL、完整 revision、长度和摘要固定在[公共资源锁](provenance/public-resources-lock.json)。评估器固定 GitHub `6491caa4c70cc06cacb6103ba73cefb00746abfe`；数据/评分成员固定 Hugging Face `96be19257d7aa251dbce4771d46a26fc36f6dc52`。评分准备取得 120 个 ZIP 成员和评估器，并校验原 121 项锁，无需下载全部题目数据。完整数据另行准备：
+
+```sh
+python3 -B tools/public_resources.py dataset --target data/DataSpace-Benchmark
+.venv-experiment/bin/python -B tools/standalone.py verify-evaluation \
+  --evaluation-root .local/evaluation-v6-public60
+```
+
+完整 ZIP 解包前 SHA-256 必须为 `68f221fafcf0b50396eca55f8298af1ad73d586a6cac6995916afca535a560af`。数据根含 `input/task_N/task.json` 和 `input/task_N/context/`；`--dataset` 接收 `input/` 的父目录。已有完整数据可在核验后复用；工具拒绝冲突目标。不会搜索相邻 DataSpace 目录或读取其凭据。
+
+`artifacts --cache ...` 可只取得 329 个精确 deb 和 21 个工作台 wheel 而不构建。复用缓存仍重算摘要；坏缓存被拒绝，不静默替换。旧 `libexpat1` 的固定摘要来自官方 HTTPS 观察，未取得其历史签名 Packages 条目；其余 328 项摘要来自已验证签名索引。此信任边界保留，不称为历史 Debian 快照认证通过。见[准备细节](provenance/public-preparation.md)。
+
+构建后保留项目内 daemon 供镜像检查。使用 `python3 -B scripts/project_docker.py info --storage-root .runtimes/public-build` 查看；检查/运行后将 `info` 改为 `stop` 停止，后续镜像检查前以同一存储执行 `start`。不要替换成系统 daemon。
+
+## 环境档案与私有配置
+
+采集只写候选；采集/检查成功不会激活档案。显式 CLI 选择优先，其次是非空 `.local/env.sh`，再到继承环境变量，最后为原精确默认档案。Shell 包装器中，非空私有值覆盖继承值，空白值则继承。包装器首次使用时由[模板](configs/env.sh.example)创建私有文件。
+
+全程使用一致设置：
+
+| 设置 | 本文取值 |
+|---|---|
+| `EVIWEAVE_PYTHON` | `$PWD/.venv-experiment/bin/python` |
+| `EVIWEAVE_ENVIRONMENT_PROFILE` | `$PWD/.local/profiles/public-host.json` |
+| `EVIWEAVE_CONFIG` | `$PWD/.local/config-v6/codex.yaml` |
+| `EVIWEAVE_DATASET` | `$PWD/data/DataSpace-Benchmark` |
+| `EVIWEAVE_EVALUATION_ROOT` | `$PWD/.local/evaluation-v6-public60` |
+| `EVIWEAVE_API_KEY` | 用户在终端设置专用 key；私有模板保持空白以继承 |
+
+使用前检查已有私有设置。`EVIWEAVE_BOOTSTRAP_PYTHON` 选择安装引导解释器，不代表目标 venv。`EVIWEAVE_AUDIT_ROOT` 可将准备/检查诊断放到项目内指定目录。统一包装器没有 `EVIWEAVE_BASE_URL` 或 `EVIWEAVE_DATASET_ROOT` 设置；端点写 YAML，其他设置使用上表名称。
+
+已有历史配置而准备了新的公开运行时时，生成**全新**离线文件，检查运行时路径后显式选择；不会覆盖 `codex.yaml`：
+
+```sh
+.venv-experiment/bin/python -B tools/host_profile.py config \
+  --profile .local/profiles/public-host.json --output .local/config-v6/offline.yaml
+```
+
+## 无模型检查与合成执行
+
+本节无需 API key。离线 doctor 使用生成的占位配置；检查本地运行时内容和能力，不认证服务。每次独立检查使用全新审计输出。
+
+```sh
+.venv-experiment/bin/python -B tools/host_profile.py doctor \
+  --profile .local/profiles/public-host.json --config .local/config-v6/offline.yaml \
+  --output .audit/public-offline-doctor
+.venv-experiment/bin/python -B tools/unified_smoke.py \
+  --environment-profile .local/profiles/public-host.json \
+  --evaluation-root .local/evaluation-v6-public60 --output-root '.audit/public synthetic'
+.venv-experiment/bin/python -B tools/run_regression.py \
+  --suite unit --output-root .audit/public-unit
+```
+
+合成入口强制替换成本地执行器并额外禁网，检查 CSV 字节、归集、中断/续跑及完成后续跑零新增尝试；2/2 是人工测试分数。不执行 benchmark 推理或真实模型客户端。包内另有 `eviweave doctor --offline --config ...`；它与档案 doctor 的区别是不会选择/检查独立宿主档案。普通 doctor 要求 key，两种模式都不认证服务。
 
 ## 统一实验流程
 
-保留仓库或源码发行包，先执行安装，再编辑一个私有环境脚本：
+**本节 `run` 命令会调用真实模型并产生费用。** 以下仅为使用示例，文档整理不执行模型运行。先准备数据/运行时/评分材料、选用检查通过的档案，再由用户自行设置专用 `EVIWEAVE_API_KEY`。不要把 key 写入 YAML、输入数据、命令参数或日志。不支持回退到其他 key。
+
+真实使用时，在私有 `.local/config-v6/codex.yaml` 中将 `experiment.model.openai_base_url` 设置为兼容 V6 的 HTTPS Responses 基础端点，不带内嵌凭据、query 或 fragment。保留 `qwen3.8-flash`、Responses、relation-v6/simple-fixes-v1、32,768 输出 token、983,616 上下文 token、单题 1,800 秒和并发 1。运行时路径须与所选档案一致。新端点/模型/宿主构成新的环境记录，不是历史模型身份的证明。
+
+检查 `.local/env.sh` 后，先对单题进行无推理检查。必须存在 key；成功仍报告 `service_auth=NOT_TESTED`、`model_calls=0`。其他前置条件通过但缺 key 时返回 2 和 `MISSING_KEY`。此生产路径拒绝占位端点。
 
 ```sh
-./scripts/install.sh
-# 编辑 .local/env.sh：设置专用 EVIWEAVE_API_KEY 及所需路径
-source scripts/env.sh
-./scripts/experiment.sh check --tasks 33
-```
-
-安装默认使用现有 CPython 3.12.3 创建项目内 `.venv-experiment`；3.13.16为独立兼容profile。
-`EVIWEAVE_BOOTSTRAP_PYTHON`可指定已有的对应解释器，`EVIWEAVE_PYTHON`指定项目内`.venv*`目标。
-安装器按[精确版本和摘要锁](locks/README.md)准备Python包，保留已有配置，不需要key或数据，
-不下载Codex、不构建Workbench。现有环境内容或版本不符时失败，不删除重建。
-默认模型配置为`.local/config-v6/codex.yaml`，数据为`data/DataSpace-Benchmark`，
-评分副本为`.local/evaluation-v6-public60`。首次生成的模型配置使用占位端点，需自行配置V6端点。
-运行时缺失时按下文显式准备历史副本；重建Workbench有内容差异，需要另建profile与实验目录。
-锁定的宿主OS/内核、解释器、依赖及运行时不匹配时在模型调用前停止。
-
-`.local/env.sh`首次创建权限600，不覆盖既有文件，也不将终端key自动写入。
-优先级为命令行、私有脚本非空值、已有环境变量、项目默认值；环境默认路径按项目根解析，
-命令行相对路径按当前目录解析。加载器不修改shell启动文件或调用者选项，不显示key。
-`check`不请求模型；缺key或本地材料时报错，key存在也不代表服务鉴权通过。
-
-下面的 **run会发起真实推理并产生费用**，默认公开60题，仅在确定实验范围后执行：
-
-```sh
-./scripts/experiment.sh run
-./scripts/experiment.sh run --tasks 33 35 --repeat 3 --output .audit/my-experiment
-./scripts/experiment.sh run --scope all --output .audit/full-experiment
-./scripts/experiment.sh run --resume --output .audit/my-experiment --yes
-./scripts/experiment.sh verify --experiment .audit/my-experiment
-./scripts/experiment.sh verify --experiment .audit/my-experiment --output .audit/my-validation
-```
-
-统一入口在创建输出前逐层校验配置，只接受已支持的 Codex 字段；未知字段（包括误填的
-`api_key`、`password`、`headers`）和叶子中的嵌套对象会被拒绝，错误不回显配置值。
-凭据仅通过 `EVIWEAVE_API_KEY` 设置。合法 V6 配置的快照格式不变；外层源码变化后，旧实验
-仍须通过原身份检查，不应绕过检查续跑。见[本轮修复说明](provenance/config-rounding.zh-CN.md)。
-
-费用的 `rounding.quantum` 表示正十进制字符串步长（如 `"0.05"`），null 表示不额外舍入。
-每请求合计后按步长舍入一次，再跨请求汇总。新费用报告标记
-`calculation_policy_version=decimal-quantum-v2`，逐请求保留舍入前金额；超出精度则拒绝步长计价。
-旧报告保留，通过 `cost revalue` 和全新输出目录取得修正结果；详见[费用说明](provenance/observability.zh-CN.md)。
-
-`--scope public60|all`与`--tasks`互斥；默认repeat为1，任务去重排序，并发沿用YAML，同题各轮不重叠。
-新run创建不可变计划；已有非空目录先核对身份并确认，默认否，非交互需`--yes`。
-输出限项目内、拒绝链接和受保护目录，使用独占锁；自定义实验目录登记本地Git排除。
-每次尝试的日志和预测保留在`tasks/task_N/run_K/`，当前答案位于`predictions/`。
-新尝试启动后旧答案退出当前选择，新尝试失败则当前答案缺失，历史结果保留。
-
-`--resume`仅恢复最近计划，不能同时更改配置、数据、选题或repeat。
-未启动、中断、超时、输出预算耗尽、运行失败、无预测或非法/损坏预测各重试一次；
-正常提交但gold评分错误的项目跳过；仅归集副本缺失则修复副本。
-全部正常提交后再次resume不需要key且零调用。普通失败继续，结构化鉴权/配额错误和
-确认的全局环境故障停止；SIGINT/SIGTERM/SIGHUP取消在途任务、保留进度并自动验证。
-鉴权识别同时支持固定客户端最终的`unexpected status 401/402/403`消息。
-当前任务完成客户端内部重连后确认失败，再停止新尝试分配并取消在途任务；工具输出和随后恢复成功的错误
-不会触发停批，普通429/500也不一律认作账户故障。首个停批原因只保存类别和事件位置。
-
-每次验证保留独立报告版本，根目录`summary.json`、`score.json`、`summary.csv`为最新副本，
-三份文件带相同report_id；再次verify可以重建缺失报告。
-验证不需要key、原数据、原配置或模型运行时，使用实验内独立评分副本；运行期间拒绝独立verify。
-当前计划公开题的不同ID构成准确率分母，缺预测仍计入，repeat不增加分母；410题有60题公开评分，
-其余350题未评分。历史尝试、当前答案和当前计划分开统计。
-用量逐原始字段求和，缺失为null并报告覆盖率，金额未计算。
-失败尝试同样核对执行证据；`attempt_integrity`与CSV证据列区分一致、不完整和冲突。
-矛盾记录使验证失败，其用量排除于可信小计并单列排除数；中断记录明确不完整，完整runner结果的外层归集失败
-仍可在续跑时零模型调用恢复。验证不修改原始记录或预测。
-退出0表示操作完整完成（答案可以错误），1表示执行/完整性/评分/报告失败，2表示参数或材料不足，130表示中断。
-独立verify可成功报告已有执行失败，不因此重新请求模型。
-
-## 官方评估
-
-EviWeave V6 在 DataSpace 官方全量评估中答对 **333/410 题，Task Accuracy 为 81.22%**。截至 **2026-10-22**，与 Jitto Build + Claude Opus 5.5 **并列第一**，见[官方榜单](https://dataspace-bench.github.io/#leaderboard)。
-
-| 项目 | 官方记录 |
-|---|---|
-| 登记名称 | `codex-controlled + Qwen3.8-Flash` |
-| 官方评测日期 | 2026-10-21 |
-| 评测范围 | DataSpace 全量 410 题 |
-
-该历史条目对应本项目的 V6 基线：Codex CLI 0.145.0、`relation-v6` 和 `simple-fixes-v1`。登记名称早于 EviWeave 命名，后续 EviWeave Controlled 控制器实现不在本包内。提交保留全部 **414 次尝试**，其中任务 **22、23、207、273** 各有一次人工触发的恢复尝试；四题固定采用 `run_2`，其余 406 题采用 `run_1`，不按分数重新选择。
-
-独立的本地公开子集结果为**首轮 44/60、恢复后 45/60**，来源和选择政策见[来源说明](provenance/README.zh-CN.md)。官方榜单已于 2026-10-22 重新核对；以上为历史提交成绩，本次整理未重新推理或重跑评测。
-
-## 底层安装与兼容入口
-
-需要 Python 3.10+，唯一 Python 运行依赖为 `PyYAML>=6,<7`。在项目根目录安装，也可安装 `dist/` 内构建的 wheel：
-
-```sh
-mkdir -p .audit/tmp .audit/cache
-export TMPDIR="$PWD/.audit/tmp"
-export PIP_CACHE_DIR="$PWD/.audit/cache/pip"
-python3 -m venv .venv
-.venv/bin/python -m pip install .
-.venv/bin/eviweave --version
-.venv/bin/eviweave list
-.venv/bin/eviweave run --help
-.venv/bin/eviweave batch --help
-```
-
-系统缺少 `ensurepip` 时，可使用已安装的 uv：`UV_CACHE_DIR="$PWD/.audit/cache/uv" uv --offline venv --python python3 .venv`，然后执行 `UV_CACHE_DIR="$PWD/.audit/cache/uv" uv pip install --python .venv/bin/python .`。
-
-配置模板为 `configs/codex.example.yaml`。其中端点为不可用占位值，实际配置使用与历史V6一致的Responses端点和模型 `qwen3.8-flash`。用户须自行设置环境变量 `EVIWEAVE_API_KEY`，使用EviWeave专用API key；不将密钥写入YAML，不读取DataSpace的api.env，也不回退到DASHSCOPE_API_KEY或OPENAI_API_KEY。下文独立配置工具可生成私有配置。工作台和Codex运行时宿主路径均相对配置文件解析，支持空格和runtime_path的 `{version}` 占位符。
-
-```sh
-.venv/bin/eviweave doctor --config configs/codex.example.yaml
-```
-
-`doctor` 不调用模型；凭据、Docker、Bubblewrap、Data Workbench 1.0 或 Codex CLI 0.145.0 缺失时返回非零并给出诊断。`run`、`batch` 默认使用 Codex，也接受显式 `--harness codex`，其他代理明确拒绝；兼容 `dataspace-baselines` 入口。实际执行 run/batch 需要完整环境，可能产生推理费用，本轮未执行此类实验。
-
-## 运行时准备与离线合成验收
-
-需要 Linux x86_64、GNU `cp`/`tar`、Docker、Bubblewrap 和 Python。准备脚本与人工合成样例进入源码发行包；wheel 仅包含 Python 包，因此请保留仓库或源码包。
-
-```sh
-scripts/install_codex_runtime.sh --help
-scripts/install_codex_runtime.sh
-python3 -B scripts/project_docker.py start
-scripts/prepare_workbench.sh build --docker-host "unix://$PWD/.runtimes/build/docker.sock"
-scripts/prepare_workbench.sh export --docker-host "unix://$PWD/.runtimes/build/docker.sock" \
-  --runtime-root .runtimes/data-workbench-rebuilt
-```
-
-Codex 安装器只下载 `0.145.0`，解包前核验 npm SHA-512；也支持 `--from-dir` 加 `--manifest` 导入，或 `--from-archive` 加 `--sha256`。运行时、缓存与临时目录默认均在项目内，可在项目内自定义。重复导入复用已核验副本，内容冲突时失败且不覆盖。准备过程仅执行真实 `codex --version`。
-
-独立 Docker 和 containerd 的持久数据均位于项目内，需要已有 `sudo -n` 权限。构建沿用历史基础镜像摘要，并锁定全部记录的 Python/系统包版本；无法获取锁定版本时失败，不自动升级。重建标签为 `eviweave-workbench:p2-rebuilt`。使用重建导出时，需相应修改配置中的工作台 image 和 rootfs，doctor 通过 `DOCKER_HOST="unix://$PWD/.runtimes/build/docker.sock"` 选择本地实例。使用完执行 `python3 -B scripts/project_docker.py stop`。准备脚本拒绝向系统 daemon 构建或导出。
-
-历史移植与重建分别记录。取得独立的历史运行时和可信文件清单后，使用 `prepare_workbench.sh import --from-dir ... --manifest ...`；归档导入要求 `--from-archive`、`--sha256` 及 `--manifest`。可通过 `python3 -B scripts/runtime_support.py --root ... --output .audit/runtime-files.json` 采集现存目录清单，但新采集不等于历史认证。`prepare_workbench.sh verify` 逐项验证。历史 binary/rootfs 不随代码发行，目前尚无公开附件下载入口，身份与重建差异见[运行时来源说明](provenance/runtime-changes.zh-CN.md)。
-
-示例配置指向已核验的历史运行时副本后：
-
-```sh
-.venv/bin/eviweave doctor --offline --config configs/codex.example.yaml
-.venv/bin/python -B tools/smoke_runtime.py --config configs/codex.example.yaml \
-  --output-root .audit/synthetic-smoke
-```
-
-输出目录必须全新。离线 doctor 将凭据显示为 `[skip]`，其他必要检查失败仍返回非零；默认 doctor 继续在缺少凭据时失败。两种模式都不认证服务、不发送推理请求。检查实际包版本、完整文件清单、英/中文 OCR 数据、只读资料/运行时/导出器挂载及可写输出。
-
-合成工具只接受占位端点，子进程仅提供无效测试 key，额外禁用网络，通过原始 Bubblewrap、运行器、导出器和批次链路运行确定性的本地 Python 程序，验证单题、两题归集、导出字节摘要及续跑不新增尝试。预期 CSV 不挂载到沙箱。这证明离线链路可用，不代表真实 Codex 推理或官方成绩复现。
-
-离线验收及构建（构建工具需安装在本地环境内）：
-
-```sh
-mkdir -p .audit/tmp
-TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m unittest discover -s tests -v
-TMPDIR="$PWD/.audit/tmp" .venv/bin/python -m build
-```
-
-## 离线行为回归
-
-在保留源码检出或源码发行包、并已安装 Python 包的环境中执行：
-
-```sh
-.venv/bin/python -B tools/run_regression.py --suite unit --output-root .audit/unit
-.venv/bin/python -B tools/run_regression.py --suite all --output-root .audit/regression \
-  --frozen-source /path/to/frozen_src --config configs/codex.example.yaml
-```
-
-输出目录必须全新或为空。unit 不依赖历史材料；reference 必须显式提供冻结来源，使用独立子进程并各自断言人工预期；runtime 必须有已核验历史运行时和占位端点配置，缺材料直接失败。见[测试来源及证据边界](provenance/regression.zh-CN.md)。
-
-原始外层检查不附加禁网，只观察网络命名空间，不发起外部连接。独立的固定 CLI config/read 诊断无推理地比较初始/trusted 配置；P2 合成诊断另加禁网。真实 Codex 内层命令执行仍未验证。轻量 CI 配置 Python 3.10/3.12/3.13，托管执行留首次公开推送时确认。在项目内环境安装 build、pip 后，可用 `python -B tools/ci_check.py --output-root .audit/ci-result` 执行同一套本地构建安装及 unit 检查。
-
-`tools/verify_baseline.py` 使用标准库，依次接收历史实验目录、现有 benchmark 目录、私有输出目录；四线程核对摘要，缺失、变更、无法解析或证据不一致均失败。新增输出必须放在本项目内，不能指向只读来源。数据、预测、凭据和私有原始审计不随代码发行。
-
-代码及说明文档采用 MIT，保留 DataSpace 上游声明，见 [LICENSE](LICENSE)。逐文件来源和改动记录保存在 `provenance/`。数据集按原发布条款另行获取。
-
-## 历史实验附件
-
-从源码检出或源码包运行，正式冻结评分使用 Python 3.12.3：
-
-```sh
-python3 -B tools/package_evidence.py build \
-  --experiment-root /path/to/historical-experiment \
-  --baseline-report /path/to/private-P0-result.json \
-  --official-evidence-root /path/to/verified-official-snapshot \
-  --output-root .audit/evidence-build
-python3 -B tools/package_evidence.py verify \
-  --archive .audit/evidence-build/eviweave-v0.1.0-v6-evidence.zip \
-  --output-root .audit/evidence-check
-```
-
-输出目录须为项目内全新或空目录。附件含410份原字节预测、414条摘要和33、328、35、391、23的**精选轨迹**（23含失败与恢复）；完整原始trace私下保留。仅复制冻结评估器，对既有预测离线重评45/60；首轮44/60作为历史记录，没有新推理或benchmark任务执行。工具独立扫描残留并拒绝缺失/变更材料；verify只用标准库，不需要历史来源、安装包或runtime。来源和附件不进入Git/wheel/sdist；当前未上传附件，线上发布留P5。详见[来源和证据边界](provenance/evidence.zh-CN.md)。
-
-## 独立配置、数据下载与评分
-
-完整数据由[官方Hugging Face发布库](https://huggingface.co/datasets/HKUSTDial/DataSpace)单独提供，下载方式参见[上游README](https://github.com/HKUSTDial/DataSpace#dataset)。下载器是可选准备工具，不是EviWeave运行依赖。所有下载、缓存和解包都放在本项目内；下载后先校验官方SHA-256。为可重复获取，请将 `DATA_REVISION` 设为发布库中选择的完整提交ID并保留该值。
-
-```sh
-mkdir -p .local/download .audit/tmp .audit/cache
-export TMPDIR="$PWD/.audit/tmp"
-export PIP_CACHE_DIR="$PWD/.audit/cache/pip"
-export HF_HOME="$PWD/.local/hf-cache"
-python3 -m venv .local/download-env
-.local/download-env/bin/python -m pip install huggingface_hub
-export DATA_REVISION='<完整的Hugging Face发布提交ID>'
-.local/download-env/bin/hf download HKUSTDial/DataSpace \
-  release/DataSpace-Benchmark.zip release/DataSpace-Benchmark.zip.sha256 \
-  --repo-type dataset --revision "$DATA_REVISION" --local-dir "$PWD/.local/download"
-(cd .local/download/release && sha256sum --check DataSpace-Benchmark.zip.sha256)
-unzip .local/download/release/DataSpace-Benchmark.zip -d data
-```
-
-数据路径必须显式配置，根目录含 `input/task_N/task.json` 和 `context/`。工具不会寻找相邻仓库或自动回退到其他数据源。本机当前私有设置使用项目内的 `data/DataSpace-Benchmark/`，不再指向相邻DataSpace项目；更换数据目录时重新生成配置到全新输出目录即可。`data/` 不进入Git或发行包。
-
-```sh
-export EVIWEAVE_DATASET_ROOT="$PWD/data/DataSpace-Benchmark"
-export EVIWEAVE_BASE_URL='<与V6一致的Responses端点>'
-# 用户自行设置，勿提交或写入配置文件：
-export EVIWEAVE_API_KEY='<你的EviWeave专用API key>'
-.venv/bin/python -B tools/standalone.py configure \
-  --dataset-root "$EVIWEAVE_DATASET_ROOT" --base-url "$EVIWEAVE_BASE_URL" \
-  --model qwen3.8-flash --output-root .local/config
-# 以下会调用真实模型，仅在计划运行该题时执行：
-.venv/bin/python -B tools/standalone.py run --settings .local/config/settings.json \
-  --task 33 --output-root .audit/independent-task33
-```
-
-本机已验证的冻结评分副本位于 `.local/evaluation-v6-public60/`，必要历史证据独立保存在 `.local/evidence-v6/`；这些私有资源不随代码发行。在其他机器需自行提供符合 [121项冻结摘要锁](provenance/evaluation-lock.json) 的评分材料，通过显式路径导入。来源必须含 `evaluate.py`、`configs/` 和 `output/`，既可来自历史冻结评分包，也可自行整理官方下载的公开材料，摘要不符则拒绝；不自动从当前上游评估器替换冻结版本。
-
-```sh
-python3 -B tools/standalone.py import-evaluation \
-  --source /path/to/frozen-evaluation --output-root .local/evaluation-v6-public60
-python3 -B tools/standalone.py verify-evaluation --evaluation-root .local/evaluation-v6-public60
-python3 -B tools/standalone.py score --evaluation-root .local/evaluation-v6-public60 \
-  --prediction-root /path/to/predictions --output-root .audit/independent-score
-# 仅评一道公开题时显式添加 --task 33；正式历史复核使用Python 3.12.3。
-```
-
-安装build和pip的Python可执行独立隔离验收：
-
-```sh
-python3 -B tools/verify_isolation.py --block-path /absolute/path/to/DataSpace \
+./scripts/experiment.sh check --tasks 33 \
+  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
   --evaluation-root .local/evaluation-v6-public60 \
-  --archive .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip \
-  --config configs/codex.example.yaml --output-root .audit/isolation-check
+  --environment-profile .local/profiles/public-host.json
 ```
 
-工具用系统挂载和PID命名空间使指定目录不可读取，不改动原目录；无真实凭据，执行构建、独立安装、测试、offline doctor、合成沙箱任务及导出、合成评分和历史附件评分。合成执行不调用真实模型；真实凭据和真实数据的独立运行需单独验收。工具和测试进入源码包，`.local/`、数据、答案、历史附件及审计全部排除。详见[隔离来源与边界](provenance/isolation.zh-CN.md)。
-
-### 第33题三次终端验证
-
-在已 `export EVIWEAVE_API_KEY` 的终端执行。默认读取 `.local/config-v6/settings.json` 和 `.local/evaluation-v6-public60/`，使用 `.venv/bin/python` 与已核验冻结源码；可用 `EVIWEAVE_PYTHON` 指定其他含PyYAML的解释器。脚本从自身位置定位项目，可从任意目录启动。
+真实单题、公开批次及该批次续跑：
 
 ```sh
-# 可选：只检查key可读性、输入及本地运行环境，无模型调用，不验证服务端鉴权。
-./scripts/check_task33.sh --check-only
-# 实际调用模型：串行跑33题三次，每次独立会话/HOME，沿用V6的30分钟单题时限。
-./scripts/check_task33.sh
+./scripts/experiment.sh run --tasks 33 --output .audit/task33-v6 \
+  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
+  --evaluation-root .local/evaluation-v6-public60 \
+  --environment-profile .local/profiles/public-host.json
+./scripts/experiment.sh run --scope public60 --output .audit/public60-v6 \
+  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
+  --evaluation-root .local/evaluation-v6-public60 \
+  --environment-profile .local/profiles/public-host.json
+./scripts/experiment.sh run --output .audit/public60-v6 --resume --yes
 ```
 
-会产生推理费用，三次任务时限合计最多90分钟，另加检查及评分时间。每次启动创建新的 `.audit/task33-three-runs-*/`；三次原始日志、预测、用量、单题冻结评分及 `summary.json`/`summary.csv` 均私下保留，不覆盖旧结果。输入、源码、配置和评分材料在运行前后核对摘要。脚本不主动输出或存储key值，也不向模型提供历史答案或评分反馈。环境/鉴权/缺预测失败会停止；答案未通过会继续完成既定三次。Ctrl+C取消当前任务，不启动后续任务。
+省略 `--tasks`/`--scope` 时默认 **public60**，`--repeat 1`。`--tasks 23 35` 显式选取 1–410 范围内的题；`--scope all` 选择全部 410 题，费用可能显著增加。`--repeat N` 计划 N 轮，不按最好一次选答案。不要用未限定范围的批次测试安装。
 
-汇总分别记录环境变量是否可读、是否记录到模型完成事件、正确次数、行数和预测SHA-256。退出码0表示三次完整执行并评分（或check-only通过），不表示答案通过；基础设施失败返回非零。即使观测到预测差异，也不能仅凭三次证明是纯随机模型波动，模型别名背后的版本和服务端采样尚未锁定。
+续跑恢复已保存的题目/轮数/配置/数据/档案，拒绝显式替换，包括 `--environment-profile`；不会导入外部档案漂移。原配置、已登记输入、源码/环境身份和运行时检查继续有效。源码改变后可能需要原冻结工具检出或新实验；不得编辑旧元数据绕过身份。`--yes` 明确允许无交互复用。
 
-## 逐请求证据与离线费用分析
+每个新分配的尝试都会替换本题当前答案，失败也一样。续跑对未启动、中断、执行失败或原始预测损坏的项目每次最多增加一次；正常提交但答案错误的项目跳过。仅归集副本损坏时可无模型修复。Ctrl+C 取消活动进程组并记录中断（130）。已完成实验续跑零新增尝试。
 
-外层工具支持显式导入项目内 JSON/SSE 请求证据与账单，保留原始数字词法，
-按冻结字段映射生成用量、服务商返回金额、公开价计算金额和账单实际金额三条独立路径，
-以及版本化报告、对账和离线重估。定价模板费率为 null，须单独审阅；
-旧 v1 任务汇总只在独立目录分析，不补造 HTTP 请求或历史费用。
+当前任务返回后，确认最终 401/402/403 失败即停止派发并取消在途。保留冻结客户端重连行为，不是逐 HTTP 即时熔断。429/500 为普通任务失败。见[修复边界](provenance/bugfix.zh-CN.md)。
 
-`./scripts/experiment.sh observe-check --output .audit/new-observation-check`
-只让固定客户端连接隔离回环人工服务。Codex 0.145.0 原生遥测不能保留完整 usage/金额扩展，
-也未证明请求前持久化，因此完整在线采集仍不支持；启用观测的 run 在模型启动前拒绝。
-导入请求数为下界，不能生成认证的正式提交总费用。真实服务及账户账单尚未验证。
-详见[合同、用法与限制](provenance/observability.zh-CN.md)。
+## 离线验证与历史证据
 
-新离线费用分析目录使用`schema_version=2`和`import_identity_version=2`，请求合同仍为v1。
-响应字节相同但物理请求ID不同会分别计数，同一证据重复导入保持幂等；该分析格式不可执行或续跑模型实验。
-旧v1分析目录只读：验证、重估需指定全新且独立的`--output`，并要求源目录已有锁文件；禁止追加导入或原地升级。
-原始材料可显式导入新目录，见[修复来源与兼容边界](provenance/bugfix.zh-CN.md)。
+统一验证读取已保存的配置/输入摘要/档案和实验内独立 121 项评分副本，无需 key、原数据/配置或模型运行时，拒绝并发写入。输出带版本的 `summary.json`、`score.json`、`summary.csv`，共享报告 ID。`submitted` 代表执行和 CSV 合法，不代表答案正确。准确率按不同公开题号计数，包含缺预测；all410 中 60 题有评分、350 题未评分。
+
+```sh
+./scripts/experiment.sh verify --experiment .audit/public60-v6 \
+  --output .audit/public60-v6-verification
+```
+
+历史证据 ZIP 和外部 `.sha256` 是**待发布 Release 资产，尚未上传**。取得后将两者放入 `.local/evidence-v6/`。先验证再解包；验证器只需标准库和源码工具。随后可用 CPython 3.12.3 对已有预测离线评分：
+
+```sh
+python3 -B tools/package_evidence.py verify \
+  --archive .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip \
+  --output-root .audit/evidence-verification
+unzip -q .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip -d .local/evidence-v6/extracted
+.venv-experiment/bin/python -B tools/standalone.py score \
+  --evaluation-root .local/evaluation-v6-public60 \
+  --prediction-root .local/evidence-v6/extracted/predictions \
+  --output-root .audit/historical-score
+```
+
+预期历史离线结果为 **45/60**、15 失败、350 未评分；首轮历史记录为 **44/60**。它们与历史官方 **333/410、81.22%** 分开：官方评测 2026-10-21，核验 2026-10-22，本次复核 2026-10-24；复核时页面仍列为并列第一，这是带日期的观察，不保证实时排名。见[官方榜单](https://dataspace-bench.github.io/#leaderboard)和[实验边界](EXPERIMENTS.zh-CN.md)。
+
+ZIP 含 410 份原字节预测、414 条尝试摘要、固定选择和 5 题 / 6 次尝试的**精选轨迹**。不含完整轨迹、参考答案、私有运行时和脱敏映射。三次缺失用量保留未知，已记录 token 不能证明完整费用。校验和证明字节完整性，不是作者签名。
+
+## 离线费用分析
+
+完整在线采集仍为 **UNSUPPORTED_G1**：固定客户端遥测缺失用量/金额扩展，且未证明每次请求前持久化。启用观测档案会在模型启动前拒绝。可执行统一实验 v2 尚未实现；分析 v2 是离线容器，不是 run/resume 格式。
+
+由用户显式提供项目内脱敏证据和已审阅定价。[定价模板](configs/pricing.example.json)费率为 null，不是报价。导入不连接服务或账户控制台。
+
+```sh
+./scripts/experiment.sh cost import --source .local/import/calls.json \
+  --source-type calls --pricing .local/pricing/reviewed.json --output .audit/call-analysis
+./scripts/experiment.sh verify --experiment .audit/call-analysis
+./scripts/experiment.sh cost revalue --experiment .audit/call-analysis \
+  --pricing .local/pricing/reviewed.json --output .audit/call-revaluation
+./scripts/experiment.sh cost submission-check --experiment .audit/call-analysis
+```
+
+请求枚举不完整时，`submission-check` 应失败：观测请求数是下界，`cost_complete=false`；导入不能认证总请求数或正式提交总费用。服务商返回、公开价计算与实际支付是三条独立金额路径。同响应字节但物理请求 ID 不同会分别计数；同一证据重复导入保持幂等。Token 子字段不加入父字段总量，未知值不补零。
+
+新分析使用 `schema_version=2`、`import_identity_version=2`，请求合同仍为 v1。旧分析 v1 只读且须已有锁；验证/重估必须指定全新独立输出。旧报告不会自动重算：
+
+```sh
+./scripts/experiment.sh verify --experiment .audit/old-v1-analysis \
+  --output .audit/old-v1-verification-new
+./scripts/experiment.sh cost revalue --experiment .audit/old-v1-analysis \
+  --pricing .local/pricing/reviewed.json --output .audit/old-v1-revaluation-new
+```
+
+新计算登记 `calculation_policy_version=decimal-quantum-v2`：每个物理请求先合计组件，再按精确步长（含 0.05）舍入一次，最后跨请求汇总。舍入前已丢失精度时拒绝计价。见[合同、JSON/SSE/账单导入与旧用量快照](provenance/observability.zh-CN.md)及[舍入政策](provenance/config-rounding.zh-CN.md)。真实服务字段和账户账单仍未验收。
+
+## 故障排查
+
+| 现象 | 处理或含义 |
+|---|---|
+| 不支持的 OS、架构或 ABI | 完整流程使用 Linux x86_64 / CPython 3.12 或 3.13，不放宽锁 |
+| 缺运行时/评分/数据 | 按上述显式目标准备，验证 121 项评分文件；`--dataset` 指向含 `input/` 的目录 |
+| 档案/解释器/内容不匹配 | 重新采集、检查、显式选择独立档案和全新 `.venv*`；保留原精确锁，不混用 venv 或实验档案 |
+| 安装后运行时路径仍旧 | 已有 YAML 按设计保留；生成全新离线配置并显式选择 |
+| namespace、挂载或 daemon 权限不足 | 提供所需宿主权限和项目内 daemon；不回退到宿主直接执行 |
+| 摘要不匹配或缓存/目标冲突 | 保留失败收据；检查来源并选择全新项目内缓存/目标，不覆盖历史资源 |
+| `MISSING_KEY` 或占位端点 | 只设置专用 key 和有效私有 Responses URL；无 key 准备使用离线 doctor |
+| 最终 401/402/403 | 当前任务确认失败后停批并取消在途；修复访问/账户额度后再有意续跑 |
+| 429/500 | 普通执行失败，检查证据；不自动扩题或增加重试 |
+| `no_prediction` / 缺原始 CSV | 属执行失败，保留日志并有意续跑；正常提交但答案错不同，resume 不重试 |
+| 完整性冲突 | 验证失败，记录 `attempt_integrity` 并排除冲突用量；不把原始记录修成成功 |
+| 锁占用 | 等待写入者结束；不对同目录并发 verify/revalue/run |
+| 旧实验源码不匹配 | 使用其原冻结工具版本或新建实验；文档不授权绕过检查 |
+| 旧费用报告 / v1 分析 | 以审阅定价重估到全新输出；保留旧字节和源目录已有锁 |
+
+退出 0 表示请求的操作完成，不代表全部答案通过；1 为执行/证据/评分/报告失败，2 为参数或前置条件失败，130 为中断。离线 verify 可成功报告已有执行失败，不重试任务。
+
+## 更多资料与归属
+
+[数据格式与自定义单题](DATA_FORMAT.md)（中文；统一流程未注册自定义评分）、[合成示例](examples/synthetic/README.md)、[源码来源](provenance/README.zh-CN.md)、[发布准备与来源](provenance/p5-documentation.md)、[CITATION.cff](CITATION.cff)。
+
+另保留 `scripts/check_task33.sh` 终端工具；`--check-only` 检查本地输入/key 可读性，不验证鉴权。它使用 `tools/standalone.py configure` 生成的 `.local/config-v6/settings.json`，默认 `.venv/bin/python`，与统一流程不同；上述流程无需此工具。创建独立配置需要全新输出目录，不覆盖统一配置。实际使用会串行启动固定三次付费尝试，HOME/会话独立；环境/鉴权/缺预测失败停止，答案错误继续。不要将它作为安装检查启动。
+
+代码和文档采用 [MIT](LICENSE)，保留 DataSpace Authors 声明及 **袁珺 / Jun Yuan** 的 EviWeave 署名。业务源码仅来自历史冻结 V6 快照，不取当前 DataSpace 代码。DataSpace 数据、预测及第三方运行时组件保留各自来源条款；本项目 MIT 不为其重新授权。数据取自[官方发布](https://huggingface.co/datasets/HKUSTDial/DataSpace/tree/96be19257d7aa251dbce4771d46a26fc36f6dc52/release)，并参阅[上游](https://github.com/HKUSTDial/DataSpace)。私有 `docs/`、审计、数据和运行时目录不进入 Git 或发行包。

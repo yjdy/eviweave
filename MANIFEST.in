@@ -1,4 +1,5 @@
 include LICENSE README.md README.zh-CN.md DATA_FORMAT.md AGENTS.md pyproject.toml MANIFEST.in .gitignore
+include EXPERIMENTS.md EXPERIMENTS.zh-CN.md CITATION.cff CHANGELOG.md RELEASE_NOTES.md ROADMAP.md
 recursive-include src *.py
 recursive-include configs *.yaml
 include configs/observability.example.json configs/pricing.example.json

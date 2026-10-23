@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "scope": "P5.3 public documentation, pending release materials and targeted distribution checks only",
+  "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+  "production_files": 22,
+  "protected_files": 17,
+  "real_model_calls": 0,
+  "publication_status": "pending",
+  "final_commit": null,
+  "final_software_build_sha256": null,
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce"
+  },
+  "files": [
+    {
+      "destination": "CHANGELOG.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "b8fea120893b047a81945db0a392c46cf1683f407c9bfe4b27296275a494e2f7",
+      "reason": "Bilingual first-version unreleased change record"
+    },
+    {
+      "destination": "CITATION.cff",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "bae12b5716f285bb9d21ebb549fefba38f0c3c6f7bb95fb06ebc1f517eacd3d7",
+      "reason": "Software 0.1.0 citation, MIT and Jun Yuan / 袁珺; no DOI or fabricated release date"
+    },
+    {
+      "destination": "DATA_FORMAT.md",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "5894d2f253d8af7dd09a753bfd54df57aba3a99bb76f5b93d419bd664969d516",
+      "release_sha256": "1a3c33c2fcf71e6b0c17cdf19fd937720ce142f37bf455b68c7604db2f512e06",
+      "reason": "Align runtime prerequisites with accepted independent public rebuild path"
+    },
+    {
+      "destination": "EXPERIMENTS.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "6052c56c8f5e5ce2514bc17afb9d6e3f70b2371ff50026ce2a3d9ae587b2ebed",
+      "reason": "Short evidence-based experiment notes; distinguish historical official/public results and later independent observations"
+    },
+    {
+      "destination": "EXPERIMENTS.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "64c6e29d343b21ee7eed947ab3ec8d5b0bf97e13fb03dab5398ee2476e4c6306",
+      "reason": "Chinese experiment notes preserving the same selection, usage and model-snapshot boundaries"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "c9611cbb2d2a49609d0bbebfc62cfb2d2dd30d377eb1b7db1c574820b771c8ab",
+      "release_sha256": "a58bd3572b3f4ee884479ba180c34a383c725f591b9d74869d7fd63c489db7f3",
+      "reason": "Include new root public documents and citation in sdist; retain private exclusions"
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "ab68ca0b0ba7b3e3be3a39b0e852597937d9ed21f0bc436427ebdcd74dad99cc",
+      "release_sha256": "0b95fceddc8651426079357bfe0841426b528e84857ff8d496f3b2bce2684894",
+      "reason": "English task-oriented documentation checked against P5.2 implementation, help and accepted evidence"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "65aef9846545bf60cb2abbecc0a1f60c878de3c4d7236bbdcef10d3f86174c9f",
+      "release_sha256": "26bc3b8083fffa1e08fe146f1b1b6e48281a6ec6fe73b9b15bd61d7dbe247d50",
+      "reason": "Chinese counterpart with identical command blocks, paths, limits and dated result scopes"
+    },
+    {
+      "destination": "RELEASE_NOTES.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "3395600dee2d758d48039e8a6eddee47d18f472a5640a91da690dbed4d5310de",
+      "reason": "Bilingual pending Release bodies; final commit and software build hashes deliberately unbound"
+    },
+    {
+      "destination": "ROADMAP.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "9146aa2b9b64913c544c3e57d9f922c982ad87171689021842b5833d9765337f",
+      "reason": "Short future-only roadmap excluding Controlled from the first release"
+    },
+    {
+      "destination": "provenance/README.zh-CN.md",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "1d1389cf44d099171f5b0f30cb7a945ca93ee860a900acca6f38d96e69263316",
+      "release_sha256": "660b0b0acf600eb9c10e2cdd6c9db7492c7e76b5631f40f817eabf998b23d2f5",
+      "reason": "Link current public documentation layer without rewriting historical source tables"
+    },
+    {
+      "destination": "provenance/p5-documentation.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "3d6be5ccc77f32a691aeb0abc4b811656b889d1a28b66e5bb87502acb4867e07",
+      "reason": "Public implementation/source/attribution basis and remaining acceptance boundaries"
+    },
+    {
+      "destination": "provenance/release-assets.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+      "reason": "Pending asset allowlist; preserve verified P4 ZIP/sidecar bytes, leave final software binding null"
+    },
+    {
+      "destination": "tests/test_release_documentation.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "e6eec93ed3827f4f12766dfdc84912f0119333adc46223641996b80145fbc352",
+      "reason": "Reject rewritten/missing preparation history, forged predecessor hashes, duplicate and business overrides"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "655938d8683c07541ecdf11852d0c2b89c3a0545",
+      "source_sha256": "2709d37cfbd389d4e8fc586d131ef9bcf0f794ed9fc4ed48c0a5622d4f5ce100",
+      "release_sha256": "1072f78f9e9b461877d771406f8fe56eaf9742fef2898f6856e7622070975b1f",
+      "reason": "Extend authenticated provenance chain without rewriting old P5 layer; require public documents in sdist"
+    }
+  ]
+}
