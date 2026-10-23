@@ -1,0 +1,54 @@
+{
+  "kind": "eviweave-usage-mapping",
+  "schema_version": 1,
+  "mapping_id": "qwen-responses-v1",
+  "provider": "aliyun",
+  "protocol": "responses",
+  "event_semantics": "cumulative",
+  "usage_events": [
+    "response.completed",
+    "response.failed",
+    "response.incomplete"
+  ],
+  "fields": {
+    "input_tokens": {
+      "path": "/response/usage/input_tokens",
+      "unit": "token",
+      "included_in": null
+    },
+    "output_tokens": {
+      "path": "/response/usage/output_tokens",
+      "unit": "token",
+      "included_in": null
+    },
+    "total_tokens": {
+      "path": "/response/usage/total_tokens",
+      "unit": "token",
+      "included_in": null
+    },
+    "cached_input_tokens": {
+      "path": "/response/usage/input_tokens_details/cached_tokens",
+      "unit": "token",
+      "included_in": "input_tokens"
+    },
+    "reasoning_output_tokens": {
+      "path": "/response/usage/output_tokens_details/reasoning_tokens",
+      "unit": "token",
+      "included_in": "output_tokens"
+    },
+    "cache_creation_input_tokens": {
+      "path": "/response/usage/cache_creation_input_tokens",
+      "unit": "token",
+      "included_in": null
+    }
+  },
+  "amounts": [],
+  "sources": [
+    "https://help.aliyun.com/zh/model-studio/qwen-api-via-openai-responses"
+  ],
+  "notes": [
+    "Unknown extensions and x_details retained in raw evidence; no guessed billing semantics.",
+    "Cache creation overlap not assumed; explicit reviewed pricing/mapping needed.",
+    "No response fee field is classified by this mapping."
+  ]
+}

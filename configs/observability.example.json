@@ -1,0 +1,12 @@
+{
+  "kind": "eviweave-observability-profile",
+  "schema_version": 1,
+  "enabled": false,
+  "mode": "full-request-evidence",
+  "endpoint": "https://example.invalid",
+  "client_version": "0.145.0",
+  "online_status": "unsupported",
+  "durable_before_send_required": true,
+  "log_user_prompt": false,
+  "note": "No certified online profile. Observe-check is finite loopback-only diagnosis; this file cannot grant capabilities."
+}

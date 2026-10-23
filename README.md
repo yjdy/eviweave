@@ -1,10 +1,17 @@
 # EviWeave — Evidence-Guided Data Agents
 
-Historical `relation-v6 + simple-fixes-v1 + Codex` baseline, prepared by **袁珺 / Jun Yuan** ([yjdy](https://github.com/yjdy)) from DataSpace. Version `0.1.0`; the internal Python package remains `dataspace_baselines`.
+EviWeave is a framework for running and evaluating evidence-guided data analysis agents. A model examines task-local source material, writes and executes analysis code in an isolated Linux workbench, and produces a `prediction.csv`. The framework validates and collects predictions, retains execution evidence, and scores tasks with available reference answers.
 
-[中文说明](README.zh-CN.md) · [Provenance](provenance/README.zh-CN.md)
+[中文说明](README.zh-CN.md) · [Dataset format and custom tasks (中文)](DATA_FORMAT.md) · [Provenance](provenance/README.zh-CN.md)
 
-P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4 provides local experiment-attachment preparation, selected-trace redaction and frozen offline scoring; public release remains P5 work. The formal technical report is deferred.
+The project provides:
+
+- A unified workflow for selecting tasks, running independent repetitions, resuming interrupted experiments, and verifying results offline.
+- Task-local sessions and writable outputs, with read-only source material and runtimes exposed through a sandbox.
+- Environment locks, frozen evaluation resources, source checksums, and versioned reports for auditing experiments.
+- Offline usage and cost analysis from explicitly imported request evidence and billing records.
+
+Version `0.1.0` preserves the historical DataSpace `relation-v6 + simple-fixes-v1 + Codex` baseline. It supports baseline reproduction, evaluation of data analysis agents, and investigation of failed or inconsistent results. Model access, datasets, and historical runtime resources are configured separately; full online capture of per-request usage and cost remains unsupported.
 
 ## Unified experiment workflow
 
@@ -143,7 +150,6 @@ EviWeave V6 achieved **333/410 correct tasks (81.22% Task Accuracy)** on the off
 | Registered method | `codex-controlled + Qwen3.8-Flash` |
 | Evaluation date | 2026-10-21 |
 | Benchmark | DataSpace, 410 tasks |
-| Entry ID | `yjdy-codex-controlled-qwen38-flash` |
 
 This historical entry corresponds to the V6 baseline released here: Codex CLI 0.145.0, `relation-v6` and `simple-fixes-v1`. Its registered name predates EviWeave; the later EviWeave Controlled implementation is outside this package. The submission retained all **414 attempts**, including one operator-triggered recovery attempt for each of tasks **22, 23, 207 and 273**. Those four use `run_2`; the other 406 use `run_1`, without selection by score.
 
@@ -248,3 +254,19 @@ python3 -B tools/package_evidence.py verify \
 ```
 
 Use fresh project-local output directories. The attachment contains 410 unchanged predictions, 414 attempt summaries and **selected traces** for tasks 33, 328, 35, 391 and 23 (both failure and recovery for 23). Complete original traces remain private. A copied frozen evaluator scores existing predictions only: 45/60; the first-pass 44/60 is a historical record. No new inference or benchmark task execution occurs. The tool performs independent residual scanning and rejects incomplete or changed evidence. Verify uses only the standard library and can run without the historical source, installed package or runtime. Source inputs and the attachment are separate from Git/wheel/sdist. No attachment has been uploaded; publication remains P5. See [evidence provenance and limits](provenance/evidence.zh-CN.md).
+
+## Offline model-call cost analysis
+
+The outer tools can import explicit project-local JSON/SSE request evidence and bills,
+retain numeric spellings, and produce versioned usage, three independent cost paths,
+and reconciliation reports. Prices are reviewed, versioned resources; shipped rates
+are null. Legacy v1 task summaries can be analyzed in a separate directory without
+inventing HTTP requests or historical charges.
+
+`./scripts/experiment.sh observe-check --output .audit/new-observation-check`
+runs the fixed client against a loopback-only artificial server. Codex 0.145.0's
+native telemetry does not preserve full raw usage/amount extensions or establish
+pre-send durability. Full online capture remains unsupported; observation-enabled
+runs fail before starting a model. Imported request counts are lower bounds and
+cannot produce a certified submission total. Real service/billing validation has
+not been performed. See the [contract, commands and limitations](provenance/observability.zh-CN.md).

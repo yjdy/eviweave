@@ -1,6 +1,7 @@
-include LICENSE README.md README.zh-CN.md AGENTS.md pyproject.toml MANIFEST.in .gitignore
+include LICENSE README.md README.zh-CN.md DATA_FORMAT.md AGENTS.md pyproject.toml MANIFEST.in .gitignore
 recursive-include src *.py
 recursive-include configs *.yaml
+include configs/observability.example.json configs/pricing.example.json
 exclude configs/local* configs/*.local.*
 recursive-include provenance *.json *.md
 recursive-include tests *.py

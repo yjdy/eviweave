@@ -1,10 +1,17 @@
 # EviWeave — Evidence-Guided Data Agents
 
-作者：**袁珺 / Jun Yuan**（[yjdy](https://github.com/yjdy)）。从 DataSpace 历史冻结版本提取 `relation-v6 + simple-fixes-v1 + Codex`，首版包版本 `0.1.0`，内部包名保留 `dataspace_baselines`。
+EviWeave 是用于运行和评估数据分析智能体的实验框架。模型以任务资料为依据，在隔离的 Linux 工作台中调查数据、编写并执行分析代码，最终输出 `prediction.csv`。框架负责校验和归集预测、保留执行证据，并对具备参考答案的任务进行离线评分。
 
-[English](README.md) · [来源](provenance/README.zh-CN.md)
+[English](README.md) · [数据格式与自定义数据集](DATA_FORMAT.md) · [来源](provenance/README.zh-CN.md)
 
-P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 提供离线行为回归、冻结参考对照和历史沙箱检查；P4 提供本地实验附件整理、精选轨迹脱敏和冻结离线评分；公开发布留在 P5。正式技术报告延后。
+项目提供以下能力：
+
+- 统一实验流程：指定任务、独立重复运行、中断续跑和离线验证。
+- 任务级隔离：独立会话和可写输出，任务资料及运行时以只读方式挂载。
+- 可核对的实验记录：环境版本锁、冻结评分资源、源码摘要和版本化报告。
+- 离线用量与费用分析：显式导入请求证据和账单，分别核算不同来源的金额。
+
+当前 `0.1.0` 版本保留 DataSpace 历史冻结的 `relation-v6 + simple-fixes-v1 + Codex` 基线，适用于基线复现、数据分析智能体评估，以及失败或不一致结果的调查。模型服务、数据集和历史运行时需单独配置；完整逐请求在线用量与费用采集尚不支持。
 
 ## 统一实验流程
 
@@ -72,7 +79,6 @@ EviWeave V6 在 DataSpace 官方全量评估中答对 **333/410 题，Task Accur
 | 登记名称 | `codex-controlled + Qwen3.8-Flash` |
 | 官方评测日期 | 2026-10-21 |
 | 评测范围 | DataSpace 全量 410 题 |
-| 条目 ID | `yjdy-codex-controlled-qwen38-flash` |
 
 该历史条目对应本项目的 V6 基线：Codex CLI 0.145.0、`relation-v6` 和 `simple-fixes-v1`。登记名称早于 EviWeave 命名，后续 EviWeave Controlled 控制器实现不在本包内。提交保留全部 **414 次尝试**，其中任务 **22、23、207、273** 各有一次人工触发的恢复尝试；四题固定采用 `run_2`，其余 406 题采用 `run_1`，不按分数重新选择。
 
@@ -248,3 +254,16 @@ python3 -B tools/verify_isolation.py --block-path /absolute/path/to/DataSpace \
 会产生推理费用，三次任务时限合计最多90分钟，另加检查及评分时间。每次启动创建新的 `.audit/task33-three-runs-*/`；三次原始日志、预测、用量、单题冻结评分及 `summary.json`/`summary.csv` 均私下保留，不覆盖旧结果。输入、源码、配置和评分材料在运行前后核对摘要。脚本不主动输出或存储key值，也不向模型提供历史答案或评分反馈。环境/鉴权/缺预测失败会停止；答案未通过会继续完成既定三次。Ctrl+C取消当前任务，不启动后续任务。
 
 汇总分别记录环境变量是否可读、是否记录到模型完成事件、正确次数、行数和预测SHA-256。退出码0表示三次完整执行并评分（或check-only通过），不表示答案通过；基础设施失败返回非零。即使观测到预测差异，也不能仅凭三次证明是纯随机模型波动，模型别名背后的版本和服务端采样尚未锁定。
+
+## 逐请求证据与离线费用分析
+
+外层工具支持显式导入项目内 JSON/SSE 请求证据与账单，保留原始数字词法，
+按冻结字段映射生成用量、服务商返回金额、公开价计算金额和账单实际金额三条独立路径，
+以及版本化报告、对账和离线重估。定价模板费率为 null，须单独审阅；
+旧 v1 任务汇总只在独立目录分析，不补造 HTTP 请求或历史费用。
+
+`./scripts/experiment.sh observe-check --output .audit/new-observation-check`
+只让固定客户端连接隔离回环人工服务。Codex 0.145.0 原生遥测不能保留完整 usage/金额扩展，
+也未证明请求前持久化，因此完整在线采集仍不支持；启用观测的 run 在模型启动前拒绝。
+导入请求数为下界，不能生成认证的正式提交总费用。真实服务及账户账单尚未验证。
+详见[合同、用法与限制](provenance/observability.zh-CN.md)。

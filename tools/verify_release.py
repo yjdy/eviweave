@@ -34,17 +34,34 @@ def main():
             raise ValueError(detail)
         checks.append(detail)
     def inspect(names, label):
-        forbidden = {'docs','.docs','.audit','.local','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent'}
+        forbidden = {'docs','.docs','.audit','.local','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent',
+                     'api-calls', 'raw', 'billing', 'checkpoints'}
         for name in names:
             path = PurePosixPath(name)
             runtime_names = {'experiment.json', 'attempt.json', 'run.json', 'selection.json', 'prediction.csv',
                              'summary.json', 'summary.csv', 'score.json', 'events.jsonl', 'stdout.log', 'stderr.log',
-                             'config.resolved.yaml', 'environment-lock.json', 'report-set.json'}
+                             'config.resolved.yaml', 'environment-lock.json', 'report-set.json',
+                             'observation.json', 'usage.json', 'cost.json', 'calls.csv', 'cost-breakdown.csv',
+                             'analysis.json', 'import-receipt.json', 'capability.json', 'server-truth.json'}
             require(path.name not in runtime_names, label + ': no unified execution artifact ' + name)
             require(not path.name.startswith('eviweave-v0.1.0-v6-evidence') and not path.name.endswith('.zip'),label+': no experimental attachment '+name)
             require(not any(part in forbidden or part.startswith('.venv') for part in path.parts),label+': clean path '+name)
             require(not (path.name == '.env' or path.name.startswith('.env.') or path.suffix in {'.pyc','.env'}),label+': no local config '+name)
             require(not (path.parent.name == 'configs' and path.name.startswith('local')),label+': no private config '+name)
+            require(path.suffix not in {'.sse', '.jsonl', '.log', '.bin'}, label+': no raw call/telemetry stream '+name)
+    def inspect_content(name, data, label):
+        path = PurePosixPath(name)
+        if path.suffix == '.json':
+            value = json.loads(data)
+            if isinstance(value, dict):
+                runtime_kinds = {'eviweave-call-import', 'eviweave-call-analysis', 'eviweave-call-generation',
+                                 'eviweave-call-report-set', 'eviweave-observation-capability'}
+                require(value.get('kind') not in runtime_kinds and value.get('object') != 'response'
+                        and 'resourceLogs' not in value and 'rows' not in value,
+                        label+': no disguised response/billing/call evidence '+name)
+        if path.suffix == '.csv':
+            require(b'bill_id' not in data.splitlines()[0] if data.splitlines() else True,
+                    label+': no private bill rows '+name)
     if args.git_scope == 'staged':
         command = ['git','-C',str(root),'diff','--cached','--name-only','--diff-filter=ACMR','-z']
     elif args.git_scope == 'head':
@@ -61,6 +78,7 @@ def main():
     if args.git_scope != 'staged':
         require({e['destination'] for e in expected.values()}.issubset(staged),'Git scope contains all 22 modules')
     for name in staged:
+        inspect_content(name, git_content(name), 'git '+args.git_scope)
         if name in {e['destination'] for e in expected.values()}:
             entry = next(e for e in expected.values() if e['destination'] == name)
             require(digest(git_content(name)) == entry['release_sha256'],'git digest '+name)
@@ -105,6 +123,15 @@ def main():
                 'locks/README.md','locks/ci-tools.txt','locks/cpython312-linux-x86_64.json','locks/cpython313-linux-x86_64.json',
                 'locks/cpython312-linux-x86_64.txt','locks/cpython313-linux-x86_64.txt'}
             require(required_unified.issubset(members), 'sdist contains unified workflow, profiles, scripts and tests')
+            required_observation = {'tools/observability_probe.py', 'tools/observability_session.py',
+                'tools/observability_store.py', 'tools/usage_normalize.py', 'tools/cost_accounting.py',
+                'tools/cost_import.py', 'tools/cost_reports.py', 'tools/cost_cli.py',
+                'tests/test_cost_observability.py', 'configs/observability.example.json', 'configs/pricing.example.json',
+                'provenance/observability-contract-v1.json', 'provenance/observability-mapping-v1.json',
+                'provenance/observability-baseline.json', 'provenance/observability.zh-CN.md'}
+            require(required_observation.issubset(members), 'sdist contains offline observation contract, tools, tests and provenance')
+            for name in required_observation:
+                require(members[name] == (root/name).read_bytes(), 'sdist current observation content '+name)
             for name in required_unified:
                 require(members[name] == (root/name).read_bytes(), 'sdist current unified content '+name)
             for suffix in ('312', '313'):
@@ -128,9 +155,12 @@ def main():
             ast.parse(data,filename=name,feature_version=(3,10))
             require(b'/home/ecs-user/' not in data and b'workspace/DataSpace' not in data,artifact.name+': no host path '+name)
         for name,data in members.items():
+            inspect_content(name, data, artifact.name)
             if name == 'configs/env.sh.example':
                 require(b'EVIWEAVE_API_KEY=""' in data and b'/home/' not in data and b'api.env' not in data, artifact.name+': environment template has no credential values')
             elif name.startswith('configs/'):
+                if name.endswith('.json'):
+                    require(name in {'configs/observability.example.json', 'configs/pricing.example.json'}, artifact.name+': only whitelisted public observation templates')
                 require(b'example.invalid' in data and b'/home/' not in data and b'api.env' not in data,artifact.name+': template endpoint only')
         archives.append({'name':artifact.name,'sha256':digest(artifact.read_bytes()),'file_count':len(members)})
     import dataspace_baselines

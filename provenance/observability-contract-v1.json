@@ -1,0 +1,40 @@
+{
+  "kind": "eviweave-model-call-observation",
+  "schema_version": 1,
+  "supported_delivery": "offline-import",
+  "online_full": "unsupported",
+  "required_association_fields": [
+    "experiment_id",
+    "plan_id",
+    "launch_id",
+    "task_id",
+    "task_attempt_id",
+    "interaction_id",
+    "request_attempt_id"
+  ],
+  "missing_values": {
+    "unknown": "not observed or not provable",
+    "not_applicable": "explicit reviewed mapping rule",
+    "reported_zero": "provider explicitly supplied zero"
+  },
+  "cost_paths": [
+    "provider_reported",
+    "public_list_calculated",
+    "billing_actual"
+  ],
+  "formats": {
+    "unified_v1": "unchanged; independent legacy import only",
+    "unified_v2": "reserved, creation disabled until G1 certified",
+    "analysis": "eviweave-call-analysis v1; not executable or resumable"
+  },
+  "identity_rules": [
+    "local physical request ID required; provider response ID is not a deduplication key",
+    "mapping/initial pricing immutable; revaluation separate",
+    "imports never certify pre-send durability or complete enumeration"
+  ],
+  "raw_numeric_policy": "sanitized UTF-8 JSON/SSE preserves all number tokens; derived decimal quantities serialized as strings",
+  "limit_bytes": 8388608,
+  "redaction_version": "credential-redaction-v1",
+  "author": "袁珺 / Jun Yuan",
+  "license": "MIT"
+}

@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "scope": "Offline observation overlay after 996882d; earlier provenance retained",
+  "production_files": 22,
+  "protected_files": 17,
+  "online_full_status": "UNSUPPORTED_G1",
+  "real_model_calls": 0,
+  "files": [
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "f9ff3dd2d2bce1da4572e74891dbdacbff266d53b945d5dd10f7cd4194c130e8",
+      "release_sha256": "6de6b6b7fbb9d0cf52044837d270c67a96e3cc8b3fe802db702a61653694fba8",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "5d616a451057bca57d3908fb1f513cd32638a1ddf7416e221be78a879967efd7",
+      "release_sha256": "688590803c488dfd1bdeec9c956cc867b7d5696445c462616f39f9a74aac1b3b",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged; add public custom-dataset format guide reference and explicit source-distribution inclusion"
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "8ea5392dff946d9505d40a6d7e67975f91d8534ddf40b5390471829b61116729",
+      "release_sha256": "704288bd6e3fef73ef90e149378ca21bac92f36eb58781b0bf229a4275ea02f6",
+      "reason": "Describe project purpose, supported workflows and current limits; remove personal biography/profile identifiers and replace internal phase summary; retain upstream provenance/license references and offline cost documentation; add public custom-dataset format guide reference and explicit source-distribution inclusion"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "eae34bc849c44cfc3bbc799f83fd3914c6658cf04651967f76aed9178b09f4b3",
+      "release_sha256": "32b8f6ec100662e70351cd3135c7e29fd1a6cbaefe035a09b728daca481630e1",
+      "reason": "Describe project purpose, supported workflows and current limits; remove personal biography/profile identifiers and replace internal phase summary; retain upstream provenance/license references and offline cost documentation; add public custom-dataset format guide reference and explicit source-distribution inclusion"
+    },
+    {
+      "destination": "configs/observability.example.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "42c30ae21d3de7dfc69e0d00dc90a7f44c5e4c3c56b028182a42cef5e1a86887",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "configs/pricing.example.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "7c9861f4c4b3e6d20bed9ad511e2a97273c21850b2e86e9e8d2023b833abe76c",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "provenance/observability-contract-v1.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4b3053a0d8ab0a7e18232ae747ed3a0bdd24894f788ef6f5cb120e26be9d9b9a",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "provenance/observability-mapping-v1.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "provenance/observability.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "e8db127c9150dcd46e6681eba022da6f3325f33f3b73518d8f4568459da2c799",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tests/test_cost_observability.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "327c8a0c6d35ca29cdf0b8839246d497fcdbe321cebd41ae23c77b9e5a2d74e4",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/cost_accounting.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "677e79b2e5fa1cd1bc401982c3e41e99241169a9c168461e2067161930e90f30",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/cost_cli.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "069009c7d46fe11077d56713f6c6a8dad04e6fc53a2f9bb321bfeaf546d9c3f7",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/cost_import.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4f4612c29e21cad08f6bc4615b79c482e151e4e632804aab532d9d55e04d2dd0",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/cost_reports.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "ec3d9349916a9dee201e62cff7173b5be52fbdff7b35245b6781dabcf9e6f2f6",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "edb1c78d1845e3c968cd289cc62f6d53cdf25ecb8f2db29316715ee2a19b99c3",
+      "release_sha256": "4bf26070ea5ca9c79eace37e59e1d8655f5066b37b8963b9c3463005ac1ebf6a",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/observability_probe.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "32cdeb336b0a0385f590ddeee63cd520387984425b5ff3aa19ebe9e4f8a2ef48",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/observability_session.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "20401f4d93ec2a3fc3d7e029314dec3a5a7f1e5241dbe8d23f76f2666986ba0d",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/observability_store.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "6823a4eab26ae76efa2f5faa84c0117e38f2e9709cbf83de9a628e2780151d06",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/usage_normalize.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "c6b95a1199baedd1823eb7c5192f570512fec44c1d8ebf18dedd62f95cedde2b",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "996882d6554b556a18753f06280c6a0838a736e1",
+      "source_sha256": "e00ea34efba5f300c8dc941dffa5ddb297096256685233baa88416843fedf302",
+      "release_sha256": "cce9192af2a2a9abd15796d16392a8c0381b1ac5459139f10c3e67523f459b69",
+      "reason": "Outer offline request-evidence import, exact cost accounting and fixed-client G1 diagnostic; native business source and V6 policies unchanged"
+    },
+    {
+      "destination": "DATA_FORMAT.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "5894d2f253d8af7dd09a753bfd54df57aba3a99bb76f5b93d419bd664969d516",
+      "reason": "Document actual task input/CSV output formats, minimal artificial example, supported custom-task invocation and frozen DataSpace evaluation boundaries; no production behavior changes"
+    }
+  ],
+  "self_reference_policy": "This index is excluded from its own digest list; package and candidate indexes authenticate its bytes."
+}

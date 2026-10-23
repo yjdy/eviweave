@@ -1,0 +1,47 @@
+{
+  "kind": "eviweave-pricing",
+  "schema_version": 1,
+  "pricing_id": "UNREVIEWED-TEMPLATE",
+  "rule_version": "exclusive-units-v1",
+  "sources": [
+    {
+      "url": "https://example.invalid/pricing",
+      "retrieved_at": "2026-10-23T00:00:00Z",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "prices": [
+    {
+      "provider": "UNSET",
+      "model": "UNSET",
+      "region": "UNSET",
+      "deployment": "UNSET",
+      "protocol": "responses",
+      "mode": "UNSET",
+      "valid_from": "2026-10-23T00:00:00Z",
+      "valid_until": "2026-10-24T00:00:00Z",
+      "currency": "UNSET",
+      "components": [
+        {
+          "field": "input_tokens",
+          "unit": "token",
+          "rate": null,
+          "unit_scale": "1000",
+          "subtract": []
+        },
+        {
+          "field": "output_tokens",
+          "unit": "token",
+          "rate": null,
+          "unit_scale": "1000",
+          "subtract": []
+        }
+      ],
+      "rounding": {
+        "mode": "half_even",
+        "quantum": null
+      }
+    }
+  ],
+  "note": "All rates null. Review applicable official source, price validity, units and overlap before use; not a Qwen tariff."
+}

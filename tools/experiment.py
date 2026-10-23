@@ -29,6 +29,8 @@ def parser():
         group.add_argument('--tasks', nargs='+', type=int)
         group.add_argument('--scope', choices=('public60', 'all'))
         q.add_argument('--repeat', type=int)
+        q.add_argument('--observability-profile', type=Path)
+        q.add_argument('--cost-pricing', type=Path)
         if name == 'run':
             q.add_argument('--output', type=Path)
             q.add_argument('--resume', action='store_true')
@@ -36,6 +38,8 @@ def parser():
     v = sub.add_parser('verify')
     v.add_argument('--experiment', type=Path, required=True)
     v.add_argument('--output', type=Path)
+    from cost_cli import add_parser
+    add_parser(sub)
     return p
 
 
@@ -59,8 +63,20 @@ def confirm(args, root, plan):
 
 
 def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
+    if args.command in ('cost', 'observe-check'):
+        from cost_cli import execute as cost_execute
+        return cost_execute(args)
+    if getattr(args, 'observability_profile', None):
+        from observability_session import require_online_profile
+        require_online_profile(args.observability_profile, args.cost_pricing)
+    if getattr(args, 'cost_pricing', None):
+        raise ValueError('--cost-pricing requires a certified observability profile')
     if args.command == 'verify':
         root = output_path(args.experiment)
+        if (root / 'observation.json').is_file():
+            from cost_cli import execute as cost_execute
+            args.command, args.cost_command = 'cost', 'verify'
+            return cost_execute(args)
         if not root.is_dir():
             raise ValueError('experiment directory missing')
         load(root)  # Validate before creating a lock file in an unrelated directory.
