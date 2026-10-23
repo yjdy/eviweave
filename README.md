@@ -53,6 +53,12 @@ The loader leaves shell startup files/options alone and does not print keys.
 ./scripts/experiment.sh verify --experiment .audit/my-experiment --output .audit/my-validation
 ```
 
+Before creating outputs, the unified entry point validates every configuration level and accepts only
+supported Codex fields. Unknown fields (including misplaced `api_key`, `password` or `headers`) and
+nested objects in scalar fields are rejected without echoing values. Credentials belong only in
+`EVIWEAVE_API_KEY`. Valid V6 snapshot formatting is unchanged; outer source changes still prevent
+resuming old experiments under a different identity. See [fix provenance](provenance/config-rounding.zh-CN.md).
+
 `--scope public60|all` and `--tasks` are exclusive. Repeat defaults to1; IDs are deduplicated/sorted.
 Concurrency comes from YAML; repetitions of the same task never overlap.
 Each new run creates an immutable plan. Reusing a nonempty directory checks identity and asks for confirmation
@@ -285,3 +291,10 @@ imports of the same evidence remain idempotent. This analysis format cannot run 
 Old v1 analysis bundles are read-only: verification/revaluation require a fresh separate `--output`, and an
 existing source lock. Append/import and in-place upgrade are refused. Original evidence can be explicitly
 imported into a new bundle. See [fix provenance and compatibility](provenance/bugfix.zh-CN.md).
+
+Pricing `rounding.quantum` is a positive decimal-string step, such as `"0.05"`, or null for no extra
+rounding. Components are summed within each physical request, rounded once to a multiple of the step
+using `half_even`, `half_up` or `truncate`, then summed across requests. New valuations record
+`calculation_policy_version=decimal-quantum-v2` and each request's `unrounded_amount`. A subtotal that
+loses precision before step rounding is rejected. Historical reports remain unchanged; use `cost revalue`
+with a fresh separate `--output` and the reviewed pricing file to obtain a corrected valuation.

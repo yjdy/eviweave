@@ -7,7 +7,7 @@ from decimal import Decimal, localcontext
 import io
 import json
 
-from cost_accounting import calculate, currency_totals, validate_pricing
+from cost_accounting import CALCULATION_POLICY_VERSION, calculate, currency_totals, validate_pricing
 from cost_import import derive
 from experiment_store import atomic_bytes, fingerprint, output_path, read, sha, uid, write
 import observability_store as store
@@ -149,6 +149,7 @@ def report(root, output=None, pricing=None, revaluation=False):
                         'currency': public['currency'], 'difference': str(Decimal(actual['amount']) - Decimal(public['amount'])),
                         'explanation': 'unexplained; source periods, discounts, credits, taxes and rounding retained separately'})
     cost = dict(common, kind='eviweave-call-cost', complete=False,
+                calculation_policy_version=CALCULATION_POLICY_VERSION,
                 completeness_reason='request enumeration not certified for imported evidence',
                 pricing_id=pricing['pricing_id'] if pricing else None,
                 pricing_sha256=fingerprint(pricing) if pricing else None,
@@ -211,6 +212,7 @@ def report(root, output=None, pricing=None, revaluation=False):
         # The exact revaluation resource is part of the committed report set's metadata.
         write(directory / 'pricing.json', pricing)
     manifest = dict(common, kind='eviweave-call-report-set',
+                    calculation_policy_version=CALCULATION_POLICY_VERSION,
                     files={name: sha(directory / name) for name in MEMBERS},
                     evidence_generation={'location': 'report-output' if legacy else 'source-analysis',
                         'path': (generation_root / 'api-calls/generations' / gid).relative_to(target if legacy else root).as_posix()},

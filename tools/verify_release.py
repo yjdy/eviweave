@@ -18,6 +18,33 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def effective_provenance(members):
+    """Validate the new overlay against retained history, then resolve latest hashes."""
+    newest = json.loads(members['provenance/config-rounding-baseline.json'])
+    history = ('extraction-manifest', 'runtime-baseline', 'regression-baseline', 'evidence-baseline',
+               'isolation-baseline', 'unified-baseline', 'observability-baseline', 'bugfix-baseline')
+    retained = newest['retained_provenance']
+    historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
+                        and name != 'provenance/config-rounding-baseline.json'}
+    if set(retained) != historical_names or any(digest(members[name]) != sha for name, sha in retained.items()):
+        raise ValueError('retained provenance set/digest mismatch')
+    latest = {}
+    for name in history:
+        for entry in json.loads(members['provenance/' + name + '.json'])['files']:
+            latest[entry['destination']] = entry['release_sha256']
+    seen = set()
+    for entry in newest['files']:
+        name = entry['destination']
+        if name in seen or name.startswith('src/') or name in retained or name == 'provenance/config-rounding-baseline.json':
+            raise ValueError('invalid or duplicate provenance override')
+        if (entry['source_sha256'] != latest.get(name) or
+                entry['source_commit'] != (newest['source_commit'] if name in latest else None)):
+            raise ValueError('provenance override source mismatch: ' + name)
+        seen.add(name)
+        latest[name] = entry['release_sha256']
+    return latest
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--project', type=Path, default=Path(__file__).resolve().parents[1])
@@ -134,11 +161,14 @@ def main():
             require(required_bugfix.issubset(members), 'sdist contains bugfix provenance and compatibility policy')
             for name in required_bugfix:
                 require(members[name] == (root/name).read_bytes(), 'sdist current bugfix metadata '+name)
-            overlay = json.loads(members['provenance/bugfix-baseline.json'])
-            for entry in overlay['files']:
-                name = entry['destination']
-                require(name in members and members[name] == (root/name).read_bytes(), 'sdist current bugfix content '+name)
-                require(digest(members[name]) == entry['release_sha256'], 'bugfix provenance digest '+name)
+            required_config_rounding = {'provenance/config-rounding-baseline.json', 'provenance/config-rounding.zh-CN.md',
+                                       'tests/test_config_rounding.py'}
+            require(required_config_rounding.issubset(members), 'sdist contains configuration/rounding fixes and provenance')
+            for name in required_config_rounding:
+                require(members[name] == (root/name).read_bytes(), 'sdist current configuration/rounding content '+name)
+            for name, expected_sha in effective_provenance(members).items():
+                require(name in members and members[name] == (root/name).read_bytes(), 'sdist current effective content '+name)
+                require(digest(members[name]) == expected_sha, 'effective provenance digest '+name)
             for name in required_observation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current observation content '+name)
             for name in required_unified:

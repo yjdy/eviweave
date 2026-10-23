@@ -2,13 +2,55 @@
 from __future__ import annotations
 
 from datetime import datetime
-from decimal import Decimal, localcontext, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_DOWN
+from decimal import Decimal, Inexact, localcontext, ROUND_HALF_EVEN, ROUND_HALF_UP, ROUND_DOWN
 import re
 
 from usage_normalize import quantity
 
 ROUNDINGS = {'half_even': ROUND_HALF_EVEN, 'half_up': ROUND_HALF_UP, 'truncate': ROUND_DOWN}
 DIMENSIONS = ('provider', 'model', 'region', 'deployment', 'protocol', 'mode')
+CALCULATION_POLICY_VERSION = 'decimal-quantum-v2'
+
+
+def rounding_quantum(value):
+    if value is None:
+        return None
+    if not isinstance(value, str) or quantity(value, integer=False) == 0:
+        raise ValueError('rounding quantum must be a positive decimal string')
+    return Decimal(value)
+
+
+def round_amount(amount, quantum, mode):
+    """Round a finite nonnegative Decimal to a multiple using exact integers.
+
+    Decimal division followed by integer rounding can lose midpoint neighbors.
+    Aligned coefficients keep that comparison exact, independent of context.
+    """
+    if quantum is None:
+        return amount
+    a, q = amount.as_tuple(), quantum.as_tuple()
+    if not amount.is_finite() or amount < 0 or not quantum.is_finite() or quantum <= 0 or mode not in ROUNDINGS:
+        raise ValueError('invalid monetary rounding operands')
+    exponent = min(a.exponent, q.exponent)
+    if max(len(a.digits), len(q.digits), abs(a.exponent - q.exponent)) > 10000:
+        raise ValueError('monetary rounding exceeds supported precision')
+    def coefficient(parts):
+        value = 0
+        for digit in parts.digits:
+            value = value * 10 + digit
+        return value * 10 ** (parts.exponent - exponent)
+    numerator, denominator = coefficient(a), coefficient(q)
+    multiple, remainder = divmod(numerator, denominator)
+    if mode != 'truncate' and (2 * remainder > denominator or
+            (2 * remainder == denominator and (mode == 'half_up' or multiple % 2))):
+        multiple += 1
+    # Construct directly: multiplying Decimals here would use the caller's context.
+    value = multiple * denominator
+    digits = []
+    while value:
+        value, digit = divmod(value, 10)
+        digits.append(digit)
+    return Decimal((0, tuple(reversed(digits)) or (0,), exponent))
 
 
 def timestamp(value):
@@ -45,15 +87,14 @@ def validate_pricing(doc):
         rounding = rule.get('rounding', {})
         if rounding.get('mode') not in ROUNDINGS:
             raise ValueError('rounding policy required')
-        if rounding.get('quantum') is not None:
-            if quantity(rounding['quantum'], integer=False) == 0:
-                raise ValueError('rounding quantum must be positive')
+        rounding_quantum(rounding.get('quantum'))
     return doc
 
 
 def unknown(reason, pricing=None, components=None):
     return {'amount': None, 'known_subtotal': '0', 'currency': None, 'complete': False,
-            'reason': reason, 'pricing_id': pricing, 'components': components or [], 'unpriced_units': []}
+            'reason': reason, 'pricing_id': pricing, 'components': components or [], 'unpriced_units': [],
+            'unrounded_amount': None, 'calculation_policy_version': CALCULATION_POLICY_VERSION}
 
 
 def calculate(record, pricing):
@@ -91,6 +132,7 @@ def calculate(record, pricing):
         errors.append('duplicate charge for the same unit')
     with localcontext() as ctx:
         ctx.prec = 4096
+        ctx.clear_flags()
         for name, component in recipes.items():
             before_errors = len(errors)
             item = fields.get(name)
@@ -150,13 +192,17 @@ def calculate(record, pricing):
                 unpriced.append(name)
         if record['normalized_usage']['anomalies'] or record['source_conflict']:
             errors.append('source/usage conflict')
-        quantum = rule['rounding'].get('quantum')
-        final = subtotal.quantize(Decimal(quantum), rounding=ROUNDINGS[rule['rounding']['mode']]) if quantum else subtotal
+        quantum = rounding_quantum(rule['rounding'].get('quantum'))
+        if quantum is not None and ctx.flags[Inexact]:
+            raise ValueError('exact subtotal required for quantum rounding; supported precision exceeded')
+        final = round_amount(subtotal, quantum, rule['rounding']['mode'])
     unsafe_subtotal = bool(record['normalized_usage']['anomalies'] or record['source_conflict'] or
                            any('overlapping' in error or 'duplicate charge' in error for error in errors))
     return {'amount': str(final) if not errors else None, 'known_subtotal': None if unsafe_subtotal else str(subtotal),
             'currency': rule['currency'], 'complete': not errors, 'reason': '; '.join(errors) if errors else None,
             'pricing_id': pricing['pricing_id'], 'components': details, 'unpriced_units': unpriced,
+            'unrounded_amount': None if errors else str(subtotal),
+            'calculation_policy_version': CALCULATION_POLICY_VERSION,
             'rounding': rule['rounding'], 'decimal_precision': 4096, 'source_conflict': record['source_conflict']}
 
 

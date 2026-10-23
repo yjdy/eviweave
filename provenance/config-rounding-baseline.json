@@ -1,0 +1,95 @@
+{
+  "schema": 1,
+  "scope": "Outer configuration and decimal quantum repairs after 021f3b2",
+  "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+  "production_files": 22,
+  "protected_files": 17,
+  "calculation_policy_version": "decimal-quantum-v2",
+  "real_model_calls": 0,
+  "retained_provenance": {
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf"
+  },
+  "files": [
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "2cf5decb49f955a7cec097687942db0147d8d1d540ece39dda626d427fbc0df7",
+      "release_sha256": "ac54d2965fc030646a8fe7b14b3df9fa9bc93e7891bb91a48f0b315b914ea9ff",
+      "reason": "Record explicit authorization and immutable boundaries for this offline repair"
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "66d8369c565996d2bde2ca331022da83e2fee6ca3bd9d882989cd871ef8a7e21",
+      "release_sha256": "ab68ca0b0ba7b3e3be3a39b0e852597937d9ed21f0bc436427ebdcd74dad99cc",
+      "reason": "Explain strict outer configuration and exact per-request rounding/revaluation in English"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "d8a554c34877d3558eedd6b1b3ce42b8ee4ae06820a0f3e7f95e75d68c9f8f0d",
+      "release_sha256": "65aef9846545bf60cb2abbecc0a1f60c878de3c4d7236bbdcef10d3f86174c9f",
+      "reason": "Explain strict outer configuration and exact per-request rounding/revaluation in Chinese"
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "c5b075e594e7a209cd389c03c42e7da3707ddd1196ea5366dce221d51b146734",
+      "release_sha256": "47cb92ae2bc03fe60c1adb3475fe13073d917acd1d376dc09a75eaa255de83cc",
+      "reason": "Reject unknown nested fields and unsafe types/URLs before snapshots; preserve valid bytes"
+    },
+    {
+      "destination": "tools/cost_accounting.py",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "677e79b2e5fa1cd1bc401982c3e41e99241169a9c168461e2067161930e90f30",
+      "release_sha256": "9ae40327c3074c9d6a42df1bc83ce75e10c033f24a0b681ddbb1edec99b00fc5",
+      "reason": "Use exact integer midpoint decisions for arbitrary decimal quantum and identify calculation policy"
+    },
+    {
+      "destination": "tools/cost_reports.py",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "de52003ceb886600c674c432a966c00816601be53ccf12465c754da54ffad292",
+      "release_sha256": "ddbac2eca72acc50b3309de82ada3b23964f976538859661a00d3d3475e39f17",
+      "reason": "Register calculation policy version in new valuation and committed report metadata"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "bdf279d31ed9b15caa3fec4ce169a55c8e9df75c84b1d7d040ad2b20ced7bbad",
+      "release_sha256": "dded546337898b24050d243a2cb825f55bb38bbbbb7afec249d42dce74cdba64",
+      "reason": "Check retained provenance and resolve latest effective overlay hashes"
+    },
+    {
+      "destination": "provenance/observability.zh-CN.md",
+      "source_commit": "021f3b227c6ee4d4a84e3e023c03dd021510e123",
+      "source_sha256": "5b510df677960b2f1585472d14bc48c33374050219bf9020fc799f891a42e401",
+      "release_sha256": "e6158a018cc6e651245989dc2f89284c0d09bebe9959a5630e335b1de3b50dbb",
+      "reason": "Specify quantum semantics, precision refusal and fresh-output revaluation"
+    },
+    {
+      "destination": "provenance/config-rounding.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "2a179495885147212126db0ead48c9ecd71a87bb904d213821edf71b3d091580",
+      "reason": "Original MIT explanation of configuration and rounding fixes and compatibility"
+    },
+    {
+      "destination": "tests/test_config_rounding.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "36443799b4936f9f1b4d65e36d670fcc6cf57272bad82134522ac33350241846",
+      "reason": "Artificial configuration, exact monetary boundary, reporting and provenance regressions"
+    }
+  ]
+}

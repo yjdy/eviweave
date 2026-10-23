@@ -21,28 +21,86 @@ def tasks_for(scope=None, tasks=None):
     return sorted(int(Path(n).stem.removeprefix('task_')) for n in read_lock()['files'] if n.startswith('configs/'))
 
 
+def endpoint(value, field):
+    try:
+        url = urlsplit(value)
+        hostname = url.hostname
+    except ValueError:
+        raise ValueError('invalid endpoint at ' + field) from None
+    if (url.scheme != 'https' or not url.hostname or url.username or url.password or url.query or url.fragment
+            or hostname == 'example.invalid' or hostname.endswith('.invalid')):
+        raise ValueError('HTTPS endpoint without credentials/query/fragment required at ' + field)
+
+
+def validate_config(raw):
+    """Reject unknown fields before the permissive frozen loader sees them.
+
+    Diagnostics contain schema locations, never user values or unknown key names.
+    """
+    def obj(value, location, allowed, required=()):
+        if not isinstance(value, dict) or set(value) - set(allowed) or set(required) - set(value):
+            raise ValueError('unsupported fields or missing mapping at ' + location)
+        return value
+
+    def leaves(value, location, booleans=(), integers=(), nullable=()):
+        for name, item in value.items():
+            where = location + '.' + name
+            if name in booleans:
+                if type(item) is not bool:
+                    raise ValueError('boolean required at ' + where)
+            elif name in integers:
+                try:
+                    valid = type(item) in (int, str) and int(item) > 0
+                except ValueError:
+                    valid = False
+                if not valid:
+                    raise ValueError('positive integer required at ' + where)
+            elif not isinstance(item, str) and not (item is None and name in nullable):
+                raise ValueError('string required at ' + where)
+
+    obj(raw, 'config', ('experiment', 'harnesses'), ('experiment', 'harnesses'))
+    experiment = obj(raw['experiment'], 'experiment',
+                     ('model', 'workbench', 'wall_time_seconds', 'concurrency', 'sandbox_image'), ('model', 'workbench'))
+    model = obj(experiment['model'], 'experiment.model',
+                ('key', 'model', 'api_key_env', 'openai_base_url', 'anthropic_base_url', 'max_output_tokens', 'context_window'),
+                ('key', 'model', 'api_key_env', 'openai_base_url'))
+    workbench = obj(experiment['workbench'], 'experiment.workbench', ('image', 'rootfs_path'), ('rootfs_path',))
+    harnesses = obj(raw['harnesses'], 'harnesses', ('codex',), ('codex',))
+    codex = obj(harnesses['codex'], 'harnesses.codex',
+                ('enabled', 'executable', 'version', 'runtime_path', 'runtime_mount', 'wire_api', 'simple_fixes'),
+                ('runtime_path', 'wire_api'))
+    leaves({k:v for k,v in experiment.items() if k not in ('model', 'workbench')}, 'experiment',
+           integers=('wall_time_seconds', 'concurrency'))
+    leaves(model, 'experiment.model', integers=('max_output_tokens', 'context_window'))
+    leaves(workbench, 'experiment.workbench')
+    leaves(codex, 'harnesses.codex', booleans=('enabled', 'simple_fixes'), nullable=('executable',))
+    if model['api_key_env'] != 'EVIWEAVE_API_KEY':
+        raise ValueError('only dedicated EVIWEAVE_API_KEY is accepted')
+    endpoint(model['openai_base_url'].rstrip('/'), 'experiment.model.openai_base_url')
+    if model.get('anthropic_base_url'):
+        endpoint(model['anthropic_base_url'], 'experiment.model.anthropic_base_url')
+    if codex['wire_api'] != 'responses':
+        raise ValueError('unified experiments require the frozen Responses policy')
+
+
 def resolved(path):
     import yaml
     from dataspace_baselines.config import load_harness_experiment_config
     path = plain(path)
-    config = load_harness_experiment_config(path)
-    if config.model.api_key_env != 'EVIWEAVE_API_KEY':
-        raise ValueError('only dedicated EVIWEAVE_API_KEY is accepted')
-    url = urlsplit(config.model.openai_base_url)
-    if (url.scheme != 'https' or not url.hostname or url.username or url.password or url.query or url.fragment
-            or url.hostname == 'example.invalid' or url.hostname.endswith('.invalid')):
-        raise ValueError('configure an HTTPS Responses endpoint without embedded credentials before check/run')
-    raw = yaml.safe_load(path.read_text())
+    snapshot = path.read_bytes()
+    try:
+        raw = yaml.safe_load(snapshot)
+    except (yaml.YAMLError, UnicodeError):
+        raise ValueError('invalid configuration YAML') from None
+    validate_config(raw)
+    try:
+        config = load_harness_experiment_config(path)
+    except (ValueError, TypeError, KeyError, OverflowError):
+        raise ValueError('invalid unified configuration values') from None
+    if path.read_bytes() != snapshot:
+        raise ValueError('configuration changed while resolving; retry with a stable file')
     raw['experiment']['workbench']['rootfs_path'] = str(config.workbench.rootfs_path)
     raw['harnesses']['codex']['runtime_path'] = config.harnesses['codex'].options['runtime_path']
-    # Never serialize arbitrary unrecognized configuration fields containing key values.
-    allowed_experiment = {'model', 'workbench', 'wall_time_seconds', 'concurrency', 'sandbox_image'}
-    if set(raw) != {'experiment', 'harnesses'} or set(raw['experiment']) - allowed_experiment:
-        raise ValueError('unsupported configuration fields in unified format')
-    if set(raw['experiment']['model']) - {'key', 'model', 'api_key_env', 'openai_base_url', 'anthropic_base_url', 'max_output_tokens', 'context_window'}:
-        raise ValueError('unsupported model fields; credential values must remain in environment')
-    if config.harnesses['codex'].options.get('wire_api') != 'responses':
-        raise ValueError('unified experiments require the frozen Responses policy')
     encoded = (json.dumps(raw, ensure_ascii=False, sort_keys=True, indent=2) + '\n').encode()
     return config, encoded
 

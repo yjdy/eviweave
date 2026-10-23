@@ -49,6 +49,16 @@ source scripts/env.sh
 ./scripts/experiment.sh verify --experiment .audit/my-experiment --output .audit/my-validation
 ```
 
+统一入口在创建输出前逐层校验配置，只接受已支持的 Codex 字段；未知字段（包括误填的
+`api_key`、`password`、`headers`）和叶子中的嵌套对象会被拒绝，错误不回显配置值。
+凭据仅通过 `EVIWEAVE_API_KEY` 设置。合法 V6 配置的快照格式不变；外层源码变化后，旧实验
+仍须通过原身份检查，不应绕过检查续跑。见[本轮修复说明](provenance/config-rounding.zh-CN.md)。
+
+费用的 `rounding.quantum` 表示正十进制字符串步长（如 `"0.05"`），null 表示不额外舍入。
+每请求合计后按步长舍入一次，再跨请求汇总。新费用报告标记
+`calculation_policy_version=decimal-quantum-v2`，逐请求保留舍入前金额；超出精度则拒绝步长计价。
+旧报告保留，通过 `cost revalue` 和全新输出目录取得修正结果；详见[费用说明](provenance/observability.zh-CN.md)。
+
 `--scope public60|all`与`--tasks`互斥；默认repeat为1，任务去重排序，并发沿用YAML，同题各轮不重叠。
 新run创建不可变计划；已有非空目录先核对身份并确认，默认否，非交互需`--yes`。
 输出限项目内、拒绝链接和受保护目录，使用独占锁；自定义实验目录登记本地Git排除。

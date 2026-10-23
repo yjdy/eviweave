@@ -92,6 +92,15 @@ HTTP 状态和服务商身份保留 null，不按时间邻近分配。提供的�
 金额与费率均为十进制字符串；结果精度上限与数量大小受合同限制。
 公开价格只按唯一匹配规则计算；未知、冲突和重叠均阻止完整金额。
 
+`rounding.quantum` 为正的有限十进制字符串步长，例如 `"0.05"`；null 表示不额外舍入。
+每个物理请求先合计组件，再按步长舍入一次，最后跨请求汇总。half_even 在中点选择偶数倍，
+half_up 在中点向较大倍数舍入，truncate 对非负金额向零舍入；结果必须为步长整数倍。
+步长判定采用精确整数运算；若组件合计已超出精度而丢失有效位，则明确拒绝本次步长计价。
+新费用结果与报告登记 `calculation_policy_version=decimal-quantum-v2`，逐请求保留
+`unrounded_amount`。定价本身的 pricing_id/rule_version 和服务商/账单金额不变。
+旧报告缺少该版本字段时不追认为已修正；保留旧件，使用相同审阅定价和全新 `--output`
+执行 `cost revalue`。旧分析v1继续只读，原始证据与定价不改写。
+
 账单 CSV 或 `{"rows":[...]}` JSON 每行需 bill_id、grain、amount_kind、amount、currency、
 period_start、period_end。时间带时区；grain 为 request/minute/hour/day/month/account；
 amount_kind 为 actual_paid/payable/list/credit/tax。只有 request 粒度、明确
