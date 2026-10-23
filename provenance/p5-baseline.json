@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "scope": "P5.2 independent host and public preparation outer tools only",
+  "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+  "production_files": 22,
+  "protected_files": 17,
+  "real_model_calls": 0,
+  "online_collection": "UNSUPPORTED_G1",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce"
+  },
+  "files": [
+    {
+      "destination": "docker/Dockerfile.public-workbench",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "248b985b6da59791cf64886e634498f2342fb7749d6b837f1400908ddaba0dec",
+      "reason": "Separate offline rebuild recipe installing all exact deb and wheel artifacts without rolling resolution"
+    },
+    {
+      "destination": "provenance/public-preparation.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "00d5bea3f56fe4cac9693b806f1a116187190da3f81c50a0d174d49c229f7be7",
+      "reason": "Minimal technical command/help, trust and identity reference; no formal stage-three docs"
+    },
+    {
+      "destination": "provenance/public-resources-lock.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+      "reason": "First-stage official URLs/revisions and observed SHA-256/ZIP offsets promoted into reviewed preparation input; HTTPS-only old expat trust explicit"
+    },
+    {
+      "destination": "tests/test_public_preparation.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "0f2285973240f6948e77e6aae5fa83ee527bc8737e0bee2825bccd2266021e4c",
+      "reason": "Independent artificial failure and success expectations for profiles, bootstrap, resources, paths and resume"
+    },
+    {
+      "destination": "tools/host_profile.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "a9c31fa14b65af6970ede767226817bd4e73cf9a2dab900375461f84c61ca5d1",
+      "reason": "New standard-library candidate measurement, schema validation, capability checks, config and offline doctor"
+    },
+    {
+      "destination": "tools/public_resources.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "6efda4bad011f810513bf2601829f67c17e46d673b86632b155818243f4ae0e6",
+      "reason": "New fixed-source resource acquisition, transactional preparation and isolated offline workbench build"
+    },
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "ac54d2965fc030646a8fe7b14b3df9fa9bc93e7891bb91a48f0b315b914ea9ff",
+      "release_sha256": "80d7975839586a240369bbb6d4f0602d120e7b2f13b8e0422cd2b564d415f5fd",
+      "reason": "Record the explicit stage-two-only authorization and preserved boundaries"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "688590803c488dfd1bdeec9c956cc867b7d5696445c462616f39f9a74aac1b3b",
+      "release_sha256": "c9611cbb2d2a49609d0bbebfc62cfb2d2dd30d377eb1b7db1c574820b771c8ab",
+      "reason": "Include the separate public rebuild recipe; retain all private exclusions"
+    },
+    {
+      "destination": "configs/env.sh.example",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "a270560ff61816ae7a01f2555af144015da3c6f423188eb26abc91da0195da0d",
+      "release_sha256": "2fb494e693413428894e24e9e47f979e8af8ad1e76a7c61ce2306721537e62d7",
+      "reason": "Add blank optional explicit profile setting without credentials"
+    },
+    {
+      "destination": "scripts/env.sh",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "6a88db059efae207a0259351871194c6695d1f05d9c8c92b75f7b77af22c3642",
+      "release_sha256": "92090a4c09a5d19f4e5b786ea99cdf83aab0e0a96b61e7290ad242805adb6cda",
+      "reason": "Bridge explicit profile with CLI/private/inherited/default precedence"
+    },
+    {
+      "destination": "tools/ci_check.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "90edd44862dfc03094c3b04413dc05d6e4286f7beb9e78c3c01ef0255679f94c",
+      "release_sha256": "9e92405402f30280a77a212ce37b41021db632e98e14949c2a172f970ae4de45",
+      "reason": "Allow authenticated locked wheel cache installation when a rolling package index omits a pinned artifact; retain all build and installed test checks"
+    },
+    {
+      "destination": "tools/environment_lock.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "4a0062d02e3c0cfda3cecc1724b7d55b47f35fa0aa77d482b3bf29aa2a9dc21a",
+      "release_sha256": "16db2830117b3fc3c2b19d39a82c1c27fe4571639140026d9ecad6b53ff10b01",
+      "reason": "Select explicit profiles; preserve exact defaults and all Python/package/host/runtime checks"
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "4bf26070ea5ca9c79eace37e59e1d8655f5066b37b8963b9c3463005ac1ebf6a",
+      "release_sha256": "435c46842e8b1e9c55d2135643d8105b4a2d4a2d9864d5d132b4edbcc44b2c4b",
+      "reason": "Explicit profile selection for check/new runs; reject resume override and restore frozen snapshot"
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "47cb92ae2bc03fe60c1adb3475fe13073d917acd1d376dc09a75eaa255de83cc",
+      "release_sha256": "a767838bb81783fe3d57c300008664f5eb8a75845b54b997b55e68f1635748b4",
+      "reason": "Include new outer profile/preparation implementation in experiment source identity"
+    },
+    {
+      "destination": "tools/install_environment.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "0eef249bfd7f60a263c9923dc73fea674b63634b15485f672fd721a4279c1b5b",
+      "release_sha256": "fe62bf930a32b375b450be9ad4b7bb9c9d1c0f9efe9a3549492ac6c9c1dc35d6",
+      "reason": "Resolve profile before bootstrap, verify reviewed wheels, bind venv identity, write config with target PyYAML"
+    },
+    {
+      "destination": "tools/run_regression.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "2a2bc1f6ce575634307f36835c99753bb787d27438de11a2d456b59594007f4b",
+      "release_sha256": "e926e459b845723045452cd90ed030805266dfcad572b55e386e94304444a032",
+      "reason": "Keep new CI/test caches and HOME under each audit output"
+    },
+    {
+      "destination": "tools/unified_smoke.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "66e27815fab7b429dd6732ad40e3a5c3d9d9f7c1ee5a75d1fd318295a23b1c3a",
+      "release_sha256": "0be40a04361a6b4ce5c438ee2a05416f4c5262d808ea55b183169f66a86d685f",
+      "reason": "Exercise an explicitly selected independently prepared runtime with mandatory local synthetic executor"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "5ebe9e17544c24090db44cc828cac0352bd4860d",
+      "source_sha256": "dded546337898b24050d243a2cb825f55bb38bbbbb7afec249d42dce74cdba64",
+      "release_sha256": "2709d37cfbd389d4e8fc586d131ef9bcf0f794ed9fc4ed48c0a5622d4f5ce100",
+      "reason": "Validate retained ancestor metadata before applying P5 source coverage; include required new tools and locks"
+    }
+  ]
+}

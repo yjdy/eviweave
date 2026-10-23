@@ -6,7 +6,7 @@ _eviweave_load_env() {
     local root name value
     root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)" || return 2
     local -A inherited=()
-    for name in EVIWEAVE_API_KEY EVIWEAVE_PYTHON EVIWEAVE_CONFIG EVIWEAVE_DATASET EVIWEAVE_EVALUATION_ROOT; do
+    for name in EVIWEAVE_API_KEY EVIWEAVE_PYTHON EVIWEAVE_CONFIG EVIWEAVE_DATASET EVIWEAVE_EVALUATION_ROOT EVIWEAVE_ENVIRONMENT_PROFILE; do
         inherited[$name]="${!name-}"
     done
     if [[ -L "$root/.local" || -L "$root/.local/env.sh" ]]; then
@@ -18,7 +18,7 @@ _eviweave_load_env() {
         (umask 077; set -o noclobber; cat -- "$root/configs/env.sh.example" > "$root/.local/env.sh") || return 2
     fi
     source "$root/.local/env.sh" || return 2
-    for name in EVIWEAVE_API_KEY EVIWEAVE_PYTHON EVIWEAVE_CONFIG EVIWEAVE_DATASET EVIWEAVE_EVALUATION_ROOT; do
+    for name in EVIWEAVE_API_KEY EVIWEAVE_PYTHON EVIWEAVE_CONFIG EVIWEAVE_DATASET EVIWEAVE_EVALUATION_ROOT EVIWEAVE_ENVIRONMENT_PROFILE; do
         value="${!name-}"
         if [[ -z "$value" ]]; then value="${inherited[$name]}"; fi
         if [[ -z "$value" ]]; then

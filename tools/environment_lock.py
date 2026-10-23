@@ -25,7 +25,11 @@ def profile_id():
     return versions[platform.python_version()]
 
 
-def profile():
+def profile(path=None):
+    path = path or os.environ.get('EVIWEAVE_ENVIRONMENT_PROFILE')
+    if path:
+        from host_profile import load_profile
+        return load_profile(path)
     doc = read(PROFILE_ROOT / (profile_id() + '.json'))
     if doc.get('format_version') != 1 or doc.get('profile_id') != profile_id():
         raise ValueError('unsupported environment profile')
@@ -79,6 +83,13 @@ def check_host(doc):
 
 
 def check_runtime(config, doc):
+    if doc.get('format_version') == 2:
+        from host_profile import runtime_check, capability
+        from public_resources import audit_root
+        from experiment_store import uid
+        result = runtime_check(doc, config)
+        capability(doc, audit_root() / 'profile-checks' / uid())
+        return result
     sys.path.insert(0, str(PROJECT / 'scripts'))
     from runtime_support import inventory
     baseline = read(PROJECT / 'provenance/runtime-baseline.json')
@@ -110,6 +121,9 @@ def check_runtime(config, doc):
 
 def verify(config=None, runtime=True, doc=None):
     doc = doc or profile()
+    if doc.get('format_version') == 2:
+        from host_profile import validate
+        validate(doc)
     check_python(doc)
     packages = check_packages(doc)
     if runtime:

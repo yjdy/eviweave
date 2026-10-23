@@ -119,7 +119,7 @@ def source_identity():
             raise ValueError('installed business module differs from frozen source: ' + str(relative))
         files[entry['destination']] = digest
     for filename in ('experiment.py', 'experiment_config.py', 'experiment_store.py', 'experiment_scheduler.py',
-                     'experiment_verify.py', 'environment_lock.py', 'standalone.py'):
+                     'experiment_verify.py', 'environment_lock.py', 'standalone.py', 'host_profile.py', 'public_resources.py'):
         files['tools/' + filename] = sha(PROJECT / 'tools' / filename)
     return files
 

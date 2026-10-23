@@ -9,6 +9,7 @@ recursive-include tools *.py
 recursive-include scripts *.py *.sh
 include .github/workflows/offline.yml
 include docker/Dockerfile.workbench docker/.dockerignore
+include docker/Dockerfile.public-workbench
 recursive-include docker/workbench *.md *.json *.txt
 recursive-include examples/synthetic *.json *.csv *.md
 prune .audit

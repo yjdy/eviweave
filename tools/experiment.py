@@ -25,6 +25,7 @@ def parser():
         q.add_argument('--config', type=Path)
         q.add_argument('--dataset', type=Path)
         q.add_argument('--evaluation-root', type=Path)
+        q.add_argument('--environment-profile', type=Path, help='explicit environment profile for a new experiment; resume restores its frozen snapshot')
         group = q.add_mutually_exclusive_group()
         group.add_argument('--tasks', nargs='+', type=int)
         group.add_argument('--scope', choices=('public60', 'all'))
@@ -94,8 +95,15 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
         return 0 if report['integrity'] == 'PASS' else 1
     if args.command == 'check':
         config, dataset, evaluation, tasks, repeat = parameters(args)
-        prepared = prepare_fn(config, dataset, evaluation, tasks)
-        diagnostic = PROJECT / '.audit/experiments' / ('check-' + uid())
+        if prepare_fn is prepare and args.environment_profile:
+            from environment_lock import profile, verify as verify_environment
+            selected = profile(args.environment_profile)
+            prepared = prepare_fn(config, dataset, evaluation, tasks,
+                                  environment_verifier=lambda c: verify_environment(c, doc=selected))
+        else:
+            prepared = prepare_fn(config, dataset, evaluation, tasks)
+        from public_resources import audit_root
+        diagnostic = audit_root() / 'experiments' / ('check-' + uid())
         diagnostic.mkdir(parents=True)
         with run_environment(diagnostic, live=False):
             # doctor offline checks all local runtime contracts; no service authentication.
@@ -113,7 +121,7 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
                           'profile': prepared['environment']['profile_id'], 'diagnostics': str(diagnostic)}))
         return 0 if present else 2
     if args.resume:
-        if not args.output or any(getattr(args, n) is not None for n in ('scope', 'tasks', 'repeat', 'config', 'dataset', 'evaluation_root')):
+        if not args.output or any(getattr(args, n) is not None for n in ('scope', 'tasks', 'repeat', 'config', 'dataset', 'evaluation_root', 'environment_profile')):
             raise ValueError('--resume requires --output and restores original tasks/repeat/configuration/data')
         root = output_path(args.output)
         before = load(root)
@@ -131,10 +139,20 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
         # Resume/reuse checks the experiment's frozen profile, not a mutable external lock.
         from environment_lock import verify as verify_environment
         frozen_environment = read(root / 'resources/environment-lock.json')
+        if args.environment_profile:
+            from environment_lock import profile
+            if profile(args.environment_profile) != frozen_environment['profile']:
+                raise ValueError('existing experiment environment profile differs')
         prepared = prepare_fn(config, dataset, evaluation, registered_tasks,
                               environment_verifier=lambda c: verify_environment(c, doc=frozen_environment['profile']))
     else:
-        prepared = prepare_fn(config, dataset, evaluation, registered_tasks)
+        if prepare_fn is prepare and args.environment_profile:
+            from environment_lock import profile, verify as verify_environment
+            selected = profile(args.environment_profile)
+            prepared = prepare_fn(config, dataset, evaluation, registered_tasks,
+                                  environment_verifier=lambda c: verify_environment(c, doc=selected))
+        else:
+            prepared = prepare_fn(config, dataset, evaluation, registered_tasks)
     state_before = fingerprint({'doc': before, 'attempts': attempts(root, before)}) if before else None
     if before:
         if before['identity'] != prepared['identity']:

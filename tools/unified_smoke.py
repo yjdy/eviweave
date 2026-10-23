@@ -81,9 +81,11 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--evaluation-root', type=Path, required=True)
     p.add_argument('--output-root', type=Path, required=True)
+    p.add_argument('--environment-profile', type=Path, help='explicit independent runtime; default retains historical runtime')
     args = p.parse_args()
     output = fresh(args.output_root)
     output.mkdir(parents=True)
+    os.environ['EVIWEAVE_AUDIT_ROOT'] = str(output)
     import yaml
     raw = yaml.safe_load((PROJECT / 'configs/codex.example.yaml').read_text())
     # This address is metadata only. The command substitution below is mandatory.
@@ -91,6 +93,14 @@ def main():
     raw['experiment']['concurrency'] = 2
     raw['experiment']['workbench']['rootfs_path'] = str(PROJECT / '.runtimes/data-workbench-1.0/rootfs')
     raw['harnesses']['codex']['runtime_path'] = str(PROJECT / '.runtimes/codex-{version}/platform-package/vendor/x86_64-unknown-linux-musl')
+    selected = None
+    if args.environment_profile:
+        from environment_lock import profile
+        selected = profile(args.environment_profile)
+        if selected['format_version'] != 2:
+            raise ValueError('explicit synthetic profile must describe an independent runtime')
+        raw['experiment']['workbench'].update(rootfs_path=selected['runtime']['workbench_root'] + '/rootfs', image=selected['runtime']['image'])
+        raw['harnesses']['codex']['runtime_path'] = selected['runtime']['codex_root'] + '/vendor/x86_64-unknown-linux-musl'
     config_path = output / 'config.yaml'
     write(config_path, raw)
     dataset = output / 'dataset'
@@ -98,7 +108,12 @@ def main():
     # Context copies, no symbolic links; runner guard accepts those registered here.
     shutil.copytree(PROJECT / 'examples/synthetic/tasks', dataset / 'input')
     # The integration runner uses the shipped tasks, snapshots use the identical copy.
-    prepared = prepare(config_path, dataset, args.evaluation_root, [1,2])
+    if selected:
+        from environment_lock import verify as verify_environment
+        prepared = prepare(config_path, dataset, args.evaluation_root, [1,2],
+                           environment_verifier=lambda c: verify_environment(c, doc=selected))
+    else:
+        prepared = prepare(config_path, dataset, args.evaluation_root, [1,2])
     root = output / 'experiment'
     root.mkdir()
     doc = initialize(root, prepared)
@@ -147,9 +162,20 @@ def main():
         before=len(attempts(root,doc))
         if schedule(root,doc,plan,config,dataset,resume=True,runner_factory=never) or len(attempts(root,doc))!=before:
             raise ValueError('final resume created extra calls')
+    # Exercise the actual CLI restore path after releasing its lock. An unusable
+    # inherited profile must not replace the experiment's frozen profile.
+    if selected:
+        from experiment import main as experiment_main
+        os.environ.pop('EVIWEAVE_API_KEY', None)
+        os.environ['EVIWEAVE_ENVIRONMENT_PROFILE'] = str(output / 'deliberately-missing-profile.json')
+        if experiment_main(['run', '--resume', '--yes', '--output', str(root)]) != 0:
+            raise ValueError('CLI could not restore the experiment profile without key/external profile')
+        if len(attempts(root, load(root))) != before:
+            raise ValueError('completed CLI resume added an attempt')
     write(output/'acceptance.json', {'status':'PASS','model_calls':0,'mode':'synthetic/mock; additional unshare-net',
           'initial_attempts':4,'interrupted_returncode':interrupted,'final_attempts':before,
-          'completed_resume_new_calls':0,'synthetic_frozen_score':'2/2','report_id':report['report_id']})
+          'completed_resume_new_calls':0,'synthetic_frozen_score':'2/2','report_id':report['report_id'],
+          'cli_frozen_profile_resume': 'PASS' if selected else 'NOT_SELECTED'})
     print(json.dumps(read(output/'acceptance.json')))
     return 0
 

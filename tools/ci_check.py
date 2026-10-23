@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--locked", action="store_true", help="also require this host to match the reproduction/compatibility profile")
+    parser.add_argument('--wheel-cache', type=Path, help='verified project-local locked wheels; use no index for installation')
     args = parser.parse_args()
     if args.locked:
         from environment_lock import verify
@@ -25,6 +26,13 @@ def main():
     output = safe_output(args.output_root)
     output.mkdir(parents=True)
     env = environment(output)
+    cache = None
+    if args.wheel_cache:
+        from public_resources import private_path
+        from environment_lock import profile, check_artifact
+        cache = private_path(args.wheel_cache)
+        for entry in profile()['packages'].values():
+            check_artifact(cache / entry['filename'], entry)
     commands = []
 
     def run(cmd, name, cwd=None):
@@ -48,6 +56,7 @@ def main():
 
     def prepare_python(py, name):
         run([sys.executable, '-B', '-m', 'pip', '--python', str(py), 'install',
+             *(['--no-index', '--find-links', str(cache)] if cache else []),
              '--only-binary=:all:', '--require-hashes', '-r', str(PROJECT / 'locks/ci-tools.txt')], name)
 
     report = {

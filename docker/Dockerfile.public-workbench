@@ -1,0 +1,21 @@
+FROM python:3.11-slim-bookworm@sha256:b18992999dbe963a45a8a4da40ac2b1975be1a776d939d098c647482bcad5cba
+LABEL org.dataspace.runtime="data-workbench" org.dataspace.runtime.version="1.0"
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY debs /opt/eviweave/debs
+COPY wheels /opt/eviweave/wheels
+COPY workbench /opt/eviweave/workbench
+# No rolling apt index or online dependency resolution. All 329 exact debs are locked.
+RUN dpkg --unpack /opt/eviweave/debs/*.deb && dpkg --configure -a
+RUN python /opt/eviweave/wheels/pip-24.0-py3-none-any.whl/pip install --no-index --no-deps --force-reinstall \
+        --find-links /opt/eviweave/wheels -r /opt/eviweave/workbench/python-packages.txt \
+    && python -m pip check \
+    && mkdir -p /opt/dataspace \
+    && python -m pip freeze --all | sort > /opt/dataspace/python-packages.txt \
+    && dpkg-query -W -f='${Package}\t${Version}\n' | sort > /opt/dataspace/system-packages.txt \
+    && cmp /opt/dataspace/python-packages.txt /opt/eviweave/workbench/python-packages.txt \
+    && cmp /opt/dataspace/system-packages.txt /opt/eviweave/workbench/system-packages.txt \
+    && cp /opt/eviweave/workbench/TOOLS.md /opt/eviweave/workbench/capabilities.json /opt/dataspace/ \
+    && rm -rf /opt/eviweave/debs /opt/eviweave/wheels
+ENV DATASPACE_TOOLS_MANIFEST=/opt/dataspace/TOOLS.md OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1
+WORKDIR /workspace
+CMD ["sleep", "infinity"]

@@ -42,8 +42,10 @@ def environment(output, pythonpath=None):
         PYTHONNOUSERSITE="1",
         PYTHONPATH=pythonpath or "",
         EVIWEAVE_API_KEY="invalid-no-model-call",
-        PIP_CACHE_DIR=str(PROJECT / ".audit/p3/cache/pip"),
-        UV_CACHE_DIR=str(PROJECT / ".audit/p3/cache/uv"),
+        PIP_CACHE_DIR=str(output / "cache/pip"),
+        UV_CACHE_DIR=str(output / "cache/uv"),
+        HOME=str(output / "home"),
+        XDG_CACHE_HOME=str(output / "cache/xdg"),
     )
     return env
 
