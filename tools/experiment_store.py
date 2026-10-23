@@ -228,11 +228,104 @@ def original(root, record):
     return internal(root, record['attempt_id']) / 'output/prediction.csv'
 
 
+def execution_evidence(root, record):
+    """Inspect lifecycle evidence without repairing or changing any original file."""
+    directory = internal(root, record['attempt_id'])
+    terminal = {'submitted', 'runtime_error', 'wall_time_exhausted', 'stopped',
+                'model_output_exhausted', 'no_prediction', 'invalid_prediction'}
+    unfinished = {'prepared', 'running', 'interrupted', 'execution_error'}
+    outer = record['status']
+    errors, missing, events, run = [], [], [], {}
+    if outer not in terminal | unfinished:
+        errors.append('unknown outer execution status')
+    run_path = directory / 'run.json'
+    if run_path.exists():
+        try:
+            run = read(run_path)
+            if not isinstance(run, dict):
+                raise ValueError('result object required')
+        except (OSError, ValueError, UnicodeError):
+            errors.append('invalid run.json')
+            run = {}
+    else:
+        missing.append('runner result missing')
+    path = directory / 'events.jsonl'
+    if path.exists():
+        try:
+            lines = plain(path).read_text(encoding='utf-8').splitlines(keepends=True)
+        except (OSError, UnicodeError):
+            errors.append('unreadable runner events')
+            lines = []
+        for i, line in enumerate(lines):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except ValueError:
+                if outer in unfinished and i == len(lines) - 1 and not line.endswith('\n'):
+                    missing.append('unfinished final event retained')
+                else:
+                    errors.append('invalid runner event JSON')
+                continue
+            if not isinstance(event, dict) or not isinstance(event.get('event'), str):
+                errors.append('invalid runner event object')
+                continue
+            events.append(event)
+    else:
+        missing.append('runner events missing')
+    starts = [e for e in events if e['event'] == 'run_started']
+    ends = [e for e in events if e['event'] == 'run_finished']
+    expected_task = f'task_{record["task"]}'
+    if len(starts) > 1 or len(ends) > 1:
+        errors.append('duplicate runner start/finish events')
+    if not starts:
+        missing.append('run_started missing')
+    elif starts[0].get('task_id') != expected_task or events[0] is not starts[0]:
+        errors.append('runner start task/order mismatch')
+    if not ends:
+        missing.append('run_finished missing')
+    elif events[-1] is not ends[0]:
+        errors.append('run_finished is not the final event')
+    if any(e.get('task_id', expected_task) != expected_task for e in events):
+        errors.append('runner event task mismatch')
+    for item, label in [(run, 'runner result'), *[(e, 'runner finish') for e in ends]]:
+        if label == 'runner result' and not run_path.exists():
+            continue
+        if not isinstance(item.get('status'), str) or item['status'] not in terminal:
+            errors.append(label + ' has invalid status')
+        if 'return_code' not in item or (item['return_code'] is not None and type(item['return_code']) is not int):
+            errors.append(label + ' has invalid return code')
+        if item.get('status') == 'submitted' and item.get('return_code') != 0:
+            errors.append(label + ' submitted with nonzero/unknown return code')
+        if outer in terminal and item.get('status') != outer:
+            errors.append(label + ' conflicts with outer status')
+    if run_path.exists():
+        if run.get('task_id') != expected_task:
+            errors.append('runner result task mismatch')
+        if ends and any(run.get(k) != ends[0].get(k) for k in ('status', 'return_code')):
+            errors.append('runner result/finish status or return code mismatch')
+        usage = run.get('usage')
+        if usage is not None and (not isinstance(usage, dict) or any(
+                not isinstance(k, str) or type(v) is not int or v < 0 for k, v in usage.items())):
+            errors.append('invalid runner usage')
+    for name in ('stdout.log', 'stderr.log'):
+        if not plain(directory / name).is_file():
+            missing.append(name + ' missing')
+    if outer in terminal:
+        errors.extend(missing)
+    elif not missing:
+        missing.append('outer lifecycle unfinished; resume required')
+    status = 'conflict' if errors else ('incomplete' if missing else 'consistent')
+    return run, {'status': status, 'reasons': list(dict.fromkeys(errors or missing))}
+
+
 def evidence(root, record):
     """Require frozen runner result, final event and CSV digest to agree."""
     from dataspace_baselines.core.prediction import validate_prediction
     directory = internal(root, record['attempt_id'])
-    run = read(directory / 'run.json')
+    run, inspection = execution_evidence(root, record)
+    if inspection['status'] == 'conflict':
+        raise ValueError('; '.join(inspection['reasons']))
     events = [json.loads(line) for line in plain(directory / 'events.jsonl').read_text().splitlines() if line.strip()]
     if not isinstance(run, dict) or any(not isinstance(e, dict) for e in events):
         raise ValueError('invalid runner result/event schema')

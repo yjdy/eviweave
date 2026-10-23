@@ -67,6 +67,10 @@ at most one new attempt per resume. Submitted but incorrectly scored answers are
 copies are repaired from intact originals. Fully submitted resume needs no API key and makes zero calls.
 Ordinary task failures continue; structured authentication/quota errors and confirmed global environment
 failures stop dispatch. SIGINT/SIGTERM/SIGHUP cancel active work, preserve progress, and trigger verification.
+Authentication detection also covers the fixed client's final `unexpected status 401/402/403` messages.
+The current task finishes its client retries before batch cancellation; then no further attempts are allocated
+and in-flight tasks are cancelled. Tool output and recovered errors do not trigger this policy; generic429/500
+are not classified as account failures. The first stop reason retains only a category and event location.
 
 Each verification retains a report version and refreshes `summary.json`, `score.json`, `summary.csv` with one
 report_id. Re-run verify to rebuild missing reports. Offline verification needs no key, original data/config,
@@ -75,6 +79,10 @@ Accuracy counts distinct public task IDs in the active plan, including missing p
 increase the denominator. For all410, public60 are scored and350 remain unscored. History, current answers,
 and active-plan progress are separate. Raw token fields are summed separately, missing values stay null with
 coverage counts, and monetary amounts are not calculated.
+Reports also inspect failed execution records. `attempt_integrity` and the CSV evidence columns distinguish
+consistent, incomplete and conflicting evidence. Conflicts fail verification and exclude that attempt's usage
+from trusted sums; exclusions are counted. Interrupted records remain incomplete, and complete runner results
+with outer collection failures remain recoverable without model calls. Verification never repairs originals.
 Exit0 means complete operation, even with wrong answers;1 means execution/integrity/scoring/report failure;
 2 means invalid arguments or missing materials;130 means interruption. Offline verify can successfully report
 existing execution failures without retrying them.
@@ -270,3 +278,10 @@ pre-send durability. Full online capture remains unsupported; observation-enable
 runs fail before starting a model. Imported request counts are lower bounds and
 cannot produce a certified submission total. Real service/billing validation has
 not been performed. See the [contract, commands and limitations](provenance/observability.zh-CN.md).
+
+New offline analysis bundles use `schema_version=2` and `import_identity_version=2`; the request contract
+remains v1. Identical response bytes from different physical request IDs are counted separately, while repeat
+imports of the same evidence remain idempotent. This analysis format cannot run or resume model experiments.
+Old v1 analysis bundles are read-only: verification/revaluation require a fresh separate `--output`, and an
+existing source lock. Append/import and in-place upgrade are refused. Original evidence can be explicitly
+imported into a new bundle. See [fix provenance and compatibility](provenance/bugfix.zh-CN.md).

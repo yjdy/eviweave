@@ -139,6 +139,7 @@ def bills_source(data, csv_format=False):
 
 
 def import_source(root, source, source_type, metadata=None):
+    store.require_writable(root)
     data = local_source(source)
     if source_type == 'billing':
         safe, rows = bills_source(data, Path(source).suffix.lower() == '.csv')

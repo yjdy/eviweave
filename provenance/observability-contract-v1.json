@@ -25,7 +25,7 @@
   "formats": {
     "unified_v1": "unchanged; independent legacy import only",
     "unified_v2": "reserved, creation disabled until G1 certified",
-    "analysis": "eviweave-call-analysis v1; not executable or resumable"
+    "analysis": "eviweave-call-analysis v2 with import_identity_version=2; v1 read-only; neither executable nor resumable"
   },
   "identity_rules": [
     "local physical request ID required; provider response ID is not a deduplication key",

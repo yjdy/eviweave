@@ -6,8 +6,10 @@ import json
 import os
 from pathlib import Path
 import re
+from contextlib import contextmanager
+import fcntl
 
-from experiment_store import atomic_bytes, fingerprint, internal, read, sha, uid, write
+from experiment_store import atomic_bytes, fingerprint, internal, locked, read, sha, uid, write
 from standalone import plain
 
 KIND = 'eviweave-call-analysis'
@@ -29,7 +31,7 @@ def create(root, mapping, pricing=None, legacy=None):
     write(root / 'resources/usage-mapping.json', mapping)
     if pricing:
         write(root / 'resources/pricing.json', pricing)
-    doc = {'kind': KIND, 'schema_version': 1, 'contract': CONTRACT, 'contract_version': 1,
+    doc = {'kind': KIND, 'schema_version': 2, 'import_identity_version': 2, 'contract': CONTRACT, 'contract_version': 1,
            'analysis_id': uid(), 'capture_level': 'task-summary-only' if legacy else 'raw-usage-import',
            'mapping_sha256': sha(root / 'resources/usage-mapping.json'),
            'initial_pricing_sha256': sha(root / 'resources/pricing.json') if pricing else None,
@@ -41,8 +43,10 @@ def create(root, mapping, pricing=None, legacy=None):
 
 def load(root):
     doc = read(root / 'observation.json')
-    if doc.get('kind') != KIND or doc.get('schema_version') != 1 or doc.get('contract_version') != 1:
+    if doc.get('kind') != KIND or type(doc.get('schema_version')) is not int or doc['schema_version'] not in (1, 2) or doc.get('contract_version') != 1:
         raise ValueError('unsupported call-analysis contract')
+    if doc['schema_version'] == 2 and (type(doc.get('import_identity_version')) is not int or doc['import_identity_version'] != 2):
+        raise ValueError('unsupported import identity version')
     if sha(root / 'resources/usage-mapping.json') != doc['mapping_sha256']:
         raise RuntimeError('frozen mapping changed')
     if doc['initial_pricing_sha256'] and sha(root / 'resources/pricing.json') != doc['initial_pricing_sha256']:
@@ -52,6 +56,34 @@ def load(root):
         if not member.is_file() and not member.is_dir():
             raise ValueError('non-regular analysis member')
     return doc
+
+
+def require_writable(root):
+    doc = load(root)
+    if doc['schema_version'] == 1:
+        raise ValueError('v1 analysis is read-only; import original evidence into a new v2 analysis')
+    return doc
+
+
+@contextmanager
+def bundle_lock(root):
+    """Old evidence uses an existing read-only shared lock; never create it."""
+    if load(root)['schema_version'] != 1:
+        with locked(root):
+            yield
+        return
+    try:
+        fd = os.open(plain(root / '.experiment.lock'), os.O_RDONLY | os.O_NOFOLLOW)
+    except FileNotFoundError as exc:
+        raise ValueError('v1 read-only analysis requires an existing lock file') from exc
+    try:
+        try:
+            fcntl.flock(fd, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ValueError('analysis is in use; retry after its writer finishes') from exc
+        yield
+    finally:
+        os.close(fd)
 
 
 def scan_journal(root):
@@ -87,6 +119,7 @@ def scan_journal(root):
 
 
 def append(root, event):
+    require_writable(root)
     rows, gaps = scan_journal(root)
     if any('incomplete' in g for g in gaps):
         raise RuntimeError('cannot append after partial line; original evidence retained')
@@ -109,12 +142,14 @@ def append(root, event):
 
 def register_import(root, sanitized, source_type, metadata):
     """Caller holds the exclusive bundle lock. Content-addressed import is idempotent."""
-    load(root)
+    require_writable(root)
     digest = hashlib.sha256(sanitized).hexdigest()
-    iid = source_type + '-' + digest
+    identity = {'identity_version': 2, 'source_type': source_type, 'source_sha256': digest,
+                'request_ids': sorted(metadata.get('request_ids', []))}
+    iid = source_type + '-' + fingerprint(identity)
     relative = f'api-calls/imports/{iid}/source.bin'
     path = internal(root, relative)
-    descriptor = dict(metadata, import_id=iid, source_type=source_type, file=relative, sha256=digest)
+    descriptor = dict(metadata, import_identity_version=2, import_id=iid, source_type=source_type, file=relative, sha256=digest)
     directory = path.parent
     if path.exists():
         if sha(path) != digest:
@@ -133,7 +168,7 @@ def register_import(root, sanitized, source_type, metadata):
 
 
 def imports(root):
-    load(root)
+    doc = load(root)
     rows, gaps = scan_journal(root)
     registered, result = set(), []
     for row in rows:
@@ -147,6 +182,12 @@ def imports(root):
         manifest = read(directory / 'manifest.json')
         if sha(directory / 'manifest.json') != row['manifest_sha256'] or sha(internal(root, manifest['file'])) != manifest['sha256']:
             raise RuntimeError('import evidence/manifest damaged')
+        expected = manifest['sha256'] if doc['schema_version'] == 1 else fingerprint({
+            'identity_version': 2, 'source_type': manifest['source_type'], 'source_sha256': manifest['sha256'],
+            'request_ids': sorted(manifest.get('request_ids', []))})
+        if (manifest.get('import_id') != iid or iid != manifest['source_type'] + '-' + expected
+                or (doc['schema_version'] == 2 and manifest.get('import_identity_version') != 2)):
+            raise RuntimeError('import identity/physical request association damaged')
         result.append(manifest)
     for directory in (root / 'api-calls/imports').glob('*'):
         if directory.name not in registered:
@@ -154,9 +195,8 @@ def imports(root):
     return result, gaps
 
 
-def generation(root, records, bills, gaps):
-    content = {'records': records, 'billing': bills, 'capture_gaps': gaps}
-    gid = fingerprint(content)
+def check_generation(root, gid):
+    """Validate a committed generation without writing, including legacy sources."""
     directory = root / 'api-calls/generations' / gid
     manifest_path = directory / 'manifest.json'
     if manifest_path.exists():
@@ -164,7 +204,19 @@ def generation(root, records, bills, gaps):
         if (manifest.get('evidence_generation_id') != gid or set(manifest.get('files', {})) != {'records.jsonl', 'billing.json', 'gaps.json'}
                 or any(sha(plain(directory / name)) != digest for name, digest in manifest['files'].items())):
             raise RuntimeError('previous evidence generation damaged')
-    else:
+        return manifest
+    return None
+
+
+def generation(root, records, bills, gaps):
+    if (root / 'observation.json').exists():
+        require_writable(root)
+    content = {'records': records, 'billing': bills, 'capture_gaps': gaps}
+    gid = fingerprint(content)
+    directory = root / 'api-calls/generations' / gid
+    manifest_path = directory / 'manifest.json'
+    manifest = check_generation(root, gid)
+    if manifest is None:
         directory.mkdir(parents=True, exist_ok=True)
         atomic_bytes(directory / 'records.jsonl', b''.join((json.dumps(r, sort_keys=True, ensure_ascii=False) + '\n').encode() for r in records))
         write(directory / 'billing.json', bills)

@@ -9,7 +9,7 @@ import json
 
 from cost_accounting import calculate, currency_totals, validate_pricing
 from cost_import import derive
-from experiment_store import atomic_bytes, fingerprint, read, sha, uid, write
+from experiment_store import atomic_bytes, fingerprint, output_path, read, sha, uid, write
 import observability_store as store
 from standalone import plain
 
@@ -86,23 +86,35 @@ def prepare_target(target, analysis_id):
 def report(root, output=None, pricing=None, revaluation=False):
     """Caller holds bundle lock, and output lock if output differs."""
     doc = store.load(root)
+    legacy = doc['schema_version'] == 1
+    if legacy:
+        if output is None:
+            raise ValueError('v1 analysis is read-only; --output must be a fresh separate directory')
+        output = output_path(output, [root])
+        # The CLI may already hold a newly created destination lock.
+        if output.exists() and any(p.name != '.experiment.lock' for p in output.iterdir()):
+            raise ValueError('v1 verification/revaluation output must be fresh')
+        prepare_target(root, doc['analysis_id'])  # Validate old committed reports read-only.
     records, bills, gaps = derive(root)
+    if legacy:
+        store.check_generation(root, fingerprint({'records': records, 'billing': bills, 'capture_gaps': gaps}))
     if pricing is None and doc['initial_pricing_sha256']:
         pricing = read(root / 'resources/pricing.json')
     if pricing:
         validate_pricing(pricing)
     if revaluation and output is None:
         raise ValueError('revaluation requires a separate output directory')
-    gid = store.generation(root, records, bills, gaps)
+    rid = uid()
+    target = output or root
+    generation_root = target / 'reports' / rid / 'evidence-generation' if legacy else root
+    gid = store.generation(generation_root, records, bills, gaps)
     for record in records:
         record['public_list_calculated'] = calculate(record, pricing)
         record['billing_actual'] = billing_cost(record, bills)
-    rid = uid()
-    target = output or root
     target.mkdir(parents=True, exist_ok=True, mode=0o700)
     prepare_target(target, doc['analysis_id'])
     directory = target / 'reports' / rid
-    directory.mkdir(parents=True)
+    directory.mkdir(parents=True, exist_ok=legacy)
     common = {'report_id': rid, 'evidence_generation_id': gid, 'analysis_id': doc['analysis_id']}
     usage = dict(common, kind='eviweave-call-usage', total_request_count=None,
                  observed_request_count=len(records), count_nature='lower_bound', fields=usage_totals(records),
@@ -171,6 +183,7 @@ def report(root, output=None, pricing=None, revaluation=False):
     issues = gaps + [r['request_attempt_id'] + ': ' + a for r in records for a in
                      (r['conflicts'] + r['normalized_usage']['anomalies'])]
     summary = dict(common, kind='eviweave-call-analysis-report', status='partial',
+                   source_schema_version=doc['schema_version'],
                    integrity='FAIL' if issues else 'PASS', anomalies=issues,
                    capture_level=doc['capture_level'], online_capture=False, total_request_count=None,
                    observed_request_count=len(records), model_calls_during_verification=0,
@@ -199,6 +212,8 @@ def report(root, output=None, pricing=None, revaluation=False):
         write(directory / 'pricing.json', pricing)
     manifest = dict(common, kind='eviweave-call-report-set',
                     files={name: sha(directory / name) for name in MEMBERS},
+                    evidence_generation={'location': 'report-output' if legacy else 'source-analysis',
+                        'path': (generation_root / 'api-calls/generations' / gid).relative_to(target if legacy else root).as_posix()},
                     pricing_file_sha256=sha(directory / 'pricing.json') if pricing else None)
     write(directory / 'report-set.json', manifest)
     # Version is committed first; each latest copy is replace+fsync, the pointer

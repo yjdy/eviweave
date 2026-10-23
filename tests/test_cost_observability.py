@@ -79,6 +79,29 @@ class CostTests(unittest.TestCase):
         self.add([c or call()])
         return importer.derive(self.root)[0][0]
 
+    def v1_fixture(self, with_lock=True):
+        """Build an artificial historical encoding, without a production v1 writer."""
+        descriptor = self.add()
+        old_id = descriptor['source_type'] + '-' + descriptor['sha256']
+        before = self.root / descriptor['file']
+        directory = before.parent.with_name(old_id)
+        before.parent.rename(directory)
+        descriptor.update(import_id=old_id, file=f'api-calls/imports/{old_id}/source.bin')
+        descriptor.pop('import_identity_version')
+        files.write(directory/'manifest.json',descriptor)
+        row = {'event':'evidence_imported','import_id':old_id,'manifest_sha256':files.sha(directory/'manifest.json'),
+               'sequence':1,'previous_sha256':None}
+        row['sha256'] = files.fingerprint(row)
+        (self.root/'api-calls/events.jsonl').write_text(json.dumps(row)+'\n')
+        files.write(self.root/'api-calls/checkpoint.json',{'sequence':1,'sha256':row['sha256']})
+        doc = files.read(self.root/'observation.json')
+        doc.update(schema_version=1); doc.pop('import_identity_version')
+        files.write(self.root/'observation.json',doc)
+        if with_lock: (self.root/'.experiment.lock').touch()
+
+    def snapshot(self):
+        return {p.relative_to(self.root).as_posix():files.sha(p) for p in self.root.rglob('*') if p.is_file()}
+
     def test_manual_0205_not_double_counting_reasoning(self):
         r = self.record()
         result = accounting.calculate(r, pricing())
@@ -109,6 +132,127 @@ class CostTests(unittest.TestCase):
         reports.report(self.root)
         self.assertEqual(files.read(self.root / 'usage.json')['observed_request_count'], 2)
         self.assertEqual(Decimal(files.read(self.root / 'cost.json')['paths']['public_list_calculated']['currencies']['TEST']['total']), Decimal('.410'))
+
+    def test_identical_raw_responses_distinct_physical_requests_are_two(self):
+        c = call()
+        metadata = {k:v for k,v in c.items() if k != 'events'}
+        payload = c['events'][0]['payload']['response']
+        payload.update(id='same-provider-id', status='completed')
+        source = self.base / 'response.json'
+        source.write_text(json.dumps(payload))
+        first = importer.import_source(self.root, source, 'responses-json', metadata)
+        second_meta = dict(metadata, request_attempt_id='r2', retry_of='r1', retry_index=1)
+        second = importer.import_source(self.root, source, 'responses-json', second_meta)
+        self.assertNotEqual(first['import_id'], second['import_id'])
+        self.assertEqual(first['sha256'], second['sha256'])
+        self.assertEqual(importer.import_source(self.root, source, 'responses-json', second_meta), second)
+        reports.report(self.root)
+        self.assertEqual(files.read(self.root / 'usage.json')['observed_request_count'], 2)
+        self.assertEqual(Decimal(files.read(self.root / 'cost.json')['paths']['public_list_calculated']['currencies']['TEST']['total']), Decimal('.410'))
+
+    def test_sse_identical_retries_and_conflicting_metadata(self):
+        c = call(); metadata = {k:v for k,v in c.items() if k != 'events'}
+        source = self.base/'response.sse'
+        source.write_text('data: '+json.dumps(dict(c['events'][0]['payload'],type='response.completed'))+'\n\n')
+        first = importer.import_source(self.root,source,'responses-sse',metadata)
+        second = importer.import_source(self.root,source,'responses-sse',dict(metadata,request_attempt_id='r2',retry_of='r1',retry_index=1))
+        self.assertNotEqual(first['import_id'],second['import_id'])
+        self.assertEqual(len(importer.derive(self.root)[0]),2)
+        snapshot = self.snapshot()
+        with self.assertRaisesRegex(ValueError,'different interpretation'):
+            importer.import_source(self.root,source,'responses-sse',dict(metadata,task_id='task_2'))
+        self.assertEqual(self.snapshot(),snapshot)
+
+    def test_import_crash_before_journal_reuses_identity_once(self):
+        c = call(); metadata = {k:v for k,v in c.items() if k != 'events'}
+        source = self.base/'response.json'; source.write_text(json.dumps(dict(c['events'][0]['payload']['response'],status='completed')))
+        with patch.object(store,'append',side_effect=OSError('fixture power loss')):
+            with self.assertRaises(OSError): importer.import_source(self.root,source,'responses-json',metadata)
+        self.assertTrue(importer.derive(self.root)[2])
+        first = importer.import_source(self.root,source,'responses-json',metadata)
+        self.assertEqual(first,importer.import_source(self.root,source,'responses-json',metadata))
+        self.assertEqual(len(store.scan_journal(self.root)[0]),1)
+        self.assertEqual(len(importer.derive(self.root)[0]),1)
+
+    def test_v1_verify_and_revalue_only_write_new_output(self):
+        self.v1_fixture(); before = self.snapshot()
+        output = self.base/'v1 verification'
+        self.assertEqual(cli.main(['verify','--experiment',str(self.root),'--output',str(output)]),0)
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(files.read(output/'usage.json')['observed_request_count'],1)
+        self.assertTrue(list((output/'reports').glob('*/evidence-generation/api-calls/generations/*/manifest.json')))
+        price = self.base/'price.json'; files.write(price,pricing())
+        revalue = self.base/'v1 revalue'
+        self.assertEqual(cli.main(['cost','revalue','--experiment',str(self.root),'--pricing',str(price),'--output',str(revalue)]),0)
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(cli.main(['cost','submission-check','--experiment',str(self.root)]),1)
+        self.assertEqual(self.snapshot(),before)
+
+    def test_v1_rejections_have_no_source_output_or_exclude_side_effects(self):
+        self.v1_fixture(); before = self.snapshot()
+        exclude = PROJECT/'.git/info/exclude'
+        git_before = exclude.read_bytes() if exclude.is_file() else None
+        receipt = self.base/'refused receipt'
+        source = self.base/'bill.json'; files.write(source,{'rows':[]})
+        self.assertEqual(cli.main(['cost','import','--experiment',str(self.root),'--source',str(source),
+                                  '--source-type','billing','--output',str(receipt)]),2)
+        self.assertFalse(receipt.exists())
+        self.assertEqual(cli.main(['cost','import','--experiment',str(self.root),
+                                  '--source-type','legacy','--output',str(receipt)]),2)
+        self.assertFalse(receipt.exists())
+        self.assertEqual(cli.main(['verify','--experiment',str(self.root)]),2)
+        existing = self.base/'existing'; existing.mkdir()
+        self.assertEqual(cli.main(['cost','verify','--experiment',str(self.root),'--output',str(existing)]),2)
+        for operation in (lambda:store.append(self.root,{'event':'bad'}),
+                          lambda:store.generation(self.root,[],[],[]),
+                          lambda:importer.import_source(self.root,source,'billing')):
+            with self.assertRaisesRegex(ValueError,'read-only'): operation()
+        self.assertEqual(self.snapshot(),before)
+        self.assertEqual(exclude.read_bytes() if exclude.is_file() else None,git_before)
+
+    def test_v1_missing_or_busy_lock_does_not_create_output(self):
+        self.v1_fixture(with_lock=False); before=self.snapshot()
+        output = self.base/'missing-lock-output'
+        self.assertEqual(cli.main(['verify','--experiment',str(self.root),'--output',str(output)]),2)
+        self.assertEqual(self.snapshot(),before); self.assertFalse(output.exists())
+        (self.root/'.experiment.lock').touch(); before=self.snapshot()
+        with files.locked(self.root):
+            self.assertEqual(cli.main(['verify','--experiment',str(self.root),'--output',str(output)]),2)
+        self.assertEqual(self.snapshot(),before); self.assertFalse(output.exists())
+
+    def test_v1_committed_report_and_generation_damage_are_still_detected(self):
+        self.v1_fixture()
+        directory = self.root/'reports/artificial-history'; directory.mkdir(parents=True)
+        for name in reports.MEMBERS: (directory/name).write_text('artificial report member')
+        files.write(directory/'report-set.json',{'analysis_id':store.load(self.root)['analysis_id'],
+            'files':{n:files.sha(directory/n) for n in reports.MEMBERS}})
+        (directory/'summary.json').write_text('damaged')
+        before = self.snapshot()
+        with store.bundle_lock(self.root):
+            with self.assertRaisesRegex(RuntimeError,'committed report damaged'):
+                reports.report(self.root,self.base/'refused-report')
+        self.assertEqual(self.snapshot(),before)
+        (directory/'summary.json').write_text('artificial report member')
+        records,bills,gaps = importer.derive(self.root)
+        gid = files.fingerprint({'records':records,'billing':bills,'capture_gaps':gaps})
+        gen = self.root/'api-calls/generations'/gid; gen.mkdir(parents=True)
+        for name in ('records.jsonl','billing.json','gaps.json'): (gen/name).write_text('artificial generation')
+        files.write(gen/'manifest.json',{'evidence_generation_id':gid,
+            'files':{n:files.sha(gen/n) for n in ('records.jsonl','billing.json','gaps.json')}})
+        (gen/'records.jsonl').write_text('damaged')
+        before = self.snapshot()
+        with store.bundle_lock(self.root):
+            with self.assertRaisesRegex(RuntimeError,'previous evidence generation damaged'):
+                reports.report(self.root,self.base/'refused-generation')
+        self.assertEqual(self.snapshot(),before)
+
+    def test_v2_import_identity_is_explicit(self):
+        doc = store.load(self.root)
+        self.assertEqual((doc['schema_version'],doc['import_identity_version']),(2,2))
+        descriptor = self.add()
+        directory = self.root/descriptor['file']
+        self.assertEqual(descriptor['import_identity_version'],2)
+        self.assertIn(descriptor['sha256'], files.read(directory.parent/'manifest.json').values())
 
     def test_duplicate_import_idempotent_and_repeat_report_conserves(self):
         a = self.add()

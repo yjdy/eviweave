@@ -9,7 +9,7 @@ from pathlib import Path
 import platform
 import shutil
 
-from experiment_store import (atomic_bytes, attempts, completed, evidence, fingerprint, internal,
+from experiment_store import (atomic_bytes, attempts, completed, evidence, execution_evidence, fingerprint, internal,
                               load, original, plan_for, read, select, sha, uid, write)
 from standalone import PROJECT, score as frozen_score, verify_evaluation
 
@@ -19,6 +19,7 @@ def usage_summary(rows):
     fields = sorted(set(fields) | {'input_tokens', 'output_tokens', 'cached_input_tokens',
                                  'cache_write_input_tokens', 'reasoning_output_tokens'})
     return {'attempts': len(rows), 'with_usage': sum(bool(r.get('usage')) for r in rows),
+            'excluded_attempts': sum(bool(r.get('usage_exclusion_reason')) for r in rows),
             'fields': {key: {'recorded_sum': sum(r['usage'][key] for r in rows if key in (r.get('usage') or {}))
                             if any(key in (r.get('usage') or {}) for r in rows) else None,
                             'coverage': sum(key in (r.get('usage') or {}) for r in rows)} for key in fields},
@@ -88,11 +89,16 @@ def verify(root, output=None, scorer=score_attempt):
         anomalies.append('current selection differs from latest allocated attempts; use resume to recover')
     for a in records:
         directory = internal(root, a['attempt_id'])
-        run = read(directory / 'run.json') if (directory / 'run.json').exists() else {}
-        row = dict(a, usage=run.get('usage') or None, return_code=run.get('return_code'),
+        run, inspection = execution_evidence(root, a)
+        conflict = inspection['status'] == 'conflict'
+        if conflict:
+            anomalies.extend(a['attempt_id'] + ': ' + reason for reason in inspection['reasons'])
+        row = dict(a, usage=None if conflict else (run.get('usage') or None), return_code=run.get('return_code'),
                    wall_time_seconds=run.get('wall_time_seconds'), error=a.get('error') or run.get('error'),
-                   prediction_valid=False, passed=None)
-        if a['status'] == 'submitted':
+                   prediction_valid=False, passed=None, evidence_status=inspection['status'],
+                   evidence_error='; '.join(inspection['reasons']) or None,
+                   usage_exclusion_reason='conflicting execution evidence' if conflict else None)
+        if a['status'] == 'submitted' and not conflict:
             try:
                 _, prediction = evidence(root, a)
                 if not a.get('prediction_sha256'):
@@ -105,6 +111,8 @@ def verify(root, output=None, scorer=score_attempt):
                     row['scoring_error_code'] = result.get('error_code')
             except (OSError, ValueError, KeyError, UnicodeError) as exc:
                 row['error'] = 'integrity/scoring: ' + str(exc)
+                row.update(evidence_status='conflict', evidence_error=str(exc), usage=None,
+                           usage_exclusion_reason='prediction/scoring evidence failed')
                 anomalies.append(a['attempt_id'] + ': ' + str(exc))
         if run.get('task_id') and run['task_id'] != f'task_{a["task"]}':
             anomalies.append(a['attempt_id'] + ': conflicting runner task')
@@ -174,6 +182,8 @@ def verify(root, output=None, scorer=score_attempt):
                'integrity': 'FAIL' if anomalies else 'PASS', 'anomalies': anomalies,
                'plan_progress': dict(progress), 'historical_status_counts': dict(Counter(a['status'] for a in rows)),
                'history_attempts': len(rows), 'current_selection': selection,
+               'attempt_integrity': {r['attempt_id']: {'status': r['evidence_status'],
+                   'reason': r['evidence_error'], 'usage_exclusion_reason': r['usage_exclusion_reason']} for r in rows},
                'current_tasks': current_tasks,
                'current_status_counts': dict(Counter(r['status'] for r in current_tasks.values())),
                'current_plan_accuracy': accuracy(plan['tasks']),
@@ -187,6 +197,7 @@ def verify(root, output=None, scorer=score_attempt):
     fields = ['report_id', 'plan_id', 'launch_id', 'task', 'repeat', 'slot', 'attempt_id', 'previous_attempt',
               'status', 'return_code', 'error', 'prediction_sha256', 'prediction_valid', 'passed',
               'scoring_error_code', 'wall_time_seconds', 'usage']
+    fields.extend(['evidence_status', 'evidence_error', 'usage_exclusion_reason'])
     handle = io.StringIO(newline='')
     writer = csv.DictWriter(handle, fieldnames=fields, extrasaction='ignore')
     writer.writeheader()

@@ -9,6 +9,8 @@ Decimal 计价、账单对账、分层报告及重估。固定 Codex 0.145.0 的
 完整在线采集 G1 未通过；当前没有认证的在线 profile，开启时在模型启动前拒绝。
 统一格式 v2 仅保留合同定义，没有可运行的 v2 实验；v1 运行和验证继续走原路径。
 离线分析格式 `eviweave-call-analysis` 不可 run/resume，不声称曾在线采集完整。
+新建分析容器为schema_version=2、import_identity_version=2；请求合同仍为v1。
+导入身份由来源类型、脱敏字节SHA与物理请求ID集合共同确定；不同物理请求即使响应字节相同也分别保存和计数。
 
 所有以下命令均为离线操作，`observe-check` 的固定客户端只连接隔离网络内的人工服务：
 
@@ -36,6 +38,11 @@ Decimal 计价、账单对账、分层报告及重估。固定 Codex 0.145.0 的
 ./scripts/experiment.sh cost revalue --experiment .audit/my-call-analysis \
   --pricing .local/pricing/another.json --output .audit/my-revaluation
 ./scripts/experiment.sh cost submission-check --experiment .audit/my-call-analysis
+
+# 旧schema_version=1分析目录只读，输出必须全新、独立；源目录须已有锁文件。
+./scripts/experiment.sh verify --experiment .audit/old-v1-analysis --output .audit/old-v1-verification-new
+./scripts/experiment.sh cost revalue --experiment .audit/old-v1-analysis \
+  --pricing .local/pricing/another.json --output .audit/old-v1-revaluation-new
 ```
 
 文件必须位于项目内，无符号链接，单文件上限 8 MiB。原件由用户自行保管；
@@ -107,3 +114,6 @@ calls.csv、cost-breakdown.csv、analysis.json；report-set.json 登记相同报
 1 为运行/证据/计算/报告失败或严格提交检查不合格，130 为用户中断。
 普通 check 不启动诊断客户端；run 的观测参数因 G1 阻断，绝不自动降级。
 新工具改变了外层源码身份；旧 v1 若要续跑，需使用其原冻结工具版本或新建目录。
+这里的可续跑v1指统一实验格式；费用分析v1本身始终不可续跑。旧费用目录禁止追加导入和原地升级，
+验证/重估使用只读共享锁，generation与报告全部写入新输出；缺锁或参数不合要求时拒绝且不写源目录。
+普通JSON/SSE或账单原件可以显式导入新建的v2分析目录；不会自动搬迁旧证据或改变旧报告。

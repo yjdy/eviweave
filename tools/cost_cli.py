@@ -84,7 +84,12 @@ def execute(args):
         print(json.dumps(result, ensure_ascii=False))
         return 0  # successful diagnosis, explicitly not a full-capture PASS
     root = output_path(args.experiment) if args.experiment else None
+    source_doc = store.load(root) if root and args.cost_command != 'import' else None
     if args.cost_command == 'import':
+        if root and (args.source_type != 'legacy' or (root / 'observation.json').exists()):
+            store.require_writable(root)  # Reject before output creation or Git exclusion.
+            if args.source_type == 'legacy':
+                raise ValueError('legacy import requires a unified experiment, not a call-analysis bundle')
         protected = [p for p in (args.source, args.metadata, args.usage_mapping, args.pricing, root) if p]
         output = output_path(args.output, protected)
         if output.exists():
@@ -126,9 +131,9 @@ def execute(args):
                       'source_sha256': descriptor['sha256'], 'report_id': result['report_id'], 'model_calls': 0})
         print(json.dumps(result, ensure_ascii=False))
         return 0 if result['integrity'] == 'PASS' else 1
-    store.load(root)
+    legacy = source_doc['schema_version'] == 1
     if args.cost_command == 'submission-check':
-        with locked(root):
+        with store.bundle_lock(root):
             result = submission_check(root)
         if args.output:
             target = output_path(args.output, [root])
@@ -141,10 +146,12 @@ def execute(args):
         print(json.dumps(result, ensure_ascii=False))
         return 1
     target = output_path(args.output, [root]) if args.output else None
+    if legacy and (not target or target.exists()):
+        raise ValueError('v1 analysis is read-only; --output must be a fresh separate directory')
     if args.cost_command == 'revalue' and not target:
         raise ValueError('revalue requires a separate --output')
     pricing = resource(args.pricing, validate_pricing) if args.cost_command == 'revalue' else None
-    with locked(root):
+    with store.bundle_lock(root):
         if target:
             if target.exists() and any(p.name not in (*MEMBERS, 'reports', 'report-set.json', '.experiment.lock') for p in target.iterdir()):
                 raise ValueError('foreign report target contents')

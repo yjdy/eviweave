@@ -130,6 +130,15 @@ def main():
                 'provenance/observability-contract-v1.json', 'provenance/observability-mapping-v1.json',
                 'provenance/observability-baseline.json', 'provenance/observability.zh-CN.md'}
             require(required_observation.issubset(members), 'sdist contains offline observation contract, tools, tests and provenance')
+            required_bugfix = {'provenance/bugfix-baseline.json', 'provenance/bugfix.zh-CN.md'}
+            require(required_bugfix.issubset(members), 'sdist contains bugfix provenance and compatibility policy')
+            for name in required_bugfix:
+                require(members[name] == (root/name).read_bytes(), 'sdist current bugfix metadata '+name)
+            overlay = json.loads(members['provenance/bugfix-baseline.json'])
+            for entry in overlay['files']:
+                name = entry['destination']
+                require(name in members and members[name] == (root/name).read_bytes(), 'sdist current bugfix content '+name)
+                require(digest(members[name]) == entry['release_sha256'], 'bugfix provenance digest '+name)
             for name in required_observation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current observation content '+name)
             for name in required_unified:

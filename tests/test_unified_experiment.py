@@ -48,7 +48,8 @@ class FakeRunner:
             time.sleep(self.delay)
         if outcome == 'crash':
             raise RuntimeError('artificial worker exception')
-        status = 'stopped' if self.cancelled else outcome
+        status = 'stopped' if self.cancelled else (
+            'runtime_error' if outcome in ('auth', 'auth_message', 'tool401') else outcome)
         (root / 'output').mkdir(exist_ok=True)
         prediction = root / 'output/prediction.csv'
         prediction.write_text('code\n001\n')
@@ -63,9 +64,13 @@ class FakeRunner:
         (root / 'events.jsonl').write_text(''.join(json.dumps(e) + '\n' for e in events))
         (root / 'stdout.log').write_text('')
         (root / 'stderr.log').write_text('')
-        if status == 'auth':
+        if outcome == 'auth':
             (root / 'stdout.log').write_text(json.dumps({'type':'turn.failed','error':{'code':'invalid_api_key'}})+'\n')
-        if status == 'tool401':
+        if outcome == 'auth_message':
+            # Fixed 0.145.0 protocol shape, with only artificial public values.
+            (root / 'stdout.log').write_text(json.dumps({'type':'turn.failed','error':{
+                'message':'unexpected status 401 Unauthorized: fixture failure, url: https://example.invalid/v1/responses'}})+'\n')
+        if outcome == 'tool401':
             (root / 'stdout.log').write_text(json.dumps({'type':'item.completed','item':{'type':'command_execution','output':'401 unauthorized'}})+'\n')
         with self.lock:
             self.active.remove(task.task_id)
@@ -242,6 +247,136 @@ class UnifiedTests(unittest.TestCase):
         runner=FakeRunner(['auth'])
         self.run_fake(runner,resume=True)
         self.assertEqual(len(runner.calls),1)
+
+    def test_fixed_client_401_message_stops_dispatch(self):
+        self.initialize(tasks=(1,2,3))
+        runner = FakeRunner(['auth_message'] * 3)
+        self.assertEqual(self.run_fake(runner), 1)
+        self.assertEqual([t for t, _ in runner.calls], ['task_1'])
+        launch = store.read(next((self.experiment / 'launches').glob('*.json')))
+        self.assertNotIn('example.invalid', launch['stop_reason'])
+
+    def test_failed_attempt_conflicting_runner_state_fails_integrity(self):
+        self.initialize(tasks=(1,))
+        self.run_fake(FakeRunner(['runtime_error']))
+        a = store.attempts(self.experiment, self.doc)[0]
+        path = self.experiment / a['attempt_id'] / 'run.json'
+        run = store.read(path)
+        run.update(status='submitted', return_code=0)
+        store.write(path, run)
+        report = self.verify()
+        self.assertEqual(report['integrity'], 'FAIL')
+        self.assertIsNone(report['usage']['all']['fields']['input_tokens']['recorded_sum'])
+
+    def test_client_auth_event_selection_and_false_positives(self):
+        directory = self.root / 'client-events'
+        directory.mkdir()
+        store.write(directory / 'run.json', {'status': 'runtime_error'})
+        failure = {'type':'turn.failed','error':{'message':'unexpected status 401 Unauthorized: fixture'}}
+        cases = [
+            ([failure], True),
+            ([{'type':'error','message':'unexpected status 403 Forbidden: fixture'}], True),
+            ([{'type':'error','error':{'status_code':402}}], True),
+            ([{'type':'turn.failed','error':{'code':'insufficient_quota'}}], True),
+            ([{'type':'error','message':'unexpected status 401 Unauthorized'}, {'type':'turn.completed'}], False),
+            ([failure, {'type':'turn.completed'}], False),
+            ([{'type':'turn.failed','error':{'message':'exceeded retry limit, last status: 429 Too Many Requests'}}], False),
+            ([{'type':'turn.failed','error':{'message':'unexpected status 500 Internal Server Error'}}], False),
+            ([{'type':'turn.failed','error':{'message':'the script printed unexpected status 401 Unauthorized'}}], False),
+            ([{'type':'item.completed','item':{'type':'command_execution','output':'unexpected status 401 Unauthorized'}}], False),
+            ([{'type':'item.completed','item':{'type':'agent_message','text':'unexpected status 401 Unauthorized'}}], False),
+            ([{'type':'turn.failed','error':{'nested':{'status_code':401}}}], False),
+            ([{'type':{},'error':{'status_code':401}}, {'type':'turn.failed','error':{'code':[]}}], False),
+        ]
+        for events, expected in cases:
+            with self.subTest(events=events):
+                (directory / 'stdout.log').write_text('not-json\n' + ''.join(json.dumps(e)+'\n' for e in events))
+                self.assertEqual(bool(sched.global_failure(directory)), expected)
+
+    def test_auth_cancels_inflight_without_allocating_next_task(self):
+        config = self.initialize(tasks=(1,2,3))
+        second_started, cancelled = threading.Event(), threading.Event()
+        class CoordinatedRunner(FakeRunner):
+            def cancel(inner):
+                super().cancel()
+                cancelled.set()
+            def run(inner, task, root):
+                if task.task_id == 'task_1':
+                    if not second_started.wait(5): raise AssertionError('second task did not start')
+                else:
+                    second_started.set()
+                    if not cancelled.wait(5): raise AssertionError('inflight task was not cancelled')
+                return super().run(task, root)
+        runner = CoordinatedRunner(['auth_message', 'runtime_error'])
+        self.assertEqual(self.run_fake(runner, config=replace(config, concurrency=2)), 1)
+        self.assertTrue(cancelled.is_set())
+        self.assertEqual({t for t, _ in runner.calls}, {'task_1', 'task_2'})
+        self.assertEqual(len(store.attempts(self.experiment, self.doc)), 2)
+        self.assertEqual(self.verify()['integrity'], 'PASS')
+
+    def test_failure_evidence_mutations_and_cli_failure(self):
+        self.initialize(tasks=(1,2))
+        self.run_fake(FakeRunner(['runtime_error', 'submitted']))
+        a = store.attempts(self.experiment, self.doc)[0]
+        directory = self.experiment / a['attempt_id']
+        run_bytes, event_bytes = (directory/'run.json').read_bytes(), (directory/'events.jsonl').read_bytes()
+        events = [json.loads(s) for s in event_bytes.decode().splitlines()]
+        mutations = [
+            ('run.json', b'[]'), ('run.json', b'{}'), ('run.json', b'{broken'),
+            ('run.json', b'{"task_id":"task_1","status":{},"return_code":0}'),
+            ('events.jsonl', b'null\n'), ('events.jsonl', event_bytes + event_bytes),
+            ('events.jsonl', (json.dumps(events[0])+'\n').encode()),
+            ('events.jsonl', (json.dumps(events[-1])+'\n'+json.dumps(events[0])+'\n').encode()),
+            ('events.jsonl', (json.dumps(events[0])+'\n'+json.dumps(dict(events[-1],return_code=7))+'\n').encode()),
+        ]
+        for name, value in mutations:
+            with self.subTest(name=name,value=value):
+                (directory/'run.json').write_bytes(run_bytes)
+                (directory/'events.jsonl').write_bytes(event_bytes)
+                (directory/name).write_bytes(value)
+                report = self.verify()
+                self.assertEqual(report['integrity'], 'FAIL')
+                self.assertEqual(report['attempt_integrity'][a['attempt_id']]['status'], 'conflict')
+                self.assertEqual(report['history_attempts'], 2)
+                self.assertEqual(report['usage']['all']['excluded_attempts'], 1)
+        args = cli.parser().parse_args(['verify','--experiment',str(self.experiment)])
+        self.assertEqual(cli.execute(args, verify_fn=lambda r,*args:self.verify()), 1)
+        self.assertEqual((directory/'run.json').read_bytes(), run_bytes)
+
+    def test_legal_failed_results_and_partial_lifecycle(self):
+        self.initialize(tasks=(1,2,3), repeat=2)
+        statuses = ['runtime_error','wall_time_exhausted','stopped','no_prediction','invalid_prediction','model_output_exhausted']
+        self.run_fake(FakeRunner(statuses))
+        records = store.attempts(self.experiment, self.doc)
+        # A validation failure after exit 0 and a process that never started are legal.
+        for a, code in zip(records[:2], [0, None]):
+            directory = self.experiment / a['attempt_id']
+            run = store.read(directory/'run.json'); run['return_code'] = code; store.write(directory/'run.json',run)
+            events = [json.loads(s) for s in (directory/'events.jsonl').read_text().splitlines()]
+            events[-1]['return_code'] = code
+            (directory/'events.jsonl').write_text(''.join(json.dumps(e)+'\n' for e in events))
+        self.assertEqual(self.verify()['integrity'], 'PASS')
+        a = records[-1]; directory = self.experiment / a['attempt_id']
+        a.update(status='interrupted'); store.write(directory/'attempt.json',a)
+        (directory/'run.json').unlink()
+        (directory/'events.jsonl').write_text(json.dumps({'event':'run_started','task_id':f'task_{a["task"]}'})+'\n{"partial":')
+        report = self.verify()
+        self.assertEqual(report['integrity'], 'PASS')
+        self.assertEqual(report['attempt_integrity'][a['attempt_id']]['status'], 'incomplete')
+
+    def test_outer_collection_error_verifies_as_recoverable(self):
+        self.initialize(tasks=(1,))
+        self.run_fake(FakeRunner())
+        a = store.attempts(self.experiment,self.doc)[0]
+        a.update(status='execution_error',error='artificial collection failure')
+        store.write(self.experiment/a['attempt_id']/'attempt.json', a)
+        (self.experiment/'predictions/task_1/prediction.csv').unlink()
+        report = self.verify()
+        self.assertEqual(report['integrity'], 'PASS')
+        self.assertEqual(report['attempt_integrity'][a['attempt_id']]['status'],'incomplete')
+        runner = FakeRunner()
+        self.assertEqual(self.run_fake(runner,resume=True),0)
+        self.assertEqual(runner.calls,[])
 
     def test_concurrency_is_bounded_and_same_task_rounds_never_overlap(self):
         config=self.initialize(repeat=3)

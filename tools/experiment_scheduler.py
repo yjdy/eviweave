@@ -6,6 +6,7 @@ from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
+import re
 import signal
 import threading
 
@@ -51,23 +52,41 @@ def pending_slots(root, plan, records):
 
 
 def global_failure(directory):
-    """Only structured API failures are global; never scan arbitrary tool text."""
+    """Recognize unrecovered client failures, never tool/model message contents."""
     path = directory / 'stdout.log'
     if not path.is_file():
         return None
     codes = {'invalid_api_key', 'authentication_error', 'unauthorized', 'insufficient_quota',
              'quota_exceeded', 'billing_hard_limit_reached', 'account_deactivated'}
-    for line in path.read_text(encoding='utf-8', errors='replace').splitlines():
+    events = []
+    for number, line in enumerate(path.read_text(encoding='utf-8', errors='replace').splitlines(), 1):
         try:
             event = json.loads(line)
         except ValueError:
             continue
-        if not isinstance(event, dict) or event.get('type') not in {'error', 'turn.failed'}:
-            continue
-        error = event.get('error')
-        if isinstance(error, dict) and (error.get('code') in codes or error.get('type') in codes
-                                       or error.get('status_code') in (401, 402, 403)):
-            return 'structured service authentication/quota failure'
+        if isinstance(event, dict) and isinstance(event.get('type'), str):
+            events.append((number, event))
+    terminals = [(n, e) for n, e in events if e.get('type') in {'turn.completed', 'turn.failed'}]
+    if terminals:
+        if terminals[-1][1]['type'] == 'turn.completed':
+            return None
+        candidates = terminals[-1:]
+    else:
+        run = read(directory / 'run.json')
+        if run.get('status') in ('submitted', 'stopped'):
+            return None
+        candidates = [(n, e) for n, e in events if e.get('type') == 'error']
+    for number, event in reversed(candidates):
+        error = event.get('error') if isinstance(event.get('error'), dict) else event
+        code = next((error[n] for n in ('code', 'type') if isinstance(error.get(n), str) and error[n] in codes), None)
+        status = error.get('status_code')
+        if type(status) is not int or status not in (401, 402, 403):
+            status = None
+        message = error.get('message')
+        match = re.match(r'^unexpected status (401|402|403)(?:\s|:|$)', message) if isinstance(message, str) else None
+        if code or status or match:
+            category = code or 'http_' + str(status or match[1])
+            return f'service authentication/quota failure: {category}; stdout.log line {number} ({event["type"]})'
     return None
 
 
@@ -121,6 +140,7 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
         write(path, launch)
         raise ValueError('set dedicated EVIWEAVE_API_KEY; no credential fallback')
     stopped = threading.Event()
+    dispatch_lock = threading.RLock()
     interrupted = []
     runner = None
     old_handlers = {}
@@ -129,9 +149,17 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
 
     def stop(signum, frame):
         interrupted.append(signum)
-        stopped.set()
+        with dispatch_lock:
+            stopped.set()
         if runner is not None:
             runner.cancel()
+
+    def stop_dispatch(reason):
+        with dispatch_lock:
+            if launch['stop_reason'] is None:
+                launch['stop_reason'] = reason
+            stopped.set()
+        runner.cancel()
 
     def allocate(slot):
         nonlocal started
@@ -173,8 +201,7 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
                 atomic_bytes(root / f'predictions/task_{record["task"]}/prediction.csv', original(root, record).read_bytes())
             reason = global_failure(directory)
             if reason:
-                stopped.set()
-                runner.cancel()
+                stop_dispatch(reason)
             write(directory / 'attempt.json', record)
             return reason
         except Exception as exc:
@@ -201,13 +228,16 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
                     exhausted = False
                     while active or not exhausted:
                         while not stopped.is_set() and len(active) < config.concurrency and not exhausted:
-                            try:
-                                slot = next(queue)
-                            except StopIteration:
-                                exhausted = True
-                                break
-                            a = allocate(slot)
-                            active[pool.submit(worker, a)] = a
+                            with dispatch_lock:
+                                if stopped.is_set():
+                                    break
+                                try:
+                                    slot = next(queue)
+                                except StopIteration:
+                                    exhausted = True
+                                    break
+                                a = allocate(slot)
+                                active[pool.submit(worker, a)] = a
                         if not active:
                             break
                         finished, _ = wait(active, return_when=FIRST_COMPLETED)
@@ -222,10 +252,7 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
                                     doctor_fn(config, probe)
                                 except Exception as exc:
                                     reason = 'confirmed global environment failure: ' + str(exc)
-                                    stopped.set()
-                                    runner.cancel()
-                            if reason:
-                                launch['stop_reason'] = reason
+                                    stop_dispatch(reason)
                         if stopped.is_set():
                             exhausted = True
                     if stopped.is_set():
