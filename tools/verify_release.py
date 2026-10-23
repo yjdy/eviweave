@@ -37,6 +37,10 @@ def main():
         forbidden = {'docs','.docs','.audit','.local','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent'}
         for name in names:
             path = PurePosixPath(name)
+            runtime_names = {'experiment.json', 'attempt.json', 'run.json', 'selection.json', 'prediction.csv',
+                             'summary.json', 'summary.csv', 'score.json', 'events.jsonl', 'stdout.log', 'stderr.log',
+                             'config.resolved.yaml', 'environment-lock.json', 'report-set.json'}
+            require(path.name not in runtime_names, label + ': no unified execution artifact ' + name)
             require(not path.name.startswith('eviweave-v0.1.0-v6-evidence') and not path.name.endswith('.zip'),label+': no experimental attachment '+name)
             require(not any(part in forbidden or part.startswith('.venv') for part in path.parts),label+': clean path '+name)
             require(not (path.name == '.env' or path.name.startswith('.env.') or path.suffix in {'.pyc','.env'}),label+': no local config '+name)
@@ -94,6 +98,23 @@ def main():
                 'provenance/evaluation-lock.json','provenance/isolation.zh-CN.md','provenance/isolation-baseline.json',
                 'scripts/check_task33.sh','tools/check_task33.py','tests/test_task33_terminal.py'}
             require(required_isolation.issubset(members), 'sdist contains independent resource and isolation tools')
+            required_unified = {'scripts/install.sh','scripts/env.sh','scripts/experiment.sh','configs/env.sh.example',
+                'tools/install_environment.py','tools/environment_lock.py','tools/experiment.py','tools/experiment_config.py',
+                'tools/experiment_store.py','tools/experiment_scheduler.py','tools/experiment_verify.py','tools/unified_smoke.py',
+                'tests/test_unified_experiment.py','provenance/unified-baseline.json','provenance/unified.zh-CN.md',
+                'locks/README.md','locks/ci-tools.txt','locks/cpython312-linux-x86_64.json','locks/cpython313-linux-x86_64.json',
+                'locks/cpython312-linux-x86_64.txt','locks/cpython313-linux-x86_64.txt'}
+            require(required_unified.issubset(members), 'sdist contains unified workflow, profiles, scripts and tests')
+            for name in required_unified:
+                require(members[name] == (root/name).read_bytes(), 'sdist current unified content '+name)
+            for suffix in ('312', '313'):
+                profile_name = 'locks/cpython'+suffix+'-linux-x86_64'
+                profile = json.loads(members[profile_name+'.json'])
+                require(profile['format_version'] == 1 and profile['python']['version'] == ('3.12.3' if suffix == '312' else '3.13.16'), 'separate exact Python profile '+suffix)
+                requirements = members[profile_name+'.txt'].decode()
+                for package, entry in profile['packages'].items():
+                    require(package+'=='+entry['version']+' --hash=sha256:'+entry['sha256'] in requirements, 'hashed dependency lock '+package+suffix)
+                    require(entry['url'].startswith('https://files.pythonhosted.org/') and len(entry['sha256'])==64 and bool(entry['files']), 'artifact source and content lock '+package+suffix)
             for name in required_isolation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current isolation content '+name)
             for name in required_p4:
@@ -107,7 +128,9 @@ def main():
             ast.parse(data,filename=name,feature_version=(3,10))
             require(b'/home/ecs-user/' not in data and b'workspace/DataSpace' not in data,artifact.name+': no host path '+name)
         for name,data in members.items():
-            if name.startswith('configs/'):
+            if name == 'configs/env.sh.example':
+                require(b'EVIWEAVE_API_KEY=""' in data and b'/home/' not in data and b'api.env' not in data, artifact.name+': environment template has no credential values')
+            elif name.startswith('configs/'):
                 require(b'example.invalid' in data and b'/home/' not in data and b'api.env' not in data,artifact.name+': template endpoint only')
         archives.append({'name':artifact.name,'sha256':digest(artifact.read_bytes()),'file_count':len(members)})
     import dataspace_baselines

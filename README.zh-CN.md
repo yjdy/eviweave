@@ -6,6 +6,63 @@
 
 P0 基线核验和 P1 独立提取已通过；P2 提供历史运行时移植、锁定版本工作台构建、离线检查和合成沙箱执行。P3 提供离线行为回归、冻结参考对照和历史沙箱检查；P4 提供本地实验附件整理、精选轨迹脱敏和冻结离线评分；公开发布留在 P5。正式技术报告延后。
 
+## 统一实验流程
+
+保留仓库或源码发行包，先执行安装，再编辑一个私有环境脚本：
+
+```sh
+./scripts/install.sh
+# 编辑 .local/env.sh：设置专用 EVIWEAVE_API_KEY 及所需路径
+source scripts/env.sh
+./scripts/experiment.sh check --tasks 33
+```
+
+安装默认使用现有 CPython 3.12.3 创建项目内 `.venv-experiment`；3.13.16为独立兼容profile。
+`EVIWEAVE_BOOTSTRAP_PYTHON`可指定已有的对应解释器，`EVIWEAVE_PYTHON`指定项目内`.venv*`目标。
+安装器按[精确版本和摘要锁](locks/README.md)准备Python包，保留已有配置，不需要key或数据，
+不下载Codex、不构建Workbench。现有环境内容或版本不符时失败，不删除重建。
+默认模型配置为`.local/config-v6/codex.yaml`，数据为`data/DataSpace-Benchmark`，
+评分副本为`.local/evaluation-v6-public60`。首次生成的模型配置使用占位端点，需自行配置V6端点。
+运行时缺失时按下文显式准备历史副本；重建Workbench有内容差异，需要另建profile与实验目录。
+锁定的宿主OS/内核、解释器、依赖及运行时不匹配时在模型调用前停止。
+
+`.local/env.sh`首次创建权限600，不覆盖既有文件，也不将终端key自动写入。
+优先级为命令行、私有脚本非空值、已有环境变量、项目默认值；环境默认路径按项目根解析，
+命令行相对路径按当前目录解析。加载器不修改shell启动文件或调用者选项，不显示key。
+`check`不请求模型；缺key或本地材料时报错，key存在也不代表服务鉴权通过。
+
+下面的 **run会发起真实推理并产生费用**，默认公开60题，仅在确定实验范围后执行：
+
+```sh
+./scripts/experiment.sh run
+./scripts/experiment.sh run --tasks 33 35 --repeat 3 --output .audit/my-experiment
+./scripts/experiment.sh run --scope all --output .audit/full-experiment
+./scripts/experiment.sh run --resume --output .audit/my-experiment --yes
+./scripts/experiment.sh verify --experiment .audit/my-experiment
+./scripts/experiment.sh verify --experiment .audit/my-experiment --output .audit/my-validation
+```
+
+`--scope public60|all`与`--tasks`互斥；默认repeat为1，任务去重排序，并发沿用YAML，同题各轮不重叠。
+新run创建不可变计划；已有非空目录先核对身份并确认，默认否，非交互需`--yes`。
+输出限项目内、拒绝链接和受保护目录，使用独占锁；自定义实验目录登记本地Git排除。
+每次尝试的日志和预测保留在`tasks/task_N/run_K/`，当前答案位于`predictions/`。
+新尝试启动后旧答案退出当前选择，新尝试失败则当前答案缺失，历史结果保留。
+
+`--resume`仅恢复最近计划，不能同时更改配置、数据、选题或repeat。
+未启动、中断、超时、输出预算耗尽、运行失败、无预测或非法/损坏预测各重试一次；
+正常提交但gold评分错误的项目跳过；仅归集副本缺失则修复副本。
+全部正常提交后再次resume不需要key且零调用。普通失败继续，结构化鉴权/配额错误和
+确认的全局环境故障停止；SIGINT/SIGTERM/SIGHUP取消在途任务、保留进度并自动验证。
+
+每次验证保留独立报告版本，根目录`summary.json`、`score.json`、`summary.csv`为最新副本，
+三份文件带相同report_id；再次verify可以重建缺失报告。
+验证不需要key、原数据、原配置或模型运行时，使用实验内独立评分副本；运行期间拒绝独立verify。
+当前计划公开题的不同ID构成准确率分母，缺预测仍计入，repeat不增加分母；410题有60题公开评分，
+其余350题未评分。历史尝试、当前答案和当前计划分开统计。
+用量逐原始字段求和，缺失为null并报告覆盖率，金额未计算。
+退出0表示操作完整完成（答案可以错误），1表示执行/完整性/评分/报告失败，2表示参数或材料不足，130表示中断。
+独立verify可成功报告已有执行失败，不因此重新请求模型。
+
 ## 官方评估
 
 EviWeave V6 在 DataSpace 官方全量评估中答对 **333/410 题，Task Accuracy 为 81.22%**。截至 **2026-10-22**，与 Jitto Build + Claude Opus 5.5 **并列第一**，见[官方榜单](https://dataspace-bench.github.io/#leaderboard)。
@@ -21,7 +78,7 @@ EviWeave V6 在 DataSpace 官方全量评估中答对 **333/410 题，Task Accur
 
 独立的本地公开子集结果为**首轮 44/60、恢复后 45/60**，来源和选择政策见[来源说明](provenance/README.zh-CN.md)。官方榜单已于 2026-10-22 重新核对；以上为历史提交成绩，本次整理未重新推理或重跑评测。
 
-## 安装与检查
+## 底层安装与兼容入口
 
 需要 Python 3.10+，唯一 Python 运行依赖为 `PyYAML>=6,<7`。在项目根目录安装，也可安装 `dist/` 内构建的 wheel：
 

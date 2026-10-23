@@ -6,6 +6,72 @@ Historical `relation-v6 + simple-fixes-v1 + Codex` baseline, prepared by **è¢ç
 
 P0 baseline verification and P1 extraction passed. P2 provides historical runtime migration, a locked workbench build, offline checks and synthetic sandbox execution. P3 adds offline behavior regression, frozen-reference comparison and historical sandbox checks; P4 provides local experiment-attachment preparation, selected-trace redaction and frozen offline scoring; public release remains P5 work. The formal technical report is deferred.
 
+## Unified experiment workflow
+
+Keep the repository or source archive. Install, edit the private environment file, then check:
+
+```sh
+./scripts/install.sh
+# Edit .local/env.sh: dedicated EVIWEAVE_API_KEY and optional paths
+source scripts/env.sh
+./scripts/experiment.sh check --tasks 33
+```
+
+The installer creates project-local `.venv-experiment` using existing CPython 3.12.3;
+CPython 3.13.16 has a separate compatibility profile. `EVIWEAVE_BOOTSTRAP_PYTHON` selects
+an existing matching interpreter; `EVIWEAVE_PYTHON` selects a project-local `.venv*` target.
+[Exact dependency and environment locks](locks/README.md) prevent implicit upgrades.
+Installation preserves private configuration, needs no key/data, and never downloads Codex or builds Workbench.
+An incompatible existing environment is rejected without replacement.
+Defaults are `.local/config-v6/codex.yaml`, `data/DataSpace-Benchmark`, and `.local/evaluation-v6-public60`.
+A newly initialized YAML has a placeholder endpoint: configure the V6 Responses endpoint yourself.
+Prepare missing historical runtimes explicitly as described below. Rebuilt Workbench has content differences
+and requires a separate profile and experiment directory. Host OS/kernel, Python, dependencies and runtime
+mismatches stop execution before model calls.
+
+The first `.local/env.sh` has mode600; existing files are preserved and inherited keys are never persisted.
+Precedence: CLI, nonempty private settings, inherited environment, project defaults.
+Default paths resolve from the project; CLI relative paths resolve from the current directory.
+The loader leaves shell startup files/options alone and does not print keys.
+`check` makes no model request; missing keys/materials fail, and a visible key does not authenticate service access.
+
+**run makes real model calls and can incur charges**. Its default is the public60 set:
+
+```sh
+./scripts/experiment.sh run
+./scripts/experiment.sh run --tasks 33 35 --repeat 3 --output .audit/my-experiment
+./scripts/experiment.sh run --scope all --output .audit/full-experiment
+./scripts/experiment.sh run --resume --output .audit/my-experiment --yes
+./scripts/experiment.sh verify --experiment .audit/my-experiment
+./scripts/experiment.sh verify --experiment .audit/my-experiment --output .audit/my-validation
+```
+
+`--scope public60|all` and `--tasks` are exclusive. Repeat defaults to1; IDs are deduplicated/sorted.
+Concurrency comes from YAML; repetitions of the same task never overlap.
+Each new run creates an immutable plan. Reusing a nonempty directory checks identity and asks for confirmation
+(default no); noninteractive reuse requires `--yes`. Outputs stay inside the project, reject links/protected
+paths, and use an exclusive lock. Custom experiment paths are added to local Git exclusions.
+All attempts remain under `tasks/task_N/run_K/`; `predictions/` contains current answers.
+Each newly started attempt replaces the task's current selection; failure leaves its current answer missing.
+
+Resume restores the latest plan, configuration and data; scope/tasks/repeat overrides are rejected.
+Unstarted, interrupted, timed-out, budget-exhausted, failed or missing/invalid/damaged predictions receive
+at most one new attempt per resume. Submitted but incorrectly scored answers are skipped. Missing collected
+copies are repaired from intact originals. Fully submitted resume needs no API key and makes zero calls.
+Ordinary task failures continue; structured authentication/quota errors and confirmed global environment
+failures stop dispatch. SIGINT/SIGTERM/SIGHUP cancel active work, preserve progress, and trigger verification.
+
+Each verification retains a report version and refreshes `summary.json`, `score.json`, `summary.csv` with one
+report_id. Re-run verify to rebuild missing reports. Offline verification needs no key, original data/config,
+or model runtime; it uses the experiment's independent frozen evaluator resources and refuses concurrent runs.
+Accuracy counts distinct public task IDs in the active plan, including missing predictions; repeats do not
+increase the denominator. For all410, public60 are scored and350 remain unscored. History, current answers,
+and active-plan progress are separate. Raw token fields are summed separately, missing values stay null with
+coverage counts, and monetary amounts are not calculated.
+Exit0 means complete operation, even with wrong answers;1 means execution/integrity/scoring/report failure;
+2 means invalid arguments or missing materials;130 means interruption. Offline verify can successfully report
+existing execution failures without retrying them.
+
 ## Independent configuration and resources
 
 Use the historical V6 Responses endpoint and `qwen3.8-flash` model with an EviWeave-dedicated API key. **Users must set `EVIWEAVE_API_KEY` themselves**; never store it in YAML or borrow DataSpace's credential file. The standalone wrapper accepts only that key variable, with no provider-key fallback. The public offline template keeps its invalid placeholder endpoint; the actual endpoint belongs in a private configuration.
@@ -83,7 +149,7 @@ This historical entry corresponds to the V6 baseline released here: Codex CLI 0.
 
 The separate local public subset scored **44/60 initially and 45/60 after recovery**. See [provenance and selection details](provenance/README.zh-CN.md). The leaderboard was rechecked on 2026-10-22; these are historical submission results, with no new inference or benchmark rerun during packaging.
 
-## Installation and checks
+## Low-level package installation and compatible commands
 
 Python 3.10+ is required. The only runtime Python dependency is `PyYAML>=6,<7`. Install from the project root (or install the wheel generated in `dist/`):
 

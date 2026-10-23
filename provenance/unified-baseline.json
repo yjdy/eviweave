@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "scope": "Unified workflow overlay after a16f4b8; prior records retained",
+  "production_files": 22,
+  "protected_files": 17,
+  "files": [
+    {
+      "destination": ".github/workflows/offline.yml",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "f35332a594c96139106d7ae00d0a0202564610c4f0bb9fee31fd5bbfb1a4aaea",
+      "release_sha256": "6ebc9cebb29cb23bb2c80dc86d7f381476e976979604f5033ccaf85fbc9b8593",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "fc831dd9ed9a6b5a080ed80d5a3c2a51a175125493932a9f51f390547072cc0b",
+      "release_sha256": "f9ff3dd2d2bce1da4572e74891dbdacbff266d53b945d5dd10f7cd4194c130e8",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "12a77de156a9a41a43b0204ea584efa80001886cd160b52ee782d97e5d7307f9",
+      "release_sha256": "5d616a451057bca57d3908fb1f513cd32638a1ddf7416e221be78a879967efd7",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "e7caee90e5eb558273f82ff13203eb668e2d025d6da167c0e62bae7592386eb7",
+      "release_sha256": "8ea5392dff946d9505d40a6d7e67975f91d8534ddf40b5390471829b61116729",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "a162d341f1ff74dba80945b94c72a5b185b656d7ee4a1e2a61e93f50f60e0d5d",
+      "release_sha256": "eae34bc849c44cfc3bbc799f83fd3914c6658cf04651967f76aed9178b09f4b3",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "configs/env.sh.example",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "a270560ff61816ae7a01f2555af144015da3c6f423188eb26abc91da0195da0d",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/README.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "7d04ad30bf61f7a2625789018499e417e7d7f7ec1d31faae9a3cdde1fcc2898e",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/ci-tools.txt",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "92809becdb9aa55c0a41efe71ea3ffc83cc2fbd97201b716948b18bc9b64129e",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/cpython312-linux-x86_64.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "e09f6c398fc3afaf7668ceee0219361b54ce8a1e150ba51102afd6e2bcb0e70a",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/cpython312-linux-x86_64.txt",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "e6cfe020e3edf566cb6d921669ae99195b6e0a46b562dfe429f7febeed1652dd",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/cpython313-linux-x86_64.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "9cae30cc129c931964da53d614c747dbb246fde7d856f8ea12b4c44263f62042",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "locks/cpython313-linux-x86_64.txt",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "f1d9be95c90d3985859d356eb732508c62190dfb80e3fd3fd2dc429c752dc42b",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "provenance/unified.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "ade225067e479adec30155c17d36017ba488d4ecad7fe9ac42f04247c70011c2",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "scripts/env.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "6a88db059efae207a0259351871194c6695d1f05d9c8c92b75f7b77af22c3642",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "scripts/experiment.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "091c8cfb61d475c650536291c9ea71876a0005e6347a9ea2077babb4bc4bac92",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "scripts/install.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "b43ade49f6abd717ed06e9b24979f0cd4f15f09af4773af23489a8524e11407d",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tests/test_unified_experiment.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "b098eb68849b651b4712feffb70d4e1ef7c9448ca5fe05a8986606e10305f1df",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/ci_check.py",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "d0a7a278a96072de1a8bae2cacec640d9b013d91a988c4f9f23eb6ad74f538c3",
+      "release_sha256": "90edd44862dfc03094c3b04413dc05d6e4286f7beb9e78c3c01ef0255679f94c",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/environment_lock.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4a0062d02e3c0cfda3cecc1724b7d55b47f35fa0aa77d482b3bf29aa2a9dc21a",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "edb1c78d1845e3c968cd289cc62f6d53cdf25ecb8f2db29316715ee2a19b99c3",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "c5b075e594e7a209cd389c03c42e7da3707ddd1196ea5366dce221d51b146734",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/experiment_scheduler.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "4156d2929528f2d8a62f3d4df3e344e666a82f587808894ea557de3098182e84",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/experiment_store.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "a874a61f9362c7e8efd478eb7734a1e158c285e1dd27590b954a5660fd53fb1c",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/experiment_verify.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "f17c2b8dd2d6b089da3052d8dae6c54b98ea40edc6217492759046504cb92f30",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/install_environment.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "0eef249bfd7f60a263c9923dc73fea674b63634b15485f672fd721a4279c1b5b",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/unified_smoke.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "release_sha256": "66e27815fab7b429dd6732ad40e3a5c3d9d9f7c1ee5a75d1fd318295a23b1c3a",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "a16f4b82d0b42ff1fbff5eb6175b6542ad66a059",
+      "source_sha256": "5c94714b6b9571589dc3ea573d5ba50dd80989273e5a8a4f54b5593e0c9025c3",
+      "release_sha256": "e00ea34efba5f300c8dc941dffa5ddb297096256685233baa88416843fedf302",
+      "reason": "Unified outer experiment installation, exact environment/dependency locks, durable scheduling/resume, offline scoring/reporting and handwritten acceptance; frozen business modules unchanged"
+    }
+  ]
+}

@@ -17,7 +17,11 @@ PROJECT = Path(__file__).resolve().parents[1]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument("--locked", action="store_true", help="also require this host to match the reproduction/compatibility profile")
     args = parser.parse_args()
+    if args.locked:
+        from environment_lock import verify
+        verify(runtime=False)
     output = safe_output(args.output_root)
     output.mkdir(parents=True)
     env = environment(output)
@@ -42,6 +46,10 @@ def main():
         )
         assert p.returncode == 0, name
 
+    def prepare_python(py, name):
+        run([sys.executable, '-B', '-m', 'pip', '--python', str(py), 'install',
+             '--only-binary=:all:', '--require-hashes', '-r', str(PROJECT / 'locks/ci-tools.txt')], name)
+
     report = {
         "status": "FAIL",
         "python": sys.version,
@@ -56,6 +64,7 @@ def main():
             "ordinary-venv",
         )
         py = ordinary / "bin/python"
+        prepare_python(py, "ordinary-locked-tools")
         run(
             [
                 sys.executable,
@@ -65,6 +74,7 @@ def main():
                 "--python",
                 str(py),
                 "install",
+                "--no-build-isolation", "--no-deps",
                 str(PROJECT),
             ],
             "ordinary-install",
@@ -86,7 +96,7 @@ def main():
                 "-B",
                 "-m",
                 "build",
-                "--sdist",
+                "--sdist", "--no-isolation",
                 "--outdir",
                 str(archives),
                 str(PROJECT),
@@ -112,7 +122,7 @@ def main():
                 "-B",
                 "-m",
                 "build",
-                "--wheel",
+                "--wheel", "--no-isolation",
                 "--outdir",
                 str(archives),
                 str(source),
@@ -125,6 +135,7 @@ def main():
             "wheel-venv",
         )
         py = install / "bin/python"
+        prepare_python(py, "wheel-locked-tools")
         run(
             [
                 sys.executable,
@@ -133,7 +144,7 @@ def main():
                 "pip",
                 "--python",
                 str(py),
-                "install",
+                "install", "--no-deps",
                 str(next(archives.glob("*.whl"))),
             ],
             "wheel-install",

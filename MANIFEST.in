@@ -19,3 +19,5 @@ prune .venv
 prune dist
 prune build
 global-exclude __pycache__ *.py[cod] .env *.env
+include configs/env.sh.example
+recursive-include locks *.json *.txt *.md
