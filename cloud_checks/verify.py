@@ -77,7 +77,7 @@ class Check:
  def units(self,name,path):
   if not path.is_file():self.errors.append(name+'-result-missing');return
   x=json.loads(path.read_text());bad=[{'case':v['case'],'status':v['status'],'reason_last_line':v.get('reason','').splitlines()[-1:] } for v in x['cases'] if v['status']!='PASS']
-  self.report[name]={'status':x['status'],'tests':x['tests'],'skips':sum(v['status']=='SKIP' for v in x['cases']),'nonpassing_cases':bad}
+  self.report[name]={'status':x['status'],'tests':x['tests'],'discovered':x.get('discovered',x['tests']),'not_applicable':x.get('not_applicable',[]),'unsupported_profile_rejection_checks':x.get('unsupported_profile_rejection_checks',0),'skips':sum(v['status']=='SKIP' for v in x['cases']),'nonpassing_cases':bad}
   if x['status']!='PASS' or bad:self.errors.append(name)
 
 
@@ -161,21 +161,46 @@ def matrix(c):
  tools=c.out/'tools-env';c.run('tool-venv',[sys.executable,'-m','venv',tools]);py=tools/'bin/python'
  c.run('locked-ci-dependencies',[py,'-m','pip','install','--only-binary=:all:','--require-hashes','-r',c.root/'locks/ci-tools.txt'])
  c.run('source-ordinary-install',[py,'-m','pip','install','--no-build-isolation','--no-deps',c.root])
- c.run('source-unit',[py,'-B','tools/run_regression.py','--suite','unit','--output-root','.audit/cloud/source-unit'],extra={'PYTHONPATH':str(c.root/'src')},soft=True)
+ if sys.version_info[:2]==(3,10):
+  c.run('source-unit',[py,'-B',CONTROL/'cloud_checks/unit_scope.py','--project',c.root,'--output',c.out/'source-unit/unit-results.json'],extra={'PYTHONPATH':str(c.root/'src')},soft=True)
+ else:
+  c.run('source-unit',[py,'-B','tools/run_regression.py','--suite','unit','--output-root','.audit/cloud/source-unit'],extra={'PYTHONPATH':str(c.root/'src')},soft=True)
  c.units('source_unit',c.out/'source-unit/unit-results.json')
- c.run('complete-ci',[py,'-B','tools/ci_check.py','--output-root','.audit/cloud/rebuilt-ci'],timeout=1500,soft=True)
+ if sys.version_info[:2]==(3,10):
+  package_ci310(c,py)
+ else:
+  c.run('complete-ci',[py,'-B','tools/ci_check.py','--output-root','.audit/cloud/rebuilt-ci'],timeout=1500,soft=True)
  rebuilt=c.out/'rebuilt-ci';
  if (rebuilt/'ci-report.json').exists():c.report['rebuilt_ci']={k:v for k,v in json.loads((rebuilt/'ci-report.json').read_text()).items() if k in ('status','python')}
  for p in (rebuilt/'unpacked').glob('*/.audit/unit/unit-results.json'):c.units('rebuilt_installed_unit',p)
  for label,package,unit_source in [('original-wheel',c.assets/'eviweave-0.1.0-py3-none-any.whl',c.root),('original-sdist',unpacked,unpacked)]:
-  venv=c.out/(label+'-env');c.run(label+'-venv',[sys.executable,'-m','venv','--without-pip',venv]);ip=venv/'bin/python'
+  venv=(unit_source/'.audit/cloud-install-env') if label=='original-sdist' else c.out/(label+'-env');c.run(label+'-venv',[sys.executable,'-m','venv','--without-pip',venv]);ip=venv/'bin/python'
   c.run(label+'-locked-tools',[py,'-m','pip','--python',ip,'install','--only-binary=:all:','--require-hashes','-r',c.root/'locks/ci-tools.txt'])
   c.run(label+'-install',[py,'-m','pip','--python',ip,'install','--no-build-isolation','--no-deps',package])
   c.run(label+'-installation-check',[ip,'-B',unit_source/'tools/check_installation.py','--output',c.out/(label+'-install.json')])
   output=unit_source/'.audit'/('cloud-'+label+'-unit')
-  c.run(label+'-unit',[ip,'-B',unit_source/'tools/run_regression.py','--suite','unit','--output-root',output],soft=True)
+  if sys.version_info[:2]==(3,10):
+   c.run(label+'-unit',[ip,'-B',CONTROL/'cloud_checks/unit_scope.py','--project',unit_source,'--output',output/'unit-results.json'],soft=True)
+  else:
+   c.run(label+'-unit',[ip,'-B',unit_source/'tools/run_regression.py','--suite','unit','--output-root',output],soft=True)
   c.units(label.replace('-','_')+'_unit',output/'unit-results.json')
  c.report['archive_rebuild_policy']='Cloud build outputs are validation only; original release assets remain unchanged'
+
+
+def package_ci310(c,py):
+ """Equivalent ordinary-install and sdist→wheel checks with explicit 3.10 scope."""
+ root=c.out/'rebuilt-ci';root.mkdir();archives=root/'archives';archives.mkdir()
+ v=root/'ordinary-env';c.run('ordinary-venv',[sys.executable,'-m','venv',v]);ip=v/'bin/python'
+ def tools(p,name):c.run(name,[py,'-m','pip','--python',p,'install','--only-binary=:all:','--require-hashes','-r',c.root/'locks/ci-tools.txt'])
+ tools(ip,'ordinary-locked-tools');c.run('ordinary-install',[py,'-m','pip','--python',ip,'install','--no-build-isolation','--no-deps',c.root]);c.run('ordinary-check',[ip,'-B',c.root/'tools/check_installation.py','--output',root/'ordinary-install.json'])
+ c.run('sdist-build',[py,'-m','build','--sdist','--no-isolation','--outdir',archives,c.root]);unpacked=root/'unpacked';unpacked.mkdir()
+ with tarfile.open(next(archives.glob('*.tar.gz'))) as tar:
+  for m in tar.getmembers():assert not PurePosixPath(m.name).is_absolute() and '..' not in PurePosixPath(m.name).parts and not m.issym() and not m.islnk()
+  tar.extractall(unpacked)
+ source=next(unpacked.iterdir());c.run('wheel-from-sdist',[py,'-m','build','--wheel','--no-isolation','--outdir',archives,source]);v=root/'wheel-env';c.run('wheel-venv',[sys.executable,'-m','venv',v]);ip=v/'bin/python';tools(ip,'wheel-locked-tools')
+ c.run('wheel-install',[py,'-m','pip','--python',ip,'install','--no-deps',next(archives.glob('*.whl'))]);c.run('wheel-check',[ip,'-B',c.root/'tools/check_installation.py','--output',root/'wheel-install.json'])
+ c.run('rebuilt-installed-unit',[ip,'-B',CONTROL/'cloud_checks/unit_scope.py','--project',source,'--output',source/'.audit/unit/unit-results.json'],soft=True)
+ write(root/'ci-report.json',{'status':'PASS' if not c.errors else 'FAIL','python':sys.version,'scope':'complete CPython3.10 package scope; seven3.12/3.13-host cases explicitly not applicable, verified on both full-runtime jobs'})
 
 
 def runtime(c):
@@ -201,6 +226,8 @@ def runtime(c):
   p=shutil.which(name,path=c.env['PATH']);assert p,'required hosted tool missing: '+name
   host[name]={'sha256':sha(p),'version':subprocess.check_output([p,'--version'],text=True).strip()}
  c.report['host_tools']=host
+ ns=Path(os.environ['GITHUB_WORKSPACE'])/'.audit/namespace-host/receipt.json'
+ if ns.exists():c.report['host_prerequisite_namespace']=json.loads(ns.read_text())
  blocks=__import__('re').findall(r'```sh\n(.*?)```',(c.root/'README.md').read_text(),__import__('re').S)
  prep=next(b for b in blocks if b.startswith('mkdir -p .audit/tmp'))
  script=c.out/'readme-prepare.sh';script.write_text(prep+'\n');c.run('readme-public-preparation',['bash','-e',script],timeout=5400)
