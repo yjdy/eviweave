@@ -3,6 +3,7 @@ on:
   push:
     branches: ['codex/p5-cloud-checks']
 permissions:
+  actions: read
   # Draft Release access requires push access; this harness only reads its assets.
   contents: write
 jobs:
