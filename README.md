@@ -1,226 +1,305 @@
-# EviWeave — Evidence-Guided Data Agents
+# EviWeave
 
-[简体中文](README.zh-CN.md)
+**Data agents that find evidence in local workspaces, perform analysis, and deliver verifiable results.**
 
-EviWeave runs data analysis tasks over heterogeneous local workspaces: inspect evidence, execute analysis in a sandbox, and submit a lossless CSV. This first version preserves the historical **relation-v6 + simple-fixes-v1** baseline with **Codex 0.145.0**, **Qwen3.8-Flash** and the **Responses** protocol. It includes explicit resource preparation, environment profiles, experiment run/resume, offline verification and offline cost analysis.
+[简体中文](README.zh-CN.md) · [Experiments](EXPERIMENTS.md) · [Download](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)
 
-**v0.1.0 is pending release.** Documentation preparation is complete; final clean-checkout acceptance, final commit/build binding and online publication remain pending. See [experiments](EXPERIMENTS.md), [release notes](RELEASE_NOTES.md), [candidate assets](provenance/release-assets.json) and [roadmap](ROADMAP.md). EviWeave Controlled is future work outside this release.
+## 1. About the project
 
-## Support and distribution scope
+Practical data analysis often combines tables, databases, long documents, and multimedia. EviWeave organizes these materials into independent tasks. An agent inspects evidence, performs analysis in an isolated workbench, and returns a complete CSV result.
 
-| Scope | Supported / verified boundary |
+The project provides:
+
+- **Evidence-guided analysis**: discover, extract, join, and compute over task-local materials.
+- **Isolated execution**: a fixed tool workbench and sandbox limit accessible files and the execution environment.
+- **Experiment management**: single-task and batch runs, interruption recovery, and prediction collection.
+- **Offline verification**: check prediction integrity and evaluate saved answers against frozen scoring materials.
+- **Offline cost analysis**: import usage or billing evidence, then calculate and reconcile costs using reviewed pricing.
+
+### DataSpace results
+
+The first release publishes the historical V6 method and reproduction materials. Its official DataSpace leaderboard name is **codex-controlled + Qwen3.8-Flash**.
+
+| Result | Score | Meaning |
+|---|---:|---|
+| Historical official full-benchmark evaluation | **333/410, 81.22%** | Evaluated on 2026-10-21; tied first when checked on 2026-10-24 |
+| Historical public-set first pass | **44/60** | Preserved initial run record |
+| Historical public set after fixed recovery | **45/60** | Offline scoring of the fixed historical prediction selection |
+
+See the [DataSpace leaderboard](https://dataspace-bench.github.io/#leaderboard) for official results. Rankings change; the table records a dated historical observation.
+
+**v0.1.0 was released on 2026-10-24.** It freezes the historical `relation-v6 + simple-fixes-v1` baseline with Codex **0.145.0**, **Qwen3.8-Flash**, and the Responses protocol. EviWeave Controlled will be developed separately and is outside this release. The historical leaderboard name and the future Controlled implementation are recorded separately.
+
+Public materials allow verification of historical predictions and the public-set score. Calling the model again creates a new experiment. No immutable service snapshot of the historical model was saved, so a new run is not guaranteed to reproduce the same answers or achieve 81.22% again.
+
+### This guide and the released version
+
+This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. Scripts explicitly marked “planned” below are not currently provided.
+
+## 2. Installation and preparation
+
+Start with the **v0.1.0 source checkout or source distribution**. A wheel supplies the business package and the `eviweave` / `dataspace-baselines` CLI aliases. Full reproduction also needs the scripts, resource locks, and verification tools in the source distribution. Download from the [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0); this project has not been published to PyPI.
+
+### 2.1 Environment preparation
+
+The full workflow requires:
+
+| Dependency | Requirement |
 |---|---|
-| Full sandbox workflow | Linux x86_64; Docker/dockerd, containerd, Bubblewrap and permission to create required namespaces/mounts; project-local Docker storage, no system socket |
-| Independent host profiles | CPython 3.12 / 3.13; actual patch version, interpreter bytes, ABI, OS/kernel and host tools are measured and checked |
-| Local acceptance | CPython 3.12.3 and 3.13.16 on one physical host; 228 source and 228 installed tests per version in P5.2 |
-| Package metadata | Python >=3.10, PyYAML>=6,<7; Python 3.10 execution and hosted CI remain unverified; CI configuration is not a passing hosted run |
-| Other platforms | macOS, Windows, ARM and arbitrary kernels have not been accepted |
-| Wheel | 22 whitelisted business modules, metadata and two CLI aliases: `eviweave`, `dataspace-baselines` |
-| Source checkout / sdist | Also supplies `scripts/`, `tools/`, locks, synthetic examples and public documentation; needed for the workflow below |
+| Operating system | Linux x86_64 |
+| Python | CPython 3.12 or 3.13 for the full environment |
+| Host tools | Docker/dockerd, containerd, Bubblewrap |
+| Permissions | Required namespace and mount capabilities, plus passwordless permission for the project-local daemon launcher |
+| Model service | A compatible HTTPS Responses endpoint and dedicated API key for real experiments |
 
-Installing a wheel alone does not provide repository tools, datasets or runtimes. A package-only user may install a locally obtained wheel in a project-local venv with `python -m pip install /project/path/eviweave-0.1.0-py3-none-any.whl`, then use `eviweave --help`; the locked source workflow below is the reproduction path. No PyPI publication is claimed.
+Cloud acceptance covered the full applicable checks on CPython **3.12.3 and 3.13.16**, and applicable package checks on **3.10.22**. Python 3.10 results do not establish support for the full workbench workflow. macOS, Windows, and ARM have not been accepted.
 
-The two original exact [profiles](locks/README.md) register the verified host on 2026-10-23, not the historical V6 machine. An independent public rebuild has its own full file inventory and identity. Matching 329 system packages, 21 Python packages and TOOLS does not prove historical rootfs equality. Historical runtime imports remain optional and require their original inventories; no private binary/rootfs download is offered.
+Prepare the environment in four steps:
 
-## Installation and resource preparation
+1. Obtain the source and select the `v0.1.0` tag as the reproduction baseline.
+2. Have a developer or administrator install the host dependencies above.
+3. Follow the [existing environment preparation steps](provenance/public-preparation.md) to download fixed resources, build the workbench, collect and check a host profile, then install through `scripts/install.sh`.
+4. Follow the same reference to create a separate offline configuration and run the offline doctor and synthetic checks before configuring model access.
 
-Run from the source root, using the intended CPython 3.12 or 3.13 as `python3` throughout collection and bootstrap. Initial preparation needs only the Python standard library plus the host tools above. All downloads, temporary files, HOME, environments and Docker/containerd state must stay inside this project. Targets must be new and disjoint; keep sufficient disk space for artifacts, Docker vfs layers and exported rootfs. The dataset ZIP is 2,878,651,222 bytes; its extracted contents total 15,010,873,064 bytes, before runtime/build storage.
+> **Planned:** `scripts/prepare_environment.sh` will wrap the existing resource preparation, profile collection, and installation tools. This script does not exist yet; use the actual steps linked above.
 
-These commands download public resources and build a separate workbench. They do not invoke a model. `workbench` requires passwordless permission for the project-local daemon launcher; it does not install missing host system tools.
+The planned script will combine:
 
-```sh
-mkdir -p .audit/tmp .audit/cache .local/profiles
-export TMPDIR="$PWD/.audit/tmp"
-export XDG_CACHE_HOME="$PWD/.audit/cache"
-export PYTHONDONTWRITEBYTECODE=1
-python3 -B tools/public_resources.py codex --target .runtimes/public
-python3 -B tools/public_resources.py workbench --target .runtimes/public/workbench \
-  --storage .runtimes/public-build
-python3 -B tools/public_resources.py evaluation --target .local/evaluation-v6-public60
-python3 -B tools/host_profile.py collect --name public-host \
-  --codex-root .runtimes/public/codex-0.145.0/platform-package \
-  --workbench-root .runtimes/public/workbench --output .local/profiles/public-host.json
-python3 -B tools/host_profile.py check --profile .local/profiles/public-host.json \
-  --output .audit/public-profile-check
-./scripts/install.sh --python "$PWD/.venv-experiment/bin/python" \
-  --environment-profile .local/profiles/public-host.json
-.venv-experiment/bin/eviweave --help
-.venv-experiment/bin/dataspace-baselines --help
-```
+- Checks for platform, Python, host tools, and required permissions.
+- Codex and workbench dependency downloads authenticated against public resource locks.
+- An independent workbench build with recorded host and runtime identities.
+- Creation of the project virtual environment and locked dependency installation.
+- Offline configuration generation and checks without model calls.
 
-The installer authenticates exact dependency wheels and contents before using locked pip, then installs the package. PyYAML is not required by the bootstrap interpreter. A repeated installation validates the same profile; it does not upgrade or overwrite a conflicting venv. An existing `.local/config-v6/codex.yaml` is preserved. For a fresh installation it is generated with selected runtime paths and `https://example.invalid/v1`.
+Existing preparation tools do not automatically install system tools, overwrite existing configuration, or call a model. A profile records the environment actually rebuilt on this host; it does not identify the original historical experiment machine. Collecting and checking a profile does not activate it: selection must be explicit when running.
 
-Resource URLs, full revisions, lengths and hashes are fixed in [the public resource lock](provenance/public-resources-lock.json). The evaluator is pinned to GitHub `6491caa4c70cc06cacb6103ba73cefb00746abfe`; dataset/scoring members to Hugging Face `96be19257d7aa251dbce4771d46a26fc36f6dc52`. Evaluation preparation fetches 120 ZIP members plus the evaluator and checks the original 121-file lock without downloading all task data. Full data preparation is separate:
+All downloads, HOME, caches, temporary files, and Docker/containerd storage stay inside the project, without using the system Docker socket. Allow space for workbench builds and exports. After checking, stop the project daemon as described in the [preparation reference](provenance/public-preparation.md); restart with the same storage when image checks are needed.
 
-```sh
-python3 -B tools/public_resources.py dataset --target data/DataSpace-Benchmark
-.venv-experiment/bin/python -B tools/standalone.py verify-evaluation \
-  --evaluation-root .local/evaluation-v6-public60
-```
+### 2.2 Data preparation
 
-Full ZIP SHA-256 must be `68f221fafcf0b50396eca55f8298af1ad73d586a6cac6995916afca535a560af` before extraction. The dataset root contains `input/task_N/task.json` and `input/task_N/context/`; `--dataset` takes the parent of `input/`. Existing complete data may be reused after verification; the tool refuses a conflicting destination. Nothing discovers neighbouring DataSpace directories or reads their credentials.
+Prepare DataSpace task data and scoring materials separately:
 
-`artifacts --cache ...` can fetch the 329 exact debs and 21 workbench wheels without building. Cache entries are rehashed; corrupt cache is rejected rather than silently replaced. The fixed old `libexpat1` hash was observed from official HTTPS; its historical signed Packages entry was unavailable. The other 328 package hashes came from verified signed indices. This trust boundary is retained, not described as a verified historical Debian snapshot. See [preparation details](provenance/public-preparation.md).
+| Material | Purpose | Needed for |
+|---|---|---|
+| 121 frozen scoring files | Evaluate saved predictions | Offline scoring |
+| Complete task dataset | Supply questions and evidence to the agent | New model runs |
+| Historical evidence archive | Verify released predictions and historical results | Historical result verification |
 
-The build leaves the project-local daemon available for image checks. Use `python3 -B scripts/project_docker.py info --storage-root .runtimes/public-build`; stop it with `stop` instead of `info` after checks/runs. Restart with `start` using the same storage before later image checks. Do not substitute the system daemon.
+The complete task ZIP is about **2.88GB**, with about **15.01GB** of extracted content, before workbench and output storage. Verifying historical results requires neither the complete task dataset nor a model execution workbench.
 
-## Environment profiles and private configuration
+> **Planned:** `scripts/prepare_dataspace.sh` will offer explicit scoring-only and complete-task-data modes, reusing existing locked download and checksum tools, without downloading the complete dataset by default. For now, use the `evaluation` or `dataset` entry in the [scoring and data preparation steps](provenance/public-preparation.md), explicitly selecting the paths below.
 
-Collection writes a candidate; successful collection/check does not activate it. Explicit CLI selection wins over nonempty `.local/env.sh`, then inherited environment, then the original exact default. For shell wrappers, nonempty private values override inherited values; blank values inherit. The private file is created from [the template](configs/env.sh.example) on first wrapper use.
+Recommended directory conventions:
 
-Use the same settings throughout:
-
-| Setting | Value in this guide |
+| Directory | Contents |
 |---|---|
-| `EVIWEAVE_PYTHON` | `$PWD/.venv-experiment/bin/python` |
-| `EVIWEAVE_ENVIRONMENT_PROFILE` | `$PWD/.local/profiles/public-host.json` |
-| `EVIWEAVE_CONFIG` | `$PWD/.local/config-v6/codex.yaml` |
-| `EVIWEAVE_DATASET` | `$PWD/data/DataSpace-Benchmark` |
-| `EVIWEAVE_EVALUATION_ROOT` | `$PWD/.local/evaluation-v6-public60` |
-| `EVIWEAVE_API_KEY` | Dedicated key set by the user in the terminal; leave the private template blank to inherit |
+| `data/DataSpace-Benchmark/` | Complete task dataset, containing `input/` |
+| `.local/evaluation-v6-public60/` | Frozen scoring materials |
+| `.local/evidence-v6/` | Downloaded historical evidence assets |
+| `.local/profiles/` | Host environment profiles |
+| `.local/config-v6/` | Private execution configuration |
+| `.audit/` | Check records, experiment outputs, and reports |
 
-Review existing private settings before use. `EVIWEAVE_BOOTSTRAP_PYTHON` chooses the installer interpreter, not the target venv. `EVIWEAVE_AUDIT_ROOT` optionally locates preparation/check diagnostics inside the project. There is no `EVIWEAVE_BASE_URL` or `EVIWEAVE_DATASET_ROOT` setting for the unified wrapper; put the endpoint in YAML and use the settings above.
+Existing data can be reused after verification. Stop on a checksum mismatch or conflicting target and preserve the original material. Evaluator and dataset revisions are pinned in the [public resource lock](provenance/public-resources-lock.json); all 121 files are also checked against the [evaluation lock](provenance/evaluation-lock.json). Keep reference answers out of the solving workspace.
 
-For a new public runtime with an existing historical configuration, generate a **fresh** offline file, inspect its runtime paths, and deliberately select it. This does not overwrite `codex.yaml`:
+### 2.3 Model access configuration
+
+Offline verification and synthetic tests do not require an API key.
+
+Before running a real experiment:
+
+1. Set a compatible HTTPS Responses base address in `experiment.model.openai_base_url` in `.local/config-v6/codex.yaml`.
+2. Set the dedicated `EVIWEAVE_API_KEY` in your terminal.
+3. Review `.local/env.sh` and select the prepared host profile and data paths. Existing private configuration is preserved by design; runtime paths must match the selected profile.
+
+The unified entry uses these settings:
+
+| Setting | Purpose / convention in this guide |
+|---|---|
+| `EVIWEAVE_PYTHON` | Project-local `.venv-experiment/bin/python` |
+| `EVIWEAVE_ENVIRONMENT_PROFILE` | A collected and checked profile under `.local/profiles/` |
+| `EVIWEAVE_CONFIG` | `.local/config-v6/codex.yaml` |
+| `EVIWEAVE_DATASET` | `data/DataSpace-Benchmark/`, the parent of `input/` |
+| `EVIWEAVE_EVALUATION_ROOT` | `.local/evaluation-v6-public60/` |
+| `EVIWEAVE_API_KEY` | Dedicated key; blank private-template values can inherit the terminal value |
+
+Prefer absolute paths inside the project for path settings. Nonempty `.local/env.sh` values override inherited environment variables; explicit CLI arguments take precedence. The installation bootstrap interpreter is selected separately with `EVIWEAVE_BOOTSTRAP_PYTHON`.
+
+Do not put the API key in model YAML, task materials, or public logs. The project uses only the dedicated `EVIWEAVE_API_KEY` and does not search other projects for credentials. The service address must not embed credentials, a query, or a fragment.
+
+For V6 reproduction, retain the frozen model name, prompts, 32,768 output tokens, 983,616 context tokens, 1,800 seconds per task, and concurrency 1. See the [preparation reference](provenance/public-preparation.md) for environment and resource identities.
+
+<a id="unified-experiment-workflow"></a>
+
+## 3. Reproducing experiments with DataSpace
+
+Verify historical materials first, then decide whether to pay for a new experiment. Run from the source root; real-experiment commands below assume `.local/env.sh` has been configured as above.
+
+### 3.1 Verify historical results offline
+
+Download these assets from the [v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0):
+
+- `eviweave-v0.1.0-v6-evidence.zip`
+- `eviweave-v0.1.0-v6-evidence.zip.sha256`
+
+Place both under `.local/evidence-v6/`. The archive contains **410 predictions, 414 attempt summaries, a fixed selection record, and selected redacted traces for 5 tasks and 6 attempts**.
+
+> **Planned:** `scripts/verify_history.sh` will combine existing archive verification, extraction, and offline scoring tools. The current standard-library verifier is `tools/package_evidence.py verify`. Check the archive and external checksum before extraction, then score with frozen materials through `tools/standalone.py score`. See the [evidence verification reference](provenance/evidence.zh-CN.md) and each tool's `--help` for existing arguments; historical offline scoring uses CPython 3.12.3.
+
+Expected results:
+
+- **45/60** on the public set.
+- 15 tasks not passed.
+- The remaining 350 tasks have no public references and are not scored locally.
+
+This verifies the historical public-set result. The full **333/410** comes from official evaluation and requires private scoring materials held by the organizers; it cannot be recomputed locally using public data alone.
+
+Historical tasks **22, 23, 207, and 273** each received one recovery attempt after missing output, with the second attempt selected by the fixed policy. All other tasks use their first attempt. The historical **44/60** first pass remains separate; predictions are not reselected using scores.
+
+### 3.2 Check the environment, then run a new experiment
+
+The synthetic check after preparation uses a local executor without model calls. It checks the sandbox, CSV output, collection, and recovery. Its 2/2 score belongs to artificial examples.
+
+Before a real run, check a single task's prerequisites:
 
 ```sh
-.venv-experiment/bin/python -B tools/host_profile.py config \
-  --profile .local/profiles/public-host.json --output .local/config-v6/offline.yaml
+./scripts/experiment.sh check --tasks 33
 ```
 
-## No-model checks and synthetic execution
+Success establishes local prerequisites only: **service authentication is not tested, and model calls remain zero**. Production checks require a key and valid endpoint; a missing key returns `MISSING_KEY`. Use the offline doctor for checks without a key.
 
-No API key is needed here. Use the generated placeholder configuration for offline doctor. These checks validate local runtime contents and capabilities, not service authentication. Choose a fresh audit output for each independent check.
+After reviewing configuration and budget, run one task:
 
 ```sh
-.venv-experiment/bin/python -B tools/host_profile.py doctor \
-  --profile .local/profiles/public-host.json --config .local/config-v6/offline.yaml \
-  --output .audit/public-offline-doctor
-.venv-experiment/bin/python -B tools/unified_smoke.py \
-  --environment-profile .local/profiles/public-host.json \
-  --evaluation-root .local/evaluation-v6-public60 --output-root '.audit/public synthetic'
-.venv-experiment/bin/python -B tools/run_regression.py \
-  --suite unit --output-root .audit/public-unit
+./scripts/experiment.sh run --tasks 33 --output .audit/task33-v6
 ```
 
-The synthetic entry forcibly substitutes the local executor and adds network isolation. It checks CSV bytes, collection, interruption/resume and completed resume with zero additional attempts; 2/2 is an artificial test score. It does not execute benchmark inference or the real model client. The package also provides `eviweave doctor --offline --config ...`; unlike the profile doctor it does not select/check an independent host profile. Ordinary doctor requires a key; neither mode authenticates the service.
-
-## Unified workflow
-
-**The `run` commands in this section invoke a real model and incur charges.** They are examples only; no model run is part of document preparation. First prepare the data/runtime/evaluator, select the checked profile, and set a dedicated `EVIWEAVE_API_KEY` yourself. Do not put the key in YAML, input data, command arguments or logs. No fallback to another key is supported.
-
-For real use, privately set `experiment.model.openai_base_url` in `.local/config-v6/codex.yaml` to the V6-compatible HTTPS Responses base URL, without embedded credentials, query or fragment. Keep `qwen3.8-flash`, Responses, relation-v6/simple-fixes-v1, 32,768 output tokens, 983,616 context tokens, 1,800 seconds per task and concurrency 1. Confirm runtime paths match the selected profile. A new endpoint/model/host is a new recorded environment, not proof of historical model identity.
-
-After reviewing `.local/env.sh`, check one task without inference. A key must be present; success still reports `service_auth=NOT_TESTED`, `model_calls=0`. Without a key it returns 2 with `MISSING_KEY` after other preconditions pass. Placeholder endpoints are refused by this production path.
+Run the 60 public-reference tasks:
 
 ```sh
-./scripts/experiment.sh check --tasks 33 \
-  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
-  --evaluation-root .local/evaluation-v6-public60 \
-  --environment-profile .local/profiles/public-host.json
+./scripts/experiment.sh run --scope public60 --output .audit/public60-v6
 ```
 
-Real single task, public batch, and resume of that batch:
+To prepare predictions for full official evaluation, explicitly select all 410 tasks with a separate output:
 
 ```sh
-./scripts/experiment.sh run --tasks 33 --output .audit/task33-v6 \
-  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
-  --evaluation-root .local/evaluation-v6-public60 \
-  --environment-profile .local/profiles/public-host.json
-./scripts/experiment.sh run --scope public60 --output .audit/public60-v6 \
-  --config .local/config-v6/codex.yaml --dataset data/DataSpace-Benchmark \
-  --evaluation-root .local/evaluation-v6-public60 \
-  --environment-profile .local/profiles/public-host.json
+./scripts/experiment.sh run --scope all --output .audit/all410-v6
+```
+
+**These `run` commands call a real model and incur costs.** Omitting the task or scope selects public60 by default, with `--repeat 1`. Always select the scope explicitly and start with a single-task check; do not test installation with an unscoped run.
+
+Report new runs separately with their model, environment, date, task scope, and score. Do not combine them with the historical 333/410 or 45/60.
+
+### 3.3 Interruption and recovery
+
+Resume an interrupted experiment in its original directory:
+
+```sh
 ./scripts/experiment.sh run --output .audit/public60-v6 --resume --yes
 ```
 
-Omitting `--tasks`/`--scope` selects **public60**, with `--repeat 1`. `--tasks 23 35` selects explicit IDs 1–410; `--scope all` selects all 410 and can cost substantially more. `--repeat N` schedules N rounds, not best-of-N selection. Do not run an unqualified batch to test installation.
+Resume restores the saved tasks, configuration, and environment identity, completing unfinished or failed executions. Valid submissions with incorrect answers are skipped. Resuming an already completed experiment should create zero new attempts. Resume rejects explicit replacement of frozen settings such as the environment profile. Each newly allocated attempt becomes that task's current selection, even if it fails.
 
-Resume restores the saved tasks/repeat/configuration/data/profile and rejects explicit replacements, including `--environment-profile`; external profile drift is not imported. Original config, registered inputs, source/environment identity and runtime checks still apply. Source changes may require the original frozen tool checkout or a new experiment; do not edit old metadata to bypass identity. `--yes` explicitly permits reuse without an interactive prompt.
+Do not improve reported scores by editing old configuration, replacing predictions, or choosing the best attempt. Ctrl+C returns 130. A final 401/402/403 stops the batch and cancels in-flight work after the current task's failure is confirmed. Fix access before deliberately resuming. A 429/500 is handled as an ordinary execution failure.
 
-Every newly allocated attempt replaces that task's current answer, even if it fails. Resume addresses unstarted, interrupted, execution-failed or raw-prediction-damaged items once per resume; a normally submitted wrong answer is skipped. A damaged collected copy can be restored without model calls. Ctrl+C cancels the active process group and records interruption (130). A completed resume makes zero new attempts.
+### 3.4 Verify and organize results
 
-Confirmed final 401/402/403 failures stop further dispatch and cancel in-flight work after the current task returns. Frozen client reconnect behavior is retained; this is not an instant per-HTTP circuit breaker. 429/500 are ordinary task failures. See [fix boundaries](provenance/bugfix.zh-CN.md).
-
-## Offline verification and historical evidence
-
-Unified verification reads saved configuration/input hashes/profile and the experiment's independent 121-file evaluator copy. It needs no key, original data/configuration or model runtime; it refuses concurrent writes. It writes versioned `summary.json`, `score.json`, `summary.csv` with one report ID. `submitted` means valid execution/CSV, not a correct answer. Accuracy counts distinct public task IDs, including missing predictions; all410 has 60 scored and 350 unscored tasks.
+Verify a new experiment offline:
 
 ```sh
 ./scripts/experiment.sh verify --experiment .audit/public60-v6 \
   --output .audit/public60-v6-verification
 ```
 
-The historical evidence ZIP and its external `.sha256` are **candidate Release assets, not yet uploaded**. Place both in `.local/evidence-v6/` after obtaining them. Verify before extracting; the verifier needs only the standard library and source tools. Then optionally score existing predictions with CPython 3.12.3:
+Verification checks experiment identity, prediction integrity, and public-task scores, producing `summary.json`, `score.json`, and `summary.csv`. Verification of an existing unified experiment needs no key, original data, original configuration, or model runtime, and makes no new model calls.
+
+Distinguish:
+
+- `submitted`: execution and CSV format checks passed.
+- Correct answer: the prediction passed the frozen scoring rules.
+
+Even after running all 410 tasks, only the 60 public-reference tasks can be scored locally. Preserve missing predictions as failures instead of removing them from the denominator.
+
+### 3.5 Calculate and reconcile costs
+
+This version supports **offline cost analysis**. Explicitly supply redacted request usage evidence and reviewed pricing to import an analysis:
 
 ```sh
-python3 -B tools/package_evidence.py verify \
-  --archive .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip \
-  --output-root .audit/evidence-verification
-unzip -q .local/evidence-v6/eviweave-v0.1.0-v6-evidence.zip -d .local/evidence-v6/extracted
-.venv-experiment/bin/python -B tools/standalone.py score \
-  --evaluation-root .local/evaluation-v6-public60 \
-  --prediction-root .local/evidence-v6/extracted/predictions \
-  --output-root .audit/historical-score
+./scripts/experiment.sh cost import \
+  --source .local/import/calls.json --source-type calls \
+  --pricing .local/pricing/reviewed.json --output .audit/call-analysis
 ```
 
-Expected historical offline result: **45/60**, 15 failed and 350 unscored; the first-pass record is **44/60**. This is separate from the official historical **333/410, 81.22%**, evaluated 2026-10-21, verified 2026-10-22 and rechecked 2026-10-24. The page still listed the result tied first at that recheck; this is a dated observation, not a live ranking guarantee. See [the official leaderboard](https://dataspace-bench.github.io/#leaderboard) and [experiment boundaries](EXPERIMENTS.md).
-
-The ZIP contains 410 unchanged predictions, 414 attempt summaries, fixed selection and **selected traces** for 5 tasks / 6 attempts. Full traces, reference answers, private runtimes and redaction mappings are excluded. Three missing usage records stay unknown; recorded tokens do not establish complete cost. Checksums establish byte integrity, not an author signature.
-
-## Offline cost analysis
-
-Complete online collection remains **UNSUPPORTED_G1**: fixed-client telemetry loses usage/amount extensions and does not establish persistence before each request. Enabling an observation profile is refused before model launch. Executable unified experiment v2 is not implemented; analysis v2 is an offline container, not a run/resume format.
-
-Provide your own explicit project-local redacted evidence and reviewed pricing. The [pricing template](configs/pricing.example.json) has null rates; it is not a quotation. Imports do not contact a service or account console.
+Check whether the evidence supports a submission cost claim:
 
 ```sh
-./scripts/experiment.sh cost import --source .local/import/calls.json \
-  --source-type calls --pricing .local/pricing/reviewed.json --output .audit/call-analysis
-./scripts/experiment.sh verify --experiment .audit/call-analysis
-./scripts/experiment.sh cost revalue --experiment .audit/call-analysis \
+./scripts/experiment.sh cost submission-check \
+  --experiment .audit/call-analysis
+```
+
+Revalue with another pricing file into a new directory:
+
+```sh
+./scripts/experiment.sh cost revalue \
+  --experiment .audit/call-analysis \
   --pricing .local/pricing/reviewed.json --output .audit/call-revaluation
-./scripts/experiment.sh cost submission-check --experiment .audit/call-analysis
 ```
 
-`submission-check` is expected to fail for incomplete enumeration: observed requests are a lower bound and `cost_complete=false`; imports cannot certify total requests or formal submission cost. Provider-reported, public-list-calculated and actual-paid amounts are separate paths. Same response bytes with different physical request IDs count separately; repeated import of the same evidence is idempotent. Token subfields are not added to their parent totals, and unknown values are not zero.
+Fill the empty rates in the [pricing template](configs/pricing.example.json) from official provider prices and record the source and applicable date. Keep public-price calculations, provider-returned amounts, and actual account payments distinct.
 
-New analyses use `schema_version=2`, `import_identity_version=2`, request contract v1. Old analysis v1 is read-only and requires an existing lock; verify/revalue must use a fresh, independent output. Old reports are not silently recomputed:
+Incomplete request records must produce an incomplete-cost result; unknown usage is not zero. Three historical attempts lack usage, so the complete historical cost cannot be reconstructed from these materials. Full online collection remains `UNSUPPORTED_G1`; finishing a run does not automatically produce a certified complete request-cost record.
 
-```sh
-./scripts/experiment.sh verify --experiment .audit/old-v1-analysis \
-  --output .audit/old-v1-verification-new
-./scripts/experiment.sh cost revalue --experiment .audit/old-v1-analysis \
-  --pricing .local/pricing/reviewed.json --output .audit/old-v1-revaluation-new
-```
+New analysis uses v2. Old v1 analysis stays read-only, with verification and revaluation written to new independent outputs. Sum components per physical request, round once to an exact step including 0.05, then sum across requests. See the [cost analysis reference](provenance/observability.zh-CN.md) and [rounding policy](provenance/config-rounding.zh-CN.md) for details.
 
-New calculations record `calculation_policy_version=decimal-quantum-v2`. Each physical request sums its components, rounds once to an exact quantum (including 0.05), then contributes to cross-request totals. Precision loss before rounding is rejected. See [contracts, JSON/SSE/billing imports and legacy snapshots](provenance/observability.zh-CN.md) and [rounding policy](provenance/config-rounding.zh-CN.md). Real service fields and account billing remain unverified.
+### 3.6 Submit results to DataSpace
 
-## Troubleshooting
+Follow the [official DataSpace submission guidelines](https://dataspace-bench.github.io/submission-guidelines.html) for a new leaderboard application. The main requirements include:
 
-| Symptom | Action / meaning |
+1. One final prediction and a matching complete execution trace for each of the 410 tasks.
+2. Metadata covering the method, model, execution date, and predefined final-result selection policy.
+3. Usage and cost records covering failed calls and retries, with official pricing sources.
+4. Local evaluation results for the 60 public-reference tasks.
+
+Use `predictions/task_N/prediction.csv`. The official package also requires `metadata.json` and `traces/`. Unified experiments collect predictions, but there is currently no tool that automatically creates and sends a complete official submission package. Review traces, costs, and metadata before submitting through the official channel.
+
+The public historical evidence ZIP contains selected traces and cannot serve directly as a new complete submission package. A cost-completeness check is not official submission approval. Disclose gaps in historical usage and immutable model identity instead of reconstructing unsupported evidence.
+
+### 3.7 Reproduction scope and common problems
+
+| Situation | Action |
 |---|---|
-| Unsupported OS, architecture or ABI | Use Linux x86_64 / CPython 3.12 or 3.13 for the full workflow; do not weaken a lock |
-| Missing runtime/evaluator/data | Prepare the explicit target above; verify 121 scoring files; point `--dataset` at the directory containing `input/` |
-| Profile/interpreter/content mismatch | Collect/check/select a fresh independent profile and `.venv*`; preserve original exact locks; do not mix profiles in a venv or experiment |
-| Wrong runtime paths after installation | Existing YAML was intentionally preserved; generate a fresh offline config and select it deliberately |
-| Namespace, mount or daemon permission failure | Supply required host permissions and project-local daemon; no host-execution fallback |
-| Hash mismatch or conflicting cache/target | Preserve failure receipt; inspect source and choose a fresh project-local cache/target; do not overwrite historical resources |
-| `MISSING_KEY` or placeholder endpoint | Set only the dedicated key and valid private Responses URL; offline doctor is the key-free preparation path |
-| Final 401/402/403 | Batch stops after the current task confirms failure and cancels in-flight work; fix access/funding before deliberate resume |
-| 429/500 | Ordinary execution failure; inspect evidence; no automatic expansion of tasks/retries |
-| `no_prediction` / missing raw CSV | Execution failure; retain logs and use deliberate resume; a wrong submitted answer is different and is not retried by resume |
-| Integrity conflict | Verify fails, records `attempt_integrity`, and excludes conflicted usage; never repair raw records into a success |
-| Lock occupied | Wait for the writer to finish; do not run concurrent verify/revalue/run against the same directory |
-| Old experiment source mismatch | Use its original frozen tool version or create a new experiment; documentation does not authorize bypass |
-| Old cost report / v1 analysis | Revalue with reviewed pricing into fresh output; preserve old bytes and existing source lock |
+| Only verifying historical results | Obtain the evidence archive and scoring materials, then verify offline |
+| Limited disk space | Avoid duplicate complete datasets; start with historical offline verification |
+| Missing tools or sandbox permissions | Provide the required host capabilities; do not fall back to direct host execution |
+| Host profile mismatch | Check the actual interpreter and runtime, then register an independent environment |
+| Runtime paths remain old | Existing YAML is preserved by design; generate and explicitly select a fresh offline configuration |
+| Missing prediction | Preserve failure records and deliberately resume after diagnosis |
+| Checksum mismatch or cache conflict | Stop using the material, check its source, and do not overwrite historical resources |
+| Integrity conflict | Fail verification and preserve evidence; do not edit original records to manufacture success |
+| Lock contention | Wait for the writer; do not run concurrent run, verify, or revalue operations on the same directory |
+| Incomplete cost evidence | State the unknown scope; do not claim certified complete costs |
+| Old experiment source identity mismatch | Use its original frozen tool version or create a new experiment; do not bypass checks |
 
-Exit 0 means the requested operation completed, not that every answer passed; 1 means execution/evidence/scoring/report failure; 2 means invalid arguments or missing prerequisites; 130 means interruption. Offline verify may successfully report existing execution failures without retrying them.
+The historical model alias has no saved immutable service snapshot, and rebuilt host environments have independent identities. Record code, environment checks, historical prediction verification, and new experiment scores separately. See [Experiments](EXPERIMENTS.md) for historical recovery, later independent runs, and evidence limits.
 
-## More information and attribution
+Exit 0 means the operation completed, not that all answers are correct. Exit 1 indicates execution, evidence, scoring, or report failure; 2 indicates an argument or prerequisite failure; 130 indicates interruption.
 
-[Data format and custom single tasks](DATA_FORMAT.md) (Chinese; custom scoring is not registered in the unified workflow), [synthetic examples](examples/synthetic/README.md), [source provenance](provenance/README.zh-CN.md), [publication preparation and sources](provenance/p5-documentation.md), [CITATION.cff](CITATION.cff).
+## 4. Future work
 
-The separate `scripts/check_task33.sh` terminal helper remains available; `--check-only` checks local inputs/key visibility, not authentication. It uses `.local/config-v6/settings.json` from `tools/standalone.py configure` and defaults to `.venv/bin/python`, unlike the unified workflow. It is not needed above. Creating that standalone config requires a fresh output directory; do not overwrite the unified config. Actual use launches exactly three serial paid trials with independent HOME/sessions, stopping on environment/authentication/missing-prediction failure and continuing on wrong answers. Do not start it as an installation check.
+Planned directions:
 
-Code and documentation: [MIT](LICENSE), with DataSpace Authors' notice and EviWeave contributions by **袁珺 / Jun Yuan** retained. The business source comes only from the historical frozen V6 snapshot, not current DataSpace code. DataSpace datasets, predictions and third-party runtime components retain their original source terms; MIT here does not relicense them. Obtain data from [the official release](https://huggingface.co/datasets/HKUSTDial/DataSpace/tree/96be19257d7aa251dbce4771d46a26fc36f6dc52/release) and consult [upstream](https://github.com/HKUSTDial/DataSpace). Private `docs/`, audit, data and runtime directories are excluded from Git and distributions.
+- **Simpler entry points**: consolidate the environment, data, and historical verification scripts described above, reduce manual configuration, and improve diagnostics.
+- **Continued compatibility checks**: verify additional Python patch versions and hosts based on evidence, and organize regular CI for future main changes.
+- **Complete cost observation**: establish per-request persistence, usage, and amount evidence, then enable full online collection only after acceptance.
+- **EviWeave Controlled**: develop separately from frozen V6, retaining clear version and experiment boundaries.
+- **Research materials**: prepare a formal technical report and fuller method analysis.
+
+These are future work, not capabilities delivered by v0.1.0. The current cloud workflow verifies fixed v0.1.0; it is not general continuous integration for main.
+
+---
+
+EviWeave author: **袁珺 / Jun Yuan**. Code and documentation use [MIT](LICENSE), retaining DataSpace Authors notices and source attribution. Data, predictions, and third-party runtime components retain their own terms; this project's MIT license does not relicense them. Data comes from the [fixed official release](https://huggingface.co/datasets/HKUSTDial/DataSpace/tree/96be19257d7aa251dbce4771d46a26fc36f6dc52/release), and business source comes from the historical frozen V6 snapshot.
+
+Private `docs/`, audit, data, configuration, and runtime directories are excluded from Git and distribution packages.
+
+[Cite this project](CITATION.cff) · [Source provenance](provenance/README.zh-CN.md) · [Custom data format](DATA_FORMAT.md) · [Release notes](RELEASE_NOTES.md)
