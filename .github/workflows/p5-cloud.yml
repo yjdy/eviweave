@@ -3,7 +3,8 @@ on:
   push:
     branches: ['codex/p5-cloud-checks']
 permissions:
-  contents: read
+  # Draft Release access requires push access; this harness only reads its assets.
+  contents: write
 jobs:
   packages:
     if: ${{ !contains(github.event.head_commit.message, '[anonymous]') }}

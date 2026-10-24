@@ -1,6 +1,6 @@
 """Cloud-only verification harness. Never part of the frozen release source."""
 from pathlib import Path, PurePosixPath
-import argparse,datetime,hashlib,json,os,platform,shutil,subprocess,sys,tarfile,time,urllib.request,urllib.parse,zipfile
+import argparse,datetime,hashlib,json,os,platform,shutil,subprocess,sys,tarfile,time,urllib.request,urllib.parse,urllib.error,zipfile
 
 REPO='yjdy/eviweave'
 COMMIT='024a8dcfd4c2d5f6ad196da630400591aa2a5b58'
@@ -28,7 +28,11 @@ OPENER=urllib.request.build_opener(Redirect()) # no CookieJar, browser session o
 def request(url,token=None,binary=False):
  headers={'User-Agent':'EviWeave-cloud-verification','Accept':'application/octet-stream' if binary else 'application/vnd.github+json'}
  if token:headers['Authorization']='Bearer '+token
- return OPENER.open(urllib.request.Request(url,headers=headers),timeout=120)
+ try:return OPENER.open(urllib.request.Request(url,headers=headers),timeout=120)
+ except urllib.error.HTTPError as exc:
+  try:message=json.loads(exc.read(4096)).get('message','HTTP error')
+  except Exception:message='non-JSON HTTP error'
+  raise RuntimeError(f'HTTP {exc.code} at {urllib.parse.urlsplit(url).path}: {message}') from None
 
 def getjson(url,token=None):
  with request(url,token) as f:
