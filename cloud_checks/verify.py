@@ -258,6 +258,15 @@ def runtime(c):
  c.run('stop-project-daemon',[sys.executable,'-B','scripts/project_docker.py','stop','--storage-root','.runtimes/public-build'])
 
 
+def assets_check(c):
+ assets(c);source(c);unpack_sdist(c);bootstrap_python(c)
+ tools=c.out/'asset-env';c.run('original-asset-env',[sys.executable,'-m','venv',tools]);py=tools/'bin/python'
+ c.run('original-asset-locked-tools',[py,'-m','pip','install','--only-binary=:all:','--require-hashes','-r',c.root/'locks/ci-tools.txt'])
+ c.run('original-wheel-install',[py,'-m','pip','install','--no-deps',c.assets/'eviweave-0.1.0-py3-none-any.whl'])
+ c.run('original-assets-full-release-provenance',[py,'-B','tools/verify_release.py','--git-scope','worktree','--archive-root',c.assets,'--output',c.out/'release-verification.json'])
+ d=json.loads((c.out/'release-verification.json').read_text());c.report['original_assets_provenance']={k:d[k] for k in ['status','checks','git_file_count','archives','installed_module_count','verbatim_file_count','runtime_dependencies']}
+
+
 def anonymous(c):
  assets(c,True)
  # Authentication used by checkout is not reused for any download or subprocess.
@@ -274,7 +283,7 @@ def anonymous(c):
  downloaded=next(dest.iterdir());old=c.root;c.root=downloaded;source(c,False);c.root=old
  c.report['anonymous_tag']={'commit':COMMIT,'source_archive_sha256':sha(archive),'source_files':155,'authorization_header':False,'cookies':False}
  # Install and run the public tag's full unit suite; same bytes link the prior cloud runtime check.
- bootstrap_python(c);tools=c.out/'anonymous-env';c.run('anonymous-venv',[sys.executable,'-m','venv',tools]);py=tools/'bin/python'
+ bootstrap_python(c);tools=downloaded/'.audit/anonymous-env';c.run('anonymous-venv',[sys.executable,'-m','venv',tools]);py=tools/'bin/python'
  c.run('anonymous-locked-tools',[py,'-m','pip','install','--only-binary=:all:','--require-hashes','-r',downloaded/'locks/ci-tools.txt'])
  c.run('anonymous-source-install',[py,'-m','pip','install','--no-build-isolation','--no-deps',downloaded])
  c.run('anonymous-original-wheel-install',[py,'-m','pip','install','--no-deps','--force-reinstall',c.assets/'eviweave-0.1.0-py3-none-any.whl'])
@@ -286,7 +295,7 @@ def anonymous(c):
 
 
 def main():
- p=argparse.ArgumentParser();p.add_argument('mode',choices=['matrix','runtime','anonymous']);p.add_argument('--target',type=Path,required=True);args=p.parse_args();root=args.target.resolve();c=Check(args.mode,root)
+ p=argparse.ArgumentParser();p.add_argument('mode',choices=['matrix','runtime','anonymous','assets_check']);p.add_argument('--target',type=Path,required=True);args=p.parse_args();root=args.target.resolve();c=Check(args.mode,root)
  try:globals()[args.mode](c)
  except BaseException as exc:
   c.errors.append(type(exc).__name__);c.report['failure_type']=type(exc).__name__;c.report['failure_detail']=str(exc)[:500]
