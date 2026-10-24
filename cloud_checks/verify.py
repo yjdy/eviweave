@@ -118,12 +118,17 @@ def assets(c,anonymous=False):
   receipts.append(download(url,dest/item['name'],item,token,maximum=item['size']))
  # After publication, all additional public bindings/summaries must also be downloaded anonymously.
  if anonymous:
+  published_expected=json.loads((CONTROL/'cloud_checks/anonymous-input.json').read_text())
+  all_expected={x['name']:x for x in published_expected['assets']}
+  assert len(remote)==12 and set(remote)==set(all_expected) and release['id']==published_expected['release_id'] and release['published_at']==published_expected['published_at_utc']
   allowed={'cloud-verification.json','cloud-verification.json.sha256','publication-binding.json','publication-binding.json.sha256'}
   for name in sorted(set(remote)-{x['name'] for x in EXPECTED}):
    assert name in allowed and remote[name]['size']<=1048576,'unknown or oversized extra asset'
-   item=remote[name];receipts.append(download(item['browser_download_url'],dest/name,maximum=1048576))
+   item=remote[name];receipts.append(download(item['browser_download_url'],dest/name,expected=all_expected[name],maximum=1048576))
   for checksum in dest.glob('*.json.sha256'):
    h,n=checksum.read_text().strip().split(maxsplit=1);assert sha(dest/n)==h
+  final_binding=json.loads((dest/'publication-binding.json').read_text());assert final_binding['formal_release_commit']==COMMIT and final_binding['git_tree']==TREE and final_binding['publication_status']=='published' and final_binding['published_at_utc']==release['published_at']
+  c.report['anonymous_asset_identity_policy']='All twelve names/sizes/SHA-256 values independently match the pre-recorded published assets; all three supplemental JSON checksums also verified; no authorization or cookies used'
  c.report['remote_assets']=receipts;c.report['release_id']=release['id'];c.report['assets_anonymous']=anonymous
  manifest=json.loads((dest/'release-manifest.json').read_text());assert manifest['source']['baseline_commit']==COMMIT and manifest['source']['baseline_git_tree']==TREE
  for line in (dest/'SHA256SUMS').read_text().splitlines():

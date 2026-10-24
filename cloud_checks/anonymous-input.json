@@ -1,0 +1,80 @@
+{
+  "release_id": 422606454,
+  "published_at_utc": "2026-10-24T09:00:29Z",
+  "release_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+  "prepublication_gates_run": 40080023991,
+  "assets": [
+    {
+      "name": "cloud-verification.json",
+      "size": 13620,
+      "sha256": "2a1ddb1f63959a9123f83493e5a3547c24129c3c330a2128cb9539a3a4ed2743",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/cloud-verification.json"
+    },
+    {
+      "name": "cloud-verification.json.sha256",
+      "size": 90,
+      "sha256": "67fb1f9ad1eeedff1bb11e27283c006ccbd68235fff6f3e5cda6f4fc864c2b80",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/cloud-verification.json.sha256"
+    },
+    {
+      "name": "eviweave-0.1.0-py3-none-any.whl",
+      "size": 46818,
+      "sha256": "226fa3e763774a6b5d8ef5be32dba32106e29a7ae29ff68a2b1faebe18c6d479",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/eviweave-0.1.0-py3-none-any.whl"
+    },
+    {
+      "name": "eviweave-0.1.0.tar.gz",
+      "size": 433037,
+      "sha256": "bcda788ba6d5918e84b8d1a618a7d48e0194ce70e0bd722f8a5e481ad6d2f645",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/eviweave-0.1.0.tar.gz"
+    },
+    {
+      "name": "eviweave-v0.1.0-v6-evidence.zip",
+      "size": 1980385,
+      "sha256": "3e40cd0e0154f9c81f643dffc5eced748e9bed2ab376200ff49b921ee4c27b39",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/eviweave-v0.1.0-v6-evidence.zip"
+    },
+    {
+      "name": "eviweave-v0.1.0-v6-evidence.zip.sha256",
+      "size": 98,
+      "sha256": "e2ba1b335fe770d777bd4216edc0d70b1ae5ea7680f9c004661bc5dd171eb780",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/eviweave-v0.1.0-v6-evidence.zip.sha256"
+    },
+    {
+      "name": "publication-binding.json",
+      "size": 4468,
+      "sha256": "b8906f0ff2458599e69832a745fd1b4ab3b29a6defca1b1e36c429ffc1302924",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/publication-binding.json"
+    },
+    {
+      "name": "publication-binding.json.sha256",
+      "size": 91,
+      "sha256": "9ea09516d51ad06f9892230fa349200ec6932803164336d0c22e57fcd3614573",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/publication-binding.json.sha256"
+    },
+    {
+      "name": "release-binding.json",
+      "size": 2229,
+      "sha256": "64f10720bc28a01903025b20263c7d841799db2908fac445cb90f21fb087d7d4",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/release-binding.json"
+    },
+    {
+      "name": "release-binding.json.sha256",
+      "size": 87,
+      "sha256": "491369630d6358676eab41a67a30ff09cf29923127ede03bc81730784ffe18f7",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/release-binding.json.sha256"
+    },
+    {
+      "name": "release-manifest.json",
+      "size": 35448,
+      "sha256": "c70d9e3a81b4ea1b346a61e4d94b253a5ae9d57d1c9ea086cdf123c04b665fef",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/release-manifest.json"
+    },
+    {
+      "name": "SHA256SUMS",
+      "size": 477,
+      "sha256": "7afdac53de5fb0c3f726a7b350ca5818ffa637a75bf5d63f992bd6838b2638df",
+      "url": "https://github.com/yjdy/eviweave/releases/download/v0.1.0/SHA256SUMS"
+    }
+  ]
+}
