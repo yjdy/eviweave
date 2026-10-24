@@ -90,7 +90,12 @@ def bootstrap_python(c):
  with zipfile.ZipFile(p) as z:
   names=[n for n in z.namelist() if PurePosixPath(n).name=='patchelf'];assert len(names)==1
   tool=p.parent/'patchelf';tool.write_bytes(z.read(names[0]));tool.chmod(0o755)
- before=sha(py);c.run('relocated-python-rpath',[tool,'--set-rpath','$ORIGIN/../lib',py])
+ before=sha(py);patched=py.with_name('.'+py.name+'.cloud-rpath');shutil.copy2(py,patched)
+ code=c.run('relocated-python-rpath',[tool,'--set-rpath','$ORIGIN/../lib',patched],soft=True)
+ if code:
+  c.report['bootstrap_patch_error']=(c.out/'relocated-python-rpath.log').read_text()[-1000:]
+  raise RuntimeError('relocated interpreter patch failed')
+ os.replace(patched,py)
  c.run('relocated-python-no-ld-path',[py,'-c','import sys,venv; print(sys.version)'],extra={'LD_LIBRARY_PATH':''})
  c.report['cloud_bootstrap']={'tool':'patchelf '+version,'official_artifact':receipt,'python_binary_before':before,'python_binary_after':sha(py),'policy':'Only newly downloaded cloud interpreter changed; frozen source and original release assets unchanged; new host profile measures resulting binary'}
 
