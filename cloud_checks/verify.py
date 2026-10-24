@@ -26,7 +26,8 @@ class Redirect(urllib.request.HTTPRedirectHandler):
 OPENER=urllib.request.build_opener(Redirect()) # no CookieJar, browser session or netrc
 
 def request(url,token=None,binary=False):
- headers={'User-Agent':'EviWeave-cloud-verification','Accept':'application/octet-stream' if binary else 'application/vnd.github+json'}
+ release_asset_api=urllib.parse.urlsplit(url).hostname=='api.github.com' and '/releases/assets/' in urllib.parse.urlsplit(url).path
+ headers={'User-Agent':'EviWeave-cloud-verification','Accept':'application/octet-stream' if binary and release_asset_api else 'application/vnd.github+json'}
  if token:headers['Authorization']='Bearer '+token
  try:return OPENER.open(urllib.request.Request(url,headers=headers),timeout=120)
  except urllib.error.HTTPError as exc:
