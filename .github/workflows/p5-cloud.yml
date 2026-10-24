@@ -7,7 +7,7 @@ permissions:
   contents: write
 jobs:
   packages:
-    if: ${{ !contains(github.event.head_commit.message, '[anonymous]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[anonymous]') && !contains(github.event.head_commit.message, '[runtime-only]') }}
     runs-on: ubuntu-22.04
     timeout-minutes: 40
     strategy:

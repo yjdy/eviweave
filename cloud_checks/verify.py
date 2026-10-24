@@ -183,8 +183,22 @@ def runtime(c):
  # Host tools must already exist; no global apt install or system Docker daemon.
  c.report['disk_free_start']=shutil.disk_usage(c.root).free
  host={}
+ if not shutil.which('bwrap'):
+  # Use the GitHub-hosted OS's package metadata to fetch a same-version Ubuntu
+  # prerequisite into checkout; never install packages into the system.
+  text=subprocess.check_output(['apt-cache','show','bubblewrap'],text=True)
+  entries=[]
+  for paragraph in text.split('\n\n'):
+   item=dict(line.split(': ',1) for line in paragraph.splitlines() if ': ' in line and not line.startswith(' '))
+   if all(k in item for k in ['Filename','SHA256','Size','Version']) and item.get('Architecture')=='amd64':entries.append(item)
+  assert entries,'No authenticated runner apt metadata for bubblewrap'
+  item=entries[0];dest=c.out/'host-tools';dest.mkdir(exist_ok=True)
+  receipt=download('https://archive.ubuntu.com/ubuntu/'+item['Filename'],dest/'bubblewrap.deb',{'size':int(item['Size']),'sha256':item['SHA256']})
+  c.run('project-local-bubblewrap-extract',['dpkg-deb','-x',dest/'bubblewrap.deb',dest/'root'])
+  c.env['PATH']=str(dest/'root/usr/bin')+os.pathsep+c.env['PATH']
+  c.report['bubblewrap_prerequisite']={'version':item['Version'],'receipt':receipt,'source':'GitHub-hosted Ubuntu signed apt metadata, official Ubuntu archive; extracted only inside checkout'}
  for name in ['docker','dockerd','containerd','bwrap']:
-  p=shutil.which(name);assert p,'required hosted tool missing: '+name
+  p=shutil.which(name,path=c.env['PATH']);assert p,'required hosted tool missing: '+name
   host[name]={'sha256':sha(p),'version':subprocess.check_output([p,'--version'],text=True).strip()}
  c.report['host_tools']=host
  blocks=__import__('re').findall(r'```sh\n(.*?)```',(c.root/'README.md').read_text(),__import__('re').S)
