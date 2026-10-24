@@ -69,6 +69,11 @@ class Check:
   record={'name':name,'returncode':p.returncode,'expected':expect,'seconds':round(time.monotonic()-started,2)};self.report['commands'].append(record);print(json.dumps(record),flush=True)
   if p.returncode!=expect:
    self.errors.append(name)
+   if name in ('readme-public-preparation','offline-config','offline-doctor-and-synthetic','supported-runtime-unit','p4-original-evidence-and-offline-score'):
+    text=(self.out/(name+'.log')).read_text(errors='replace')
+    tail='\n'.join(text.splitlines()[-8:]).replace(str(self.root),'CHECKOUT')
+    tail=__import__('re').sub(r'https?://[^\s]+','[resource-url]',tail)
+    self.report.setdefault('bounded_failure_diagnostics',{})[name]=tail[-1800:]
    if not soft:raise RuntimeError('cloud step failed: '+name)
   return p.returncode
  def finish(self):
@@ -235,7 +240,14 @@ def runtime(c):
  for key,prefix in [('offline-config','.venv-experiment/bin/python -B tools/host_profile.py config'),('offline-doctor-and-synthetic','.venv-experiment/bin/python -B tools/host_profile.py doctor')]:
   body=next(b for b in blocks if b.startswith(prefix))
   # The documented final unit command is retained; all full applicable unit is mandatory.
-  p=c.out/(key+'.sh');p.write_text(body+'\n');c.run(key,['bash','-e',p],timeout=1800)
+  if key=='offline-doctor-and-synthetic':
+   boundary=body.index('.venv-experiment/bin/python -B tools/run_regression.py')
+   runtime_body,unit_body=body[:boundary],body[boundary:]
+   p=c.out/(key+'.sh');p.write_text(runtime_body+'\n');c.run(key,['bash','-e',p],timeout=1800)
+   p=c.out/'supported-runtime-unit.sh';p.write_text(unit_body+'\n')
+   c.run('supported-runtime-unit',['sudo','-E','env','LD_LIBRARY_PATH='+c.env.get('LD_LIBRARY_PATH',''),'unshare','--mount','--fork','/usr/bin/python3',CONTROL/'cloud_checks/namespace.py',str(os.getuid()),str(os.getgid()),'/bin/bash','-e',p],timeout=1800,extra={'GITHUB_WORKSPACE':os.environ['GITHUB_WORKSPACE']})
+  else:
+   p=c.out/(key+'.sh');p.write_text(body+'\n');c.run(key,['bash','-e',p],timeout=1800)
  syn=c.root/'.audit/public synthetic';synacc=json.loads((syn/'acceptance.json').read_text());assert synacc['status']=='PASS' and synacc['interrupted_returncode']==130 and synacc['completed_resume_new_calls']==0
  c.report['synthetic']={k:v for k,v in synacc.items() if k!='report_id'}
  c.report['csvs']=[]

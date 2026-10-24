@@ -72,7 +72,7 @@ jobs:
       - name: Independently rebuild and exercise real Bubblewrap without a model
         env:
           CLOUD_READ_TOKEN: ${{ github.token }}
-        run: sudo -E env LD_LIBRARY_PATH="$LD_LIBRARY_PATH" unshare --mount --fork /usr/bin/python3 control/cloud_checks/namespace.py "$(id -u)" "$(id -g)" "$(command -v python)" -B control/cloud_checks/verify.py runtime --target "$GITHUB_WORKSPACE/c"
+        run: python -B control/cloud_checks/verify.py runtime --target "$GITHUB_WORKSPACE/c"
       - name: Publish curated small runtime result only
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
