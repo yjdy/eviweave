@@ -1,0 +1,40 @@
+{
+  "packages": [
+    {
+      "run_id": 40079123718,
+      "artifact": "package-result-3.10",
+      "minor": "3.10"
+    },
+    {
+      "run_id": 40079123718,
+      "artifact": "package-result-3.12.3",
+      "minor": "3.12"
+    },
+    {
+      "run_id": 40079123718,
+      "artifact": "package-result-3.13.16",
+      "minor": "3.13"
+    }
+  ],
+  "runtime": {
+    "run_id": 40079420957
+  },
+  "assets": {
+    "run_id": 40079261128
+  },
+  "jobs": {
+    "package-result-3.10": "packages (3.10)",
+    "package-result-3.12.3": "packages (3.12.3)",
+    "package-result-3.13.16": "packages (3.13.16)",
+    "runtime-result": "runtime",
+    "original-assets-result": "original-assets"
+  },
+  "failed_attempts_retained": [
+    40077695639,
+    40078241196,
+    40078358873,
+    40078502086,
+    40078626440,
+    40079123718
+  ]
+}
