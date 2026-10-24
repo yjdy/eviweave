@@ -1,0 +1,109 @@
+name: P5 cloud release verification
+on:
+  push:
+    branches: ['codex/p5-cloud-checks']
+permissions:
+  contents: read
+jobs:
+  packages:
+    if: ${{ !contains(github.event.head_commit.message, '[anonymous]') }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        python: ['3.10', '3.12.3', '3.13.16']
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 024a8dcfd4c2d5f6ad196da630400591aa2a5b58
+          path: candidate
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Verify actual release source and original remote assets
+        env:
+          CLOUD_READ_TOKEN: ${{ github.token }}
+        run: python -B control/cloud_checks/verify.py matrix --target "$GITHUB_WORKSPACE/candidate"
+      - name: Publish curated small verification result only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: package-result-${{ matrix.python }}
+          path: control/public-results/*.json
+          if-no-files-found: error
+          retention-days: 30
+  runtime:
+    if: ${{ !contains(github.event.head_commit.message, '[anonymous]') }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: control
+          persist-credentials: false
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: 024a8dcfd4c2d5f6ad196da630400591aa2a5b58
+          path: c
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - name: Independently rebuild and exercise real Bubblewrap without a model
+        env:
+          CLOUD_READ_TOKEN: ${{ github.token }}
+        run: python -B control/cloud_checks/verify.py runtime --target "$GITHUB_WORKSPACE/c"
+      - name: Publish curated small runtime result only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: runtime-result
+          path: control/public-results/*.json
+          if-no-files-found: error
+          retention-days: 30
+  anonymous:
+    if: ${{ contains(github.event.head_commit.message, '[anonymous]') }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          path: control
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python candidate
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - name: Anonymous public release and tag verification
+        run: python -B control/cloud_checks/verify.py anonymous --target "$GITHUB_WORKSPACE/candidate"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: anonymous-result
+          path: control/public-results/*.json
+          if-no-files-found: error
+          retention-days: 30
