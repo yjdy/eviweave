@@ -138,6 +138,7 @@ def acceptance(language, history_python):
         for name in names:
             assert identities[name] == hashlib.sha256(subprocess.check_output(['git', 'show', actual + ':' + name], cwd=ROOT)).hexdigest()
         c.report['candidate_fingerprint'] = hashlib.sha256(json.dumps(identities, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        c.report['candidate_file_count'] = len(identities)
         for i, block in enumerate(document_commands(target, language)):
             script = c.out / ('readme-' + str(i) + '.sh')
             script.write_text('set -eu\n' + block + '\n')
@@ -147,6 +148,16 @@ def acceptance(language, history_python):
         history = next(r for r in reports if r['action'] == 'history')
         assert history['public_score'] == '45/60' and history['per_task_match']
         c.report['history'] = {k: history[k] for k in ('public_score', 'per_task_match', 'archive_sha256', 'missing_usage_attempts')}
+        environment_report = next(r for r in reports if r['action'] == 'environment')
+        profile_doc = json.loads((target / '.local/profiles/public-host.json').read_text())
+        assert profile_doc['kind'] == 'independent-host' and profile_doc['runtime']['kind'] == 'independent-public-rebuild'
+        c.report['environment'] = {
+            'host_kind': profile_doc['kind'], 'runtime_kind': profile_doc['runtime']['kind'],
+            'python_version': profile_doc['python']['version'], 'profile_sha256': environment_report['profile_sha256'],
+            'resource_lock_sha256': environment_report['resource_lock_sha256'],
+            'workbench_inventory_sha256': sha(target / '.runtimes/prepared/workbench-files.json'),
+            'workbench_entries': len(profile_doc['runtime']['workbench_inventory']['entries']),
+            'service_auth': environment_report['service_auth'], 'selected': environment_report['selected']}
         c.run('environment-reuse', ['bash', 'scripts/prepare_environment.sh', '--python', sys.executable, '--reuse'])
         c.run('scoring-reuse', ['bash', 'scripts/prepare_dataspace.sh', '--python', sys.executable, '--reuse'])
         py = target / '.venv-experiment/bin/python'
@@ -164,7 +175,8 @@ def acceptance(language, history_python):
         c.run('source-unit', [py, '-B', 'tools/run_regression.py', '--suite', 'unit', '--output-root', '.audit/cloud-source-unit'])
         units = json.loads((target / '.audit/cloud-source-unit/unit-results.json').read_text())
         assert units['status'] == 'PASS' and all(x['status'] == 'PASS' for x in units['cases'])
-        c.report['source_unit'] = {'status': units['status'], 'tests': units['tests'], 'skips': 0}
+        c.report['source_unit'] = {'status': units['status'], 'tests': units['tests'], 'skips': 0,
+                                   'preparation_cases': sum(x['case'].startswith('test_preparation_scripts.') for x in units['cases'])}
         c.run('installation-sdist-wheel-tests', [py, '-B', 'tools/ci_check.py', '--output-root', '.audit/cloud-build'])
         built = json.loads((target / '.audit/cloud-build/ci-report.json').read_text())
         assert built['status'] == 'PASS'
@@ -172,13 +184,14 @@ def acceptance(language, history_python):
         assert len(installed_units) == 1
         installed = json.loads(installed_units[0].read_text())
         assert installed['status'] == 'PASS' and all(x['status'] == 'PASS' for x in installed['cases'])
-        c.report['installed_unit'] = {'status': installed['status'], 'tests': installed['tests'], 'skips': 0}
+        c.report['installed_unit'] = {'status': installed['status'], 'tests': installed['tests'], 'skips': 0,
+                                      'preparation_cases': sum(x['case'].startswith('test_preparation_scripts.') for x in installed['cases'])}
         c.run('release-provenance', [target / '.audit/cloud-build/wheel-env/bin/python', '-B', 'tools/verify_release.py',
                                       '--git-scope', 'head', '--archive-root', '.audit/cloud-build/archives',
                                       '--output', '.audit/cloud-build/release-verification.json'])
         release = json.loads((target / '.audit/cloud-build/release-verification.json').read_text())
         assert release['status'] == 'PASS'
-        c.report['packaging'] = {k: release[k] for k in ('status', 'checks', 'installed_module_count', 'verbatim_file_count')}
+        c.report['packaging'] = {k: release[k] for k in ('status', 'checks', 'installed_module_count', 'verbatim_file_count', 'archives')}
         c.report['builds_are_acceptance_only'] = True
     except Exception as exc:
         c.errors.append(type(exc).__name__)

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "scope": "Preparation entries, README follow-up, exact-candidate hosted checks and source/package verification; pending hosted acceptance",
+  "scope": "Preparation entries, README follow-up, exact-candidate hosted checks and source/package verification; execution evidence recorded separately in hosted results",
   "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
   "baseline_commit": "08ceaa0e3a23d6371f9570862da420de7e90cce5",
   "source_identity_note": "source_sha256 extends the last recorded released content. baseline_sha256 separately records actual post-release baseline bytes, including README and cloud-control changes first registered here. release_sha256 denotes candidate bytes, not a claim of publication.",
@@ -133,7 +133,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "afd8b1eb9b3dd40e4e46f8c3f4d4ec4bf58caa1db25476549edab246498a83db",
+      "release_sha256": "39c138defce7f711aacd8b5adece5f4b9f652ad344f283c520d84d92941020b2",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {
