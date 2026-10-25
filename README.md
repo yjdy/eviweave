@@ -34,11 +34,11 @@ Public materials allow verification of historical predictions and the public-set
 
 ### This guide and the released version
 
-This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. Scripts explicitly marked “planned” below are not currently provided.
+This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The three preparation entries below have been added to the development branch, with cloud acceptance still pending; they are absent from the published v0.1.0 tag and packages.
 
 ## 2. Installation and preparation
 
-Start with the **v0.1.0 source checkout or source distribution**. A wheel supplies the business package and the `eviweave` / `dataspace-baselines` CLI aliases. Full reproduction also needs the scripts, resource locks, and verification tools in the source distribution. Download from the [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0); this project has not been published to PyPI.
+The new scripts require a development checkout containing all three entries; no new distribution containing them is available yet. To reproduce the original release, start with the **v0.1.0 source checkout or source distribution** and use the [original preparation tools](provenance/public-preparation.md). A wheel supplies the business package and the `eviweave` / `dataspace-baselines` CLI aliases. Full reproduction also needs the scripts, resource locks, and verification tools in the source distribution. Download from the [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0); this project has not been published to PyPI.
 
 ### 2.1 Environment preparation
 
@@ -56,24 +56,29 @@ Cloud acceptance covered the full applicable checks on CPython **3.12.3 and 3.13
 
 Prepare the environment in four steps:
 
-1. Obtain the source and select the `v0.1.0` tag as the reproduction baseline.
+1. Obtain the source containing the new scripts; use the intended CPython 3.12 or 3.13 as `python3` below.
 2. Have a developer or administrator install the host dependencies above.
-3. Follow the [existing environment preparation steps](provenance/public-preparation.md) to download fixed resources, build the workbench, collect and check a host profile, then install through `scripts/install.sh`.
-4. Follow the same reference to create a separate offline configuration and run the offline doctor and synthetic checks before configuring model access.
+3. Check static prerequisites, then prepare the workbench, register a profile, and install:
 
-> **Planned:** `scripts/prepare_environment.sh` will wrap the existing resource preparation, profile collection, and installation tools. This script does not exist yet; use the actual steps linked above.
+```sh
+./scripts/prepare_environment.sh --python python3 --check-only
+```
 
-The planned script will combine:
+```sh
+./scripts/prepare_environment.sh --python python3
+```
 
-- Checks for platform, Python, host tools, and required permissions.
-- Codex and workbench dependency downloads authenticated against public resource locks.
-- An independent workbench build with recorded host and runtime identities.
-- Creation of the project virtual environment and locked dependency installation.
-- Offline configuration generation and checks without model calls.
+4. On success, inspect the reported `.audit/preparation/.../preparation-report.json`, then explicitly select the profile and model configuration as described in section 2.3.
 
-Existing preparation tools do not automatically install system tools, overwrite existing configuration, or call a model. A profile records the environment actually rebuilt on this host; it does not identify the original historical experiment machine. Collecting and checking a profile does not activate it: selection must be explicit when running.
+**Acceptance status: code added to the development branch; cloud usage and installation acceptance have not run.** `--check-only` neither connects to the network nor writes files, and does not certify passwordless privileges or sandbox capability. Actual preparation checks those capabilities.
 
-All downloads, HOME, caches, temporary files, and Docker/containerd storage stay inside the project, without using the system Docker socket. Allow space for workbench builds and exports. After checking, stop the project daemon as described in the [preparation reference](provenance/public-preparation.md); restart with the same storage when image checks are needed.
+Defaults are `.venv-experiment`, `.local/profiles/public-host.json`, and `.local/config-v6/offline-public-host.yaml`, with Codex, workbench, and independent daemon storage under `.runtimes/prepared/`. Preparation runs only the offline doctor; it does not download scoring materials or the complete dataset.
+
+Existing targets require explicit `--reuse`. Conflicts or corruption are rejected without replacing environments. Select independent directories with `--venv`, `--profile-name`, `--runtime-root`, and `--cache`; see `--help`. Existing `.local/config-v6/codex.yaml` is preserved. Offline configuration is reused only when unchanged since its script-recorded checksum.
+
+The script does not install system tools, activate profiles, edit `.local/env.sh`, or call a model. A profile records this rebuilt environment, not the original historical experiment host. Downloads, HOME, caches, temporary files, and Docker/containerd storage remain inside the project, without the system Docker socket.
+
+The initial check requires at least 8GiB free; peak usage may be higher. The script stops daemons it started and preserves previously running instances. For later image checks, restart with the same storage as described in the [script reference](provenance/preparation-scripts.md). After preparing the environment and scoring files, follow that reference for synthetic checks without model calls.
 
 ### 2.2 Data preparation
 
@@ -87,7 +92,23 @@ Prepare DataSpace task data and scoring materials separately:
 
 The complete task ZIP is about **2.88GB**, with about **15.01GB** of extracted content, before workbench and output storage. Verifying historical results requires neither the complete task dataset nor a model execution workbench.
 
-> **Planned:** `scripts/prepare_dataspace.sh` will offer explicit scoring-only and complete-task-data modes, reusing existing locked download and checksum tools, without downloading the complete dataset by default. For now, use the `evaluation` or `dataset` entry in the [scoring and data preparation steps](provenance/public-preparation.md), explicitly selecting the paths below.
+The default prepares only scoring materials. Start with static preflight:
+
+```sh
+./scripts/prepare_dataspace.sh --python python3 --check-only
+```
+
+```sh
+./scripts/prepare_dataspace.sh --python python3
+```
+
+Explicitly select complete data only for new model experiments:
+
+```sh
+./scripts/prepare_dataspace.sh --python python3 --mode full
+```
+
+**The new full-data wrapper will be checked with artificial small archives; this work will not download the approximately 15GB complete dataset again. Cloud acceptance is still pending.** `--reuse` explicitly verifies existing targets. Select scoring, data, and cache directories with `--evaluation-root`, `--dataset`, and `--cache`. Complete-data reuse requires the retained, checksum-matching original ZIP in the cache for per-file comparison; a missing ZIP does not trigger an implicit download.
 
 Recommended directory conventions:
 
@@ -144,7 +165,17 @@ Download these assets from the [v0.1.0 Release](https://github.com/yjdy/eviweave
 
 Place both under `.local/evidence-v6/`. The archive contains **410 predictions, 414 attempt summaries, a fixed selection record, and selected redacted traces for 5 tasks and 6 attempts**.
 
-> **Planned:** `scripts/verify_history.sh` will combine existing archive verification, extraction, and offline scoring tools. The current standard-library verifier is `tools/package_evidence.py verify`. Check the archive and external checksum before extraction, then score with frozen materials through `tools/standalone.py score`. See the [evidence verification reference](provenance/evidence.zh-CN.md) and each tool's `--help` for existing arguments; historical offline scoring uses CPython 3.12.3.
+Historical scoring requires CPython 3.12.3. If `python3` selects another version, first set the Shell variable `HISTORY_PYTHON` to an already prepared 3.12.3 interpreter's absolute path; the script does not install it.
+
+Explicitly allow downloads from the fixed public Release, then verify and score:
+
+```sh
+./scripts/verify_history.sh --python "${HISTORY_PYTHON:-python3}" --download
+```
+
+Omit `--download` for existing assets; the default is fully offline. Select inputs and a fresh output using `--archive`, `--evaluation-root`, and `--output`, or first run read-only static preflight with `--check-only`. Missing ZIP/checksum files, mismatching digests, or different per-task scoring results fail.
+
+The script requires only source tools, the standard library, and the prepared 121 scoring files, without installing the business package, full workbench, or task dataset. Its report records the original archive SHA-256 and per-task match. Cloud verification of this new entry is still pending.
 
 Expected results:
 
@@ -282,19 +313,19 @@ The public historical evidence ZIP contains selected traces and cannot serve dir
 
 The historical model alias has no saved immutable service snapshot, and rebuilt host environments have independent identities. Record code, environment checks, historical prediction verification, and new experiment scores separately. See [Experiments](EXPERIMENTS.md) for historical recovery, later independent runs, and evidence limits.
 
-Exit 0 means the operation completed, not that all answers are correct. Exit 1 indicates execution, evidence, scoring, or report failure; 2 indicates an argument or prerequisite failure; 130 indicates interruption.
+For the experiment commands above, exit 0 means the operation completed, not that all answers are correct. Exit 1 indicates execution, evidence, scoring, or report failure; 2 indicates an argument or prerequisite failure; 130 indicates interruption.
 
 ## 4. Future work
 
 Planned directions:
 
-- **Simpler entry points**: consolidate the environment, data, and historical verification scripts described above, reduce manual configuration, and improve diagnostics.
+- **Better entry points**: finish cloud acceptance of the three new scripts and improve diagnostics and preparation based on actual use.
 - **Continued compatibility checks**: verify additional Python patch versions and hosts based on evidence, and organize regular CI for future main changes.
 - **Complete cost observation**: establish per-request persistence, usage, and amount evidence, then enable full online collection only after acceptance.
 - **EviWeave Controlled**: develop separately from frozen V6, retaining clear version and experiment boundaries.
 - **Research materials**: prepare a formal technical report and fuller method analysis.
 
-These are future work, not capabilities delivered by v0.1.0. The current cloud workflow verifies fixed v0.1.0; it is not general continuous integration for main.
+These are future work, not capabilities delivered by v0.1.0. The historical cloud workflow still verifies fixed v0.1.0; the new preparation workflow will test its actual candidate commit and has not run yet.
 
 ---
 

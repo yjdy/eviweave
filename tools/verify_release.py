@@ -24,10 +24,13 @@ def effective_provenance(members):
     history = ('extraction-manifest', 'runtime-baseline', 'regression-baseline', 'evidence-baseline',
                'isolation-baseline', 'unified-baseline', 'observability-baseline', 'bugfix-baseline')
     retained = newest['retained_provenance']
-    overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json')
+    overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json',
+                     'provenance/preparation-scripts-baseline.json')
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
+    if overlay_names[2] in members and overlay_names[1] not in members:
+        raise ValueError('script provenance requires retained documentation overlay')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
@@ -54,6 +57,14 @@ def effective_provenance(members):
                 or any(digest(members[name]) != value for name, value in layer['retained_provenance'].items())):
             raise ValueError('retained provenance set/digest mismatch in ' + overlay_name)
         seen = set()
+        for removed in layer.get('removed_files', []):
+            name = removed['destination']
+            if (overlay_name != 'provenance/preparation-scripts-baseline.json'
+                    or name != '.github/workflows/offline.yml' or name in seen or name not in latest
+                    or removed['source_sha256'] != latest.get(name)):
+                raise ValueError('invalid workflow retirement provenance')
+            seen.add(name)
+            del latest[name]
         for entry in layer['files']:
             name = entry['destination']
             if name in seen or name.startswith('src/') or name in previous_names or name in overlay_names:
@@ -158,7 +169,9 @@ def main():
                 'tools/smoke_runtime.py','tools/synthetic_executor.py','examples/synthetic/tasks/task_1/task.json',
                 'examples/synthetic/tasks/task_2/task.json','examples/synthetic/expected/task_1.csv','examples/synthetic/expected/task_2.csv'}
             require(required.issubset(members), 'sdist contains all P2 preparation and synthetic inputs')
-            required_p3 = {'.github/workflows/offline.yml','tools/run_regression.py','tools/regression_cases.py','tools/runtime_regression.py','tools/config_lifecycle.py','tools/sandbox_probe.py','tools/ci_check.py','tools/check_installation.py','tools/unit_worker.py','tests/test_native_cli.py','tests/test_batch_identity.py','tests/test_codex_history.py','tests/test_regression.py','tests/test_jail_contract.py','tests/integration/test_historical_runtime.py','provenance/regression-baseline.json','provenance/regression.zh-CN.md'}
+            required_p3 = {'tools/run_regression.py','tools/regression_cases.py','tools/runtime_regression.py','tools/config_lifecycle.py','tools/sandbox_probe.py','tools/ci_check.py','tools/check_installation.py','tools/unit_worker.py','tests/test_native_cli.py','tests/test_batch_identity.py','tests/test_codex_history.py','tests/test_regression.py','tests/test_jail_contract.py','tests/integration/test_historical_runtime.py','provenance/regression-baseline.json','provenance/regression.zh-CN.md'}
+            if 'provenance/preparation-scripts-baseline.json' not in members:
+                required_p3.add('.github/workflows/offline.yml')
             require(required_p3.issubset(members), 'sdist contains all P3 suites, diagnostic tools, provenance and CI workflow')
             required_p4={'tools/package_evidence.py','tools/evidence_support.py','tools/evidence_verify.py','tests/test_evidence_packaging.py','provenance/evidence-baseline.json','provenance/evidence.zh-CN.md'}
             require(required_p4.issubset(members), 'sdist contains P4 evidence tools, tests and provenance')
@@ -200,6 +213,12 @@ def main():
                                       'provenance/p5-documentation.md', 'provenance/release-assets.json',
                                       'provenance/p5-documentation-baseline.json', 'tests/test_release_documentation.py'}
             require(required_documentation.issubset(members), 'sdist contains public documentation, citation and pending release materials')
+            if 'provenance/preparation-scripts-baseline.json' in members:
+                required_scripts = {'scripts/prepare_environment.sh', 'scripts/prepare_dataspace.sh',
+                                    'scripts/verify_history.sh', 'tools/preparation.py',
+                                    'tests/test_preparation_scripts.py', 'provenance/preparation-scripts.md',
+                                    '.github/workflows/preparation.yml', 'cloud_checks/preparation.py'}
+                require(required_scripts.issubset(members), 'sdist contains preparation entries, verification and source records')
             for name in required_documentation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current public documentation '+name)
             for name, expected_sha in effective_provenance(members).items():

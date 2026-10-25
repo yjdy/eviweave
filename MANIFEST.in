@@ -8,7 +8,8 @@ recursive-include provenance *.json *.md
 recursive-include tests *.py
 recursive-include tools *.py
 recursive-include scripts *.py *.sh
-include .github/workflows/offline.yml
+include .github/workflows/p5-cloud.yml .github/workflows/preparation.yml
+recursive-include cloud_checks *.py *.json
 include docker/Dockerfile.workbench docker/.dockerignore
 include docker/Dockerfile.public-workbench
 recursive-include docker/workbench *.md *.json *.txt

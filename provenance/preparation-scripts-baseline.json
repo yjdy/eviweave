@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "scope": "Preparation entries, README follow-up, exact-candidate hosted checks and source/package verification; pending hosted acceptance",
+  "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+  "baseline_commit": "08ceaa0e3a23d6371f9570862da420de7e90cce5",
+  "source_identity_note": "source_sha256 extends the last recorded released content. baseline_sha256 separately records actual post-release baseline bytes, including README and cloud-control changes first registered here. release_sha256 denotes candidate bytes, not a claim of publication.",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce"
+  },
+  "removed_files": [
+    {
+      "destination": ".github/workflows/offline.yml",
+      "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+      "source_sha256": "6ebc9cebb29cb23bb2c80dc86d7f381476e976979604f5033ccaf85fbc9b8593",
+      "reason": "Retire the default workflow already removed by the separately authorized cloud-checks merge; replace packaging requirement with current preparation workflow."
+    }
+  ],
+  "files": [
+    {
+      "destination": ".github/workflows/p5-cloud.yml",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "ada0bbfa734e3d0765b177a79bb29bd940c1c3119e0d5e6822ca2074106aa478",
+      "release_sha256": "ada0bbfa734e3d0765b177a79bb29bd940c1c3119e0d5e6822ca2074106aa478",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": ".github/workflows/preparation.yml",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "0db82dd5e07fe6ad9b005aa11641cd94a4318d7090dee281de620e56a1152159",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": ".gitignore",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "630fc7cac5074a750d46c784b659a0700389bc3817f2090a5845362d65ec7b3f",
+      "release_sha256": "630fc7cac5074a750d46c784b659a0700389bc3817f2090a5845362d65ec7b3f",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "LICENSE",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "9650b7acf94d387e7983d2ff353f05022fbcccbc076035e2d78197a6c0f8dbb0",
+      "release_sha256": "9650b7acf94d387e7983d2ff353f05022fbcccbc076035e2d78197a6c0f8dbb0",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+      "source_sha256": "a58bd3572b3f4ee884479ba180c34a383c725f591b9d74869d7fd63c489db7f3",
+      "baseline_sha256": "a58bd3572b3f4ee884479ba180c34a383c725f591b9d74869d7fd63c489db7f3",
+      "release_sha256": "98f5ebb5172e2561b48d5155bd6cef166ebc88a1d994635afb282e255504d4b2",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+      "source_sha256": "0b95fceddc8651426079357bfe0841426b528e84857ff8d496f3b2bce2684894",
+      "baseline_sha256": "ea0a52816b50343ca15fdd8c31223e85ac2333e9c12ffd5da6a122ed009f76c3",
+      "release_sha256": "f3aed92b1e0dcc4d21a43df3b838b7c79033fa3726950ad75a04020f04d37eff",
+      "reason": "Bind the approved post-release bilingual guide and new preparation commands, retaining explicit unverified status."
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+      "source_sha256": "26bc3b8083fffa1e08fe146f1b1b6e48281a6ec6fe73b9b15bd61d7dbe247d50",
+      "baseline_sha256": "b772a6a0f2cf2e32c4acb966a119f197804c2b2dfe4c31785f3475ebf63074bb",
+      "release_sha256": "18525c9fbd2ed71de1d95a8d88e60e221dbf8c3e08dbab85ec1b4317e746a419",
+      "reason": "Bind the approved post-release bilingual guide and new preparation commands, retaining explicit unverified status."
+    },
+    {
+      "destination": "cloud_checks/anonymous-input.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "f340c31267c81e46eca29399eeb3755785ea784c4b9a64617b2362b24c469ddc",
+      "release_sha256": "f340c31267c81e46eca29399eeb3755785ea784c4b9a64617b2362b24c469ddc",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/expected-assets.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "8182f34a0ce86914d54b0a4cf5e1805290aebe47f440993a82cb03169d29ee12",
+      "release_sha256": "8182f34a0ce86914d54b0a4cf5e1805290aebe47f440993a82cb03169d29ee12",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/gates-input.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "7f55bad347e08bb0b931a2b7e3818062af311b38d41d85d5396f29190368e127",
+      "release_sha256": "7f55bad347e08bb0b931a2b7e3818062af311b38d41d85d5396f29190368e127",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/gates.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "5d662c8ab3a6ebe55d4e1c79a43add9fddfd583665a2a4582b0bd1e7621e7e63",
+      "release_sha256": "5d662c8ab3a6ebe55d4e1c79a43add9fddfd583665a2a4582b0bd1e7621e7e63",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/namespace.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "400134f8b373fea05cf60bf1e7241bb983ee73fef6660c11fe1f0f0ba219fc71",
+      "release_sha256": "400134f8b373fea05cf60bf1e7241bb983ee73fef6660c11fe1f0f0ba219fc71",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/preparation.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "3660ba1c2a1ac02ca52ceeef747d4d223a21256f053e821eccec3d7d7b541a4a",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "cloud_checks/unit_scope.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "5cc84da6d23fd9f69e8d65e78fc15895ef92b0b9b04d5172d5bbd636bdca2dd4",
+      "release_sha256": "5cc84da6d23fd9f69e8d65e78fc15895ef92b0b9b04d5172d5bbd636bdca2dd4",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "cloud_checks/verify.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "d272977dbcea044d7e2918e967bb5244635cab24bd54bfb850e88a935358d67c",
+      "release_sha256": "d272977dbcea044d7e2918e967bb5244635cab24bd54bfb850e88a935358d67c",
+      "reason": "Register retained cloud acceptance controls introduced after the original v0.1.0 source."
+    },
+    {
+      "destination": "configs/codex.example.yaml",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "7dea4c199101f1c27af84ac362eb613bf8d4ae98bcb09633d9512a3fcc13224e",
+      "release_sha256": "7dea4c199101f1c27af84ac362eb613bf8d4ae98bcb09633d9512a3fcc13224e",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "provenance/changes.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "33ce6a49a9b76c3588e4aa6f08f8b78cee5c45e5129e13db6997554975cd2f3f",
+      "release_sha256": "33ce6a49a9b76c3588e4aa6f08f8b78cee5c45e5129e13db6997554975cd2f3f",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "provenance/preparation-scripts.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "17ed2f067380ca58166220a92f8fd23083ac0c4ccf0569d11fbdc02797b4be3e",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "provenance/runtime-changes.zh-CN.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "d8a44c921d4eac1bc636e04b27da9048527ec6d2b5d6482e183d024079f9f0e0",
+      "release_sha256": "d8a44c921d4eac1bc636e04b27da9048527ec6d2b5d6482e183d024079f9f0e0",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "pyproject.toml",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "e74b8ef4c74efd412c83269497af4fe3b1326913f2ffb16ed9741631c30c94bc",
+      "release_sha256": "e74b8ef4c74efd412c83269497af4fe3b1326913f2ffb16ed9741631c30c94bc",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "scripts/prepare_dataspace.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "ff08a118bf82e5ecf8444a17efa46f1c5e85507286221f052d8a16c31358f2a9",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "scripts/prepare_environment.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "42223667d8d3a5bf38e6e3d435ac51f1540cf557056b7c0d491ecbc39f6add2c",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "scripts/verify_history.sh",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "f9366f69700123af5e08415b48ae00fca31b188262ae89b406ce21dca284fb2a",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tests/test_baseline_audit.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "795c19f51085f2ebe06b47cb2cacc18215d8a02b56d2b774b842660088c7eef0",
+      "release_sha256": "795c19f51085f2ebe06b47cb2cacc18215d8a02b56d2b774b842660088c7eef0",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tests/test_extraction.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "8094ee77eea833b2b51f8d733ea3674aed5e573074c335f04adb476e5f7b3612",
+      "release_sha256": "8094ee77eea833b2b51f8d733ea3674aed5e573074c335f04adb476e5f7b3612",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tests/test_preparation_scripts.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "276ec7e03aba773329428f3b2a7c4bdbf8963045897454a90e5c0366e406006e",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tools/preparation.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "78f6dde3f2ecb14934be6d30fb3d0db3d7de91d7b738e21bedce4032462a527f",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tools/verify_baseline.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "1688d50b38a26f9fb524fe529964e272357de9edac2c9c46483b82c5c6468957",
+      "release_sha256": "1688d50b38a26f9fb524fe529964e272357de9edac2c9c46483b82c5c6468957",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
+      "source_sha256": "1072f78f9e9b461877d771406f8fe56eaf9742fef2898f6856e7622070975b1f",
+      "baseline_sha256": "1072f78f9e9b461877d771406f8fe56eaf9742fef2898f6856e7622070975b1f",
+      "release_sha256": "f33a81849be73f82a84e9b6df00015d768dafa0352356912d70795e0d0030d3b",
+      "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
+    }
+  ]
+}

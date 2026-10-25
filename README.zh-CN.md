@@ -34,11 +34,11 @@ EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSp
 
 ### 当前说明与发布版本
 
-本页按已完成的发布与云端验收更新。v0.1.0 标签、安装包和历史来源材料保留原字节，其中部分文件仍使用发布准备时的表述。实际发布状态、云端结果与提交绑定见 [Release 正文及附件](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)。下文明确标为“计划新增”的脚本当前尚未提供。
+本页按已完成的发布与云端验收更新。v0.1.0 标签、安装包和历史来源材料保留原字节，其中部分文件仍使用发布准备时的表述。实际发布状态、云端结果与提交绑定见 [Release 正文及附件](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)。下文三个准备入口已加入当前开发分支，云端验收尚待执行；它们未包含在已发布的 v0.1.0 标签或安装包中。
 
 ## 2. 安装与准备
 
-建议从 **v0.1.0 源码或源码包**开始。单独安装 wheel 可以取得业务包和 `eviweave` / `dataspace-baselines` 两个命令入口；完整复现还需要源码中的脚本、资源锁和验证工具。下载入口为 [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)，本项目未发布到 PyPI。
+使用下述新脚本需要包含三个入口的开发分支源码，当前尚无包含它们的新发行包。复验原始发布版本可从 **v0.1.0 源码或源码包**开始，并使用[原有准备工具](provenance/public-preparation.md)。单独安装 wheel 可以取得业务包和 `eviweave` / `dataspace-baselines` 两个命令入口；完整复现还需要源码中的脚本、资源锁和验证工具。下载入口为 [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)，本项目未发布到 PyPI。
 
 ### 2.1 环境准备
 
@@ -56,24 +56,29 @@ EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSp
 
 环境安装分为四步：
 
-1. 获取源码，并选择 `v0.1.0` 标签作为复现起点。
+1. 获取包含新脚本的源码；将目标 CPython 3.12 或 3.13 作为下文的 `python3`。
 2. 由开发者或系统管理员安装上述宿主依赖。
-3. 按[现有环境准备步骤](provenance/public-preparation.md)下载固定资源、构建工作台、采集并检查环境档案，再通过 `scripts/install.sh` 安装项目。
-4. 按同一文档生成独立离线配置，执行离线 doctor 和合成测试，确认环境可用后再配置模型访问。
+3. 先检查静态前置条件，再准备工作台、登记档案并安装：
 
-> **计划新增：** `scripts/prepare_environment.sh` 将封装已有资源准备、档案采集和安装工具。当前尚无此脚本；现阶段请使用上方链接中的实际步骤。
+```sh
+./scripts/prepare_environment.sh --python python3 --check-only
+```
 
-该计划脚本将统一完成：
+```sh
+./scripts/prepare_environment.sh --python python3
+```
 
-- 检查平台、Python、宿主工具和必要权限。
-- 按公开资源锁获取 Codex 和工作台依赖，校验下载内容。
-- 独立构建工作台，记录当前宿主及运行时身份。
-- 创建项目虚拟环境、安装锁定依赖。
-- 生成离线配置，并执行无模型检查。
+4. 成功后，查看终端给出的 `.audit/preparation/.../preparation-report.json`，再按第 2.3 节显式选择档案和模型配置。
 
-现有准备工具不会自动安装系统工具、覆盖已有配置或调用模型。环境档案记录的是本次重建的实际环境，不能将其认作历史实验的原始主机。采集和检查档案不会自动激活，运行时需要显式选择。
+**当前验收状态：代码已加入开发分支，云端使用与安装验收尚未执行。** `--check-only` 不联网、不写文件，也不验证免密权限或沙箱能力；实际准备时才执行这些检查。
 
-所有下载、HOME、缓存、临时文件和 Docker/containerd 存储均放在项目内部，不接系统 Docker socket。准备前应预留工作台构建与导出的空间。检查完成后，按[环境准备说明](provenance/public-preparation.md)停止项目 daemon；需要镜像检查时再使用同一存储启动。
+默认创建 `.venv-experiment`、`.local/profiles/public-host.json`、`.local/config-v6/offline-public-host.yaml`，并将 Codex、工作台和独立 daemon 存储放在 `.runtimes/prepared/`。准备只执行离线 doctor，不下载评分材料或完整题目数据。
+
+已有目标需显式添加 `--reuse`；冲突或损坏直接拒绝，不覆盖已有环境。可用 `--venv`、`--profile-name`、`--runtime-root` 和 `--cache` 选择独立目录，详情见 `--help`。已有 `.local/config-v6/codex.yaml` 保留；离线配置只复用本脚本登记摘要后未变化的文件。
+
+脚本不会自动安装系统工具、激活档案、改写 `.local/env.sh` 或调用模型。档案记录的是本次重建环境，不能认作历史实验原始主机。所有下载、HOME、缓存、临时文件和 Docker/containerd 存储留在项目内，不接系统 Docker socket。
+
+脚本要求至少 8GiB 可用空间作为初始检查，实际峰值可能更高。它会停止本次启动的 daemon，保留原先已运行的实例；后续镜像检查按[脚本使用说明](provenance/preparation-scripts.md)使用同一存储重新启动。环境与评分材料准备完成后，可按该说明执行无模型合成测试。
 
 ### 2.2 数据准备
 
@@ -87,7 +92,23 @@ DataSpace 的题目数据和评分材料分开准备：
 
 完整题目 ZIP 约 **2.88GB**，解压内容约 **15.01GB**，另需工作台和输出空间。只复验历史成绩，无需下载完整题目数据，也无需构建模型运行工作台。
 
-> **计划新增：** `scripts/prepare_dataspace.sh` 将提供“仅准备评分材料”和“准备完整题目数据”两种明确选择，复用现有锁定下载与摘要校验工具，默认不下载完整数据。当前请使用[评分与数据准备步骤](provenance/public-preparation.md)中的 `evaluation` 或 `dataset` 入口，并显式选择下表路径。
+默认仅准备评分材料，可先检查静态前置条件：
+
+```sh
+./scripts/prepare_dataspace.sh --python python3 --check-only
+```
+
+```sh
+./scripts/prepare_dataspace.sh --python python3
+```
+
+只有需要新模型实验时才明确选择完整数据：
+
+```sh
+./scripts/prepare_dataspace.sh --python python3 --mode full
+```
+
+**完整数据模式的新增包装层将使用人工小型归档验证，本轮不重新下载约 15GB 完整数据；云端验收尚待执行。** `--reuse` 显式核验已有目标，评分目录、数据目录和缓存分别通过 `--evaluation-root`、`--dataset`、`--cache` 指定。复用完整数据需要缓存中保留摘要匹配的原 ZIP，以逐文件比对；不会因 ZIP 缺失自动补下载。
 
 建议保持以下目录约定：
 
@@ -144,7 +165,17 @@ API key 不写入模型 YAML、题目资料或公开日志。项目只使用专�
 
 将两者放入 `.local/evidence-v6/`。附件包含 **410 份预测、414 条尝试摘要、固定选择记录，以及 5 题、6 次尝试的精选脱敏轨迹**。
 
-> **计划新增：** `scripts/verify_history.sh` 将串联已有附件校验、解包和离线评分工具。当前标准库校验入口为 `tools/package_evidence.py verify`；先核对归档及外部摘要，再解包，通过 `tools/standalone.py score` 使用冻结材料评分。现有参数见[附件校验说明](provenance/evidence.zh-CN.md)和对应工具的 `--help`；历史离线评分采用 CPython 3.12.3。
+历史评分要求 CPython 3.12.3。若 `python3` 是其他版本，先将 Shell 变量 `HISTORY_PYTHON` 设置为已准备的 3.12.3 解释器绝对路径；脚本不会安装该解释器。
+
+显式允许从固定公开 Release 获取附件，并执行校验和评分：
+
+```sh
+./scripts/verify_history.sh --python "${HISTORY_PYTHON:-python3}" --download
+```
+
+已有附件时省略 `--download`，默认完全离线。可用 `--archive`、`--evaluation-root` 和 `--output` 显式选择输入与全新输出，或先用 `--check-only` 做不写入的静态检查。缺 ZIP、缺外部摘要、摘要不符或评分逐题不一致均失败。
+
+脚本无需安装业务包、完整工作台或题目数据，只依赖源码工具、标准库和准备好的 121 项评分材料。报告登记原附件 SHA-256 和逐题匹配结果；新入口的云端复验尚待执行。
 
 完成后应得到：
 
@@ -282,19 +313,19 @@ API key 不写入模型 YAML、题目资料或公开日志。项目只使用专�
 
 历史模型别名没有对应的不可变服务快照；新宿主环境也拥有独立身份。因此，代码、环境检查、历史预测核验和新实验得分应分别记录。更多历史恢复、后续独立运行及证据限制见[实验说明](EXPERIMENTS.zh-CN.md)。
 
-退出 0 表示操作完成，不表示答案全部正确；1 表示执行、证据、评分或报告失败，2 表示参数或前置条件失败，130 表示中断。
+上述实验命令退出 0 表示操作完成，不表示答案全部正确；1 表示执行、证据、评分或报告失败，2 表示参数或前置条件失败，130 表示中断。
 
 ## 4. 后续计划
 
 后续工作围绕以下方向推进：
 
-- **简化使用入口**：整理上述环境、数据和历史验证脚本，减少手工配置步骤，补充更清晰的诊断说明。
+- **完善使用入口**：完成上述三个新脚本的云端验收，依据实际反馈改善诊断和准备流程。
 - **持续验证兼容性**：在已验版本基础上，逐步验证更多 Python 补丁版本和宿主环境，整理面向后续 main 变更的常规 CI。
 - **完善费用观测**：补齐逐次请求的持久化、用量和金额证据，通过验收后再启用完整在线采集。
 - **开发 EviWeave Controlled**：与冻结 V6 分开演进，保持清楚的版本及实验边界。
 - **补充研究材料**：整理正式技术报告和更完整的方法分析。
 
-这些项目属于后续工作，不代表 v0.1.0 已提供相应能力。当前云端验证工作流面向固定 v0.1.0，不是 main 的通用持续集成。
+这些项目属于后续工作，不代表 v0.1.0 已提供相应能力。历史云端工作流仍验证固定 v0.1.0；新增准备脚本工作流将检验其实际候选提交，目前尚未运行。
 
 ---
 

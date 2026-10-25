@@ -1,0 +1,64 @@
+name: Preparation scripts acceptance
+on:
+  workflow_dispatch:
+  push:
+    branches: ['codex/preparation-scripts']
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: preparation-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  preparation:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - python: '3.12.3'
+            language: en
+          - python: '3.13.16'
+            language: zh
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/host-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/host-home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        id: history
+        with:
+          python-version: '3.12.3'
+      - name: Keep history interpreter library lookup inside checkout
+        run: python -B cloud_checks/preparation.py --bootstrap
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Keep selected interpreter library lookup inside checkout
+        run: python -B cloud_checks/preparation.py --bootstrap
+      - name: Test actual candidate and README in a clean copy
+        env:
+          HISTORY_PYTHON: ${{ steps.history.outputs.python-path }}
+        run: >-
+          sudo -E env LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
+          "$(id -u)" "$(id -g)" "$(command -v python)" -B
+          cloud_checks/preparation.py --language '${{ matrix.language }}'
+          --history-python "$HISTORY_PYTHON"
+      - name: Upload curated summaries only
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: preparation-${{ matrix.language }}-${{ matrix.python }}
+          path: public-results/preparation-*.json
+          if-no-files-found: error
+          retention-days: 30
