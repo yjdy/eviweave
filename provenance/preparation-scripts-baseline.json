@@ -77,16 +77,16 @@
       "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
       "source_sha256": "0b95fceddc8651426079357bfe0841426b528e84857ff8d496f3b2bce2684894",
       "baseline_sha256": "ea0a52816b50343ca15fdd8c31223e85ac2333e9c12ffd5da6a122ed009f76c3",
-      "release_sha256": "f3aed92b1e0dcc4d21a43df3b838b7c79033fa3726950ad75a04020f04d37eff",
-      "reason": "Bind the approved post-release bilingual guide and new preparation commands, retaining explicit unverified status."
+      "release_sha256": "2916ab9aa1efb586c780fc3d6b08498cbb54958af5379a2dd19bd755ee8323f7",
+      "reason": "Bind bilingual script commands and actual hosted execution records while preserving the original release scope."
     },
     {
       "destination": "README.zh-CN.md",
       "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
       "source_sha256": "26bc3b8083fffa1e08fe146f1b1b6e48281a6ec6fe73b9b15bd61d7dbe247d50",
       "baseline_sha256": "b772a6a0f2cf2e32c4acb966a119f197804c2b2dfe4c31785f3475ebf63074bb",
-      "release_sha256": "18525c9fbd2ed71de1d95a8d88e60e221dbf8c3e08dbab85ec1b4317e746a419",
-      "reason": "Bind the approved post-release bilingual guide and new preparation commands, retaining explicit unverified status."
+      "release_sha256": "8f1b190c408ba0b32f8cf6d59fbef4943a98ebb22cc88dc309a5ba442fb46dbe",
+      "reason": "Bind bilingual script commands and actual hosted execution records while preserving the original release scope."
     },
     {
       "destination": "cloud_checks/anonymous-input.json",
@@ -173,7 +173,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "17ed2f067380ca58166220a92f8fd23083ac0c4ccf0569d11fbdc02797b4be3e",
+      "release_sha256": "fc7081dfa90b6d2d8a4d20530c9fdc1f94624855f7a35a540b60e399cc953187",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {

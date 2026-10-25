@@ -4,12 +4,12 @@ Author / 作者：袁珺 / Jun Yuan. Code and documentation: MIT, retaining Data
 
 ## Status / 状态
 
-These three entries exist on the development branch. Hosted acceptance has not
-run yet. They are not part of the original v0.1.0 tag or released packages. No
+These three entries exist on the development branch. See the [hosted workflow](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml)
+for actual candidate execution records. They are not part of the original v0.1.0 tag or released packages. No
 new model inference, benchmark run, online cost collection, or publication is
 performed by these entries.
 
-三个入口已写入开发分支，托管验收尚未执行；它们不在原 v0.1.0 标签或发行包中。
+三个入口由开发分支提供，实际候选执行记录见托管工作流；它们不在原 v0.1.0 标签或发行包中。
 不执行真实推理、benchmark 运行、在线费用采集或发布。
 
 ## Entries / 入口
@@ -151,12 +151,12 @@ The new hosted workflow checks its actual candidate commit, using clean copies,
 CPython 3.12.3/3.13.16, real Bubblewrap, locked installation, source/installed
 tests, sdist-to-wheel builds and original public historical evidence. Full data
 mode uses small artificial archives instead of repeating the full dataset
-download. Only curated summaries are uploaded. None of these checks have been
-run for this development candidate yet.
+download. Only curated summaries are uploaded. Reports distinguish each actually tested
+candidate commit and job result; workflow configuration alone is not a pass.
 
 新托管工作流检验实际候选提交，在干净副本中使用 3.12.3/3.13.16、真实 Bubblewrap、
 锁定安装、源码/安装后测试、sdist→wheel 和原公开历史附件。完整数据模式只用小型
-人工归档，不重复全量下载；仅上传筛选摘要。当前候选的这些检查尚未执行。
+人工归档，不重复全量下载；仅上传筛选摘要。报告区分实际被测候选提交及各job结果，不能凭配置存在宣称通过。
 
 The new provenance layer retains all prior JSON bytes, binds the post-release
 README changes, and explicitly retires the removed default offline workflow.

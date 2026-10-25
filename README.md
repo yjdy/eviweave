@@ -34,7 +34,7 @@ Public materials allow verification of historical predictions and the public-set
 
 ### This guide and the released version
 
-This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The three preparation entries below have been added to the development branch, with cloud acceptance still pending; they are absent from the published v0.1.0 tag and packages.
+This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The development branch provides the three preparation entries below; see the [preparation workflow](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml) for hosted execution records. They are absent from the published v0.1.0 tag and packages.
 
 ## 2. Installation and preparation
 
@@ -70,7 +70,7 @@ Prepare the environment in four steps:
 
 4. On success, inspect the reported `.audit/preparation/.../preparation-report.json`, then explicitly select the profile and model configuration as described in section 2.3.
 
-**Acceptance status: code added to the development branch; cloud usage and installation acceptance have not run.** `--check-only` neither connects to the network nor writes files, and does not certify passwordless privileges or sandbox capability. Actual preparation checks those capabilities.
+The development branch provides these preparation entries; the workflow records the actual scope of acceptance. `--check-only` neither connects to the network nor writes files, and does not certify passwordless privileges or sandbox capability. Actual preparation checks those capabilities.
 
 Defaults are `.venv-experiment`, `.local/profiles/public-host.json`, and `.local/config-v6/offline-public-host.yaml`, with Codex, workbench, and independent daemon storage under `.runtimes/prepared/`. Preparation runs only the offline doctor; it does not download scoring materials or the complete dataset.
 
@@ -108,7 +108,7 @@ Explicitly select complete data only for new model experiments:
 ./scripts/prepare_dataspace.sh --python python3 --mode full
 ```
 
-**The new full-data wrapper will be checked with artificial small archives; this work will not download the approximately 15GB complete dataset again. Cloud acceptance is still pending.** `--reuse` explicitly verifies existing targets. Select scoring, data, and cache directories with `--evaluation-root`, `--dataset`, and `--cache`. Complete-data reuse requires the retained, checksum-matching original ZIP in the cache for per-file comparison; a missing ZIP does not trigger an implicit download.
+**Acceptance of the new full-data wrapper is limited to artificial small archives; this work does not download the approximately 15GB complete dataset again.** `--reuse` explicitly verifies existing targets. Select scoring, data, and cache directories with `--evaluation-root`, `--dataset`, and `--cache`. Complete-data reuse requires the retained, checksum-matching original ZIP in the cache for per-file comparison; a missing ZIP does not trigger an implicit download.
 
 Recommended directory conventions:
 
@@ -175,7 +175,7 @@ Explicitly allow downloads from the fixed public Release, then verify and score:
 
 Omit `--download` for existing assets; the default is fully offline. Select inputs and a fresh output using `--archive`, `--evaluation-root`, and `--output`, or first run read-only static preflight with `--check-only`. Missing ZIP/checksum files, mismatching digests, or different per-task scoring results fail.
 
-The script requires only source tools, the standard library, and the prepared 121 scoring files, without installing the business package, full workbench, or task dataset. Its report records the original archive SHA-256 and per-task match. Cloud verification of this new entry is still pending.
+The script requires only source tools, the standard library, and the prepared 121 scoring files, without installing the business package, full workbench, or task dataset. Its report records the original archive SHA-256 and per-task match. Execution records are available in the preparation workflow.
 
 Expected results:
 
@@ -319,13 +319,13 @@ For the experiment commands above, exit 0 means the operation completed, not tha
 
 Planned directions:
 
-- **Better entry points**: finish cloud acceptance of the three new scripts and improve diagnostics and preparation based on actual use.
+- **Better entry points**: improve diagnostics and preparation based on actual use of the three scripts.
 - **Continued compatibility checks**: verify additional Python patch versions and hosts based on evidence, and organize regular CI for future main changes.
 - **Complete cost observation**: establish per-request persistence, usage, and amount evidence, then enable full online collection only after acceptance.
 - **EviWeave Controlled**: develop separately from frozen V6, retaining clear version and experiment boundaries.
 - **Research materials**: prepare a formal technical report and fuller method analysis.
 
-These are future work, not capabilities delivered by v0.1.0. The historical cloud workflow still verifies fixed v0.1.0; the new preparation workflow will test its actual candidate commit and has not run yet.
+These are future work, not capabilities delivered by v0.1.0. The historical cloud workflow still verifies fixed v0.1.0; the new preparation workflow tests its actual candidate commit, with execution records kept separate from historical v0.1.0.
 
 ---
 
