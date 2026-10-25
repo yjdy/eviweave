@@ -33,6 +33,13 @@ def main():
                 if not pidfile.exists(): break
                 time.sleep(0.1)
             else: raise RuntimeError('project Docker did not stop in time')
+            # The PID file may disappear before dockerd releases its socket and
+            # storage. A subsequent start must not observe the retiring daemon.
+            for _ in range(100):
+                status = Path(f'/proc/{pid}/status')
+                if not status.exists() or 'State:\tZ' in status.read_text(): break
+                time.sleep(0.1)
+            else: raise RuntimeError('project Docker process did not exit in time')
         if containerd_pid.exists():
             pid = int(containerd_pid.read_text())
             cmdline = Path(f'/proc/{pid}/cmdline').read_bytes().replace(b'\0', b' ').decode()

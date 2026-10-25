@@ -253,6 +253,35 @@ class PreparationScriptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'retirement'):
             effective_provenance(corrupted)
 
+    def test_docker_stop_waits_for_process_after_pidfile_disappears(self):
+        import importlib.util
+        sys.path.insert(0, str(ROOT / 'scripts'))
+        spec = importlib.util.spec_from_file_location('preparation_project_docker', ROOT / 'scripts/project_docker.py')
+        docker = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(docker)
+        storage = self.base / 'daemon'
+        storage.mkdir()
+        pidfile = storage / 'docker.pid'
+        pidfile.write_text('12345')
+        proc = self.base / 'proc/12345'
+        proc.mkdir(parents=True)
+        (proc / 'cmdline').write_bytes(b'dockerd\0--config-file\0' + str(storage / 'daemon.json').encode())
+        (proc / 'status').write_text('State:\tS (sleeping)\n')
+        def path(value):
+            text = str(value)
+            return self.base / text.lstrip('/') if text.startswith('/proc/') else Path(value)
+        waits = []
+        def sleep(seconds):
+            waits.append(seconds)
+            if len(waits) == 2:
+                (proc / 'status').write_text('State:\tZ (zombie)\n')
+        with patch.object(docker, 'Path', side_effect=path), \
+                patch.object(docker.sys, 'argv', ['project_docker.py', 'stop', '--storage-root', str(storage)]), \
+                patch.object(docker.subprocess, 'run', side_effect=lambda *a, **kw: pidfile.unlink()), \
+                patch.object(docker.time, 'sleep', side_effect=sleep):
+            docker.main()
+        self.assertEqual(waits, [0.1, 0.1])
+
 
 if __name__ == '__main__':
     unittest.main()

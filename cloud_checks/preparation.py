@@ -25,7 +25,7 @@ def sha(path):
 def safe_error(detail):
     """Expose only literal errors already in public source, never log payloads."""
     literals = []
-    for path in (ROOT / 'tools').glob('*.py'):
+    for path in [*(ROOT / 'tools').glob('*.py'), *(ROOT / 'scripts').glob('*.py')]:
         for node in ast.walk(ast.parse(path.read_text())):
             if isinstance(node, ast.Raise) and isinstance(node.exc, ast.Call) and node.exc.args:
                 arg = node.exc.args[0]
@@ -65,6 +65,9 @@ class Check:
             self.errors.append(name)
             diagnostics = []
             for line in (self.out / (name + '.log')).read_text(errors='replace').splitlines():
+                exception = re.match(r'^(\w+(?:Error|Exception)): (.*)$', line)
+                if exception:
+                    diagnostics.append({'error_type': exception[1], 'error': safe_error(exception[2])})
                 if line.startswith('{'):
                     try:
                         doc = json.loads(line)
@@ -133,6 +136,18 @@ def acceptance(language, history_python):
     c.report.update(actual_candidate_commit=actual, candidate_tree=subprocess.check_output(['git', 'rev-parse', 'HEAD^{tree}'], cwd=target, text=True).strip(),
                     clean_copy_without_developer_state=True, full_dataset_download=False)
     try:
+        # No images or datasets: exercise actual stop/start readiness repeatedly
+        # before the expensive preparation path. Never touches the system socket.
+        lifecycle = target / '.runtimes/daemon-check/build'
+        try:
+            for cycle in range(20):
+                c.run('daemon-cycle-start-' + str(cycle), [sys.executable, '-B', 'scripts/project_docker.py', 'start', '--storage-root', lifecycle])
+                c.run('daemon-cycle-stop-' + str(cycle), [sys.executable, '-B', 'scripts/project_docker.py', 'stop', '--storage-root', lifecycle])
+                assert not any((lifecycle / (n + '.pid')).exists() for n in ('docker', 'containerd'))
+            c.report['daemon_lifecycle'] = {'cycles': 20, 'status': 'PASS', 'pid_files_cleared': True}
+        finally:
+            if any((lifecycle / (n + '.pid')).exists() for n in ('docker', 'containerd')):
+                c.run('daemon-cycle-cleanup', [sys.executable, '-B', 'scripts/project_docker.py', 'stop', '--storage-root', lifecycle])
         names = subprocess.check_output(['git', 'ls-files'], cwd=target, text=True).splitlines()
         identities = {n: sha(target / n) for n in names}
         for name in names:
