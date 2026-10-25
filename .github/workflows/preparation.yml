@@ -49,7 +49,7 @@ jobs:
         env:
           HISTORY_PYTHON: ${{ steps.history.outputs.python-path }}
         run: >-
-          sudo -E env LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
           unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
           "$(id -u)" "$(id -g)" "$(command -v python)" -B
           cloud_checks/preparation.py --language '${{ matrix.language }}'

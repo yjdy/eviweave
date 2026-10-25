@@ -1,6 +1,7 @@
 """Hosted-only acceptance of the current preparation candidate, not fixed v0.1.0."""
 from pathlib import Path
 import argparse
+import ast
 import datetime
 import hashlib
 import json
@@ -19,6 +20,18 @@ from verify import bootstrap_python
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def safe_error(detail):
+    """Expose only literal errors already in public source, never log payloads."""
+    literals = []
+    for path in (ROOT / 'tools').glob('*.py'):
+        for node in ast.walk(ast.parse(path.read_text())):
+            if isinstance(node, ast.Raise) and isinstance(node.exc, ast.Call) and node.exc.args:
+                arg = node.exc.args[0]
+                if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                    literals.append(arg.value)
+    return next((s for s in sorted(literals, key=len, reverse=True) if detail == s or detail.startswith(s + ':')), 'NON_LITERAL_ERROR; private details retained on runner')
 
 
 class Check:
@@ -50,6 +63,26 @@ class Check:
         print(json.dumps(self.report['commands'][-1]), flush=True)
         if result.returncode:
             self.errors.append(name)
+            diagnostics = []
+            for line in (self.out / (name + '.log')).read_text(errors='replace').splitlines():
+                if line.startswith('{'):
+                    try:
+                        doc = json.loads(line)
+                    except ValueError:
+                        continue
+                    if doc.get('status') in ('FAIL', 'INTERRUPTED'):
+                        diagnostics.append({'status': doc['status'], 'error': safe_error(str(doc.get('error', '')))})
+            self.report.setdefault('failure_diagnostics', {})[name] = diagnostics
+            for report in (self.root / '.audit/preparation').glob('*/preparation-report.json'):
+                doc = json.loads(report.read_text())
+                if doc['status'] != 'PASS':
+                    self.report.setdefault('preparation_failures', []).append({'action': doc['action'],
+                        'status': doc['status'], 'error': safe_error(str(doc.get('error', ''))), 'steps': doc['steps']})
+            for report in (self.root / '.local/preparation-cache').glob('*/failure-*.json'):
+                doc = json.loads(report.read_text())
+                self.report.setdefault('resource_failures', []).append({'error_type': doc.get('error_type'),
+                    'error': safe_error(str(doc.get('detail', '')))})
+            print(json.dumps({'failed_step': name, 'diagnostics': diagnostics}), flush=True)
             if not soft:
                 raise ValueError('cloud step failed: ' + name)
         return result.returncode
