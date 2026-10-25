@@ -68,6 +68,7 @@ class PreparationScriptTests(unittest.TestCase):
         with patch.object(prep, 'available', return_value=0):
             with self.assertRaisesRegex(ValueError, 'space'):
                 prep.preflight(self.args('dataspace', '--mode', 'full',
+                                         '--evaluation-root', str(self.base / 'fresh-evaluation'),
                                          '--dataset', str(ROOT / 'data/preparation-artificial-target')))
 
     def test_environment_rejects_unsupported_python(self):

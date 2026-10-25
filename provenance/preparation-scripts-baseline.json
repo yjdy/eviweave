@@ -45,7 +45,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "8bdf20289d7b868116bf172d4e707624ec344c701f2e76469e728265d1f70172",
+      "release_sha256": "97fb2fd866dd921742ee92175b5582cda815053f77c35be011363e5bed1bc1f3",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {
@@ -133,7 +133,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "f69bf5de2a09a884629e7250f30a5ef6eb9e2f0d93c1e0eabcacf0133f836ac3",
+      "release_sha256": "afd8b1eb9b3dd40e4e46f8c3f4d4ec4bf58caa1db25476549edab246498a83db",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {
@@ -237,7 +237,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "276ec7e03aba773329428f3b2a7c4bdbf8963045897454a90e5c0366e406006e",
+      "release_sha256": "89336596d2d5f89a73792d37c1aa93b6efbcc0d0d04aa1edb558563530a8bffb",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {

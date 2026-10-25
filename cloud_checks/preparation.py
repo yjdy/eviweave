@@ -73,6 +73,16 @@ class Check:
                     if doc.get('status') in ('FAIL', 'INTERRUPTED'):
                         diagnostics.append({'status': doc['status'], 'error': safe_error(str(doc.get('error', '')))})
             self.report.setdefault('failure_diagnostics', {})[name] = diagnostics
+            for path in (self.root / '.audit').rglob('unit-results.json'):
+                doc = json.loads(path.read_text())
+                bad = []
+                for case in doc.get('cases', []):
+                    if case['status'] != 'PASS':
+                        reason = case.get('reason', '')
+                        frames = [{'file': Path(f).name, 'line': int(n), 'function': fn}
+                                  for f, n, fn in re.findall(r'File "([^"]+)", line (\d+), in (\S+)', reason)]
+                        bad.append({'case': case['case'], 'status': case['status'], 'frames': frames})
+                self.report.setdefault('unit_diagnostics', []).append({'tests': doc.get('tests'), 'status': doc.get('status'), 'nonpassing': bad})
             for report in (self.root / '.audit/preparation').glob('*/preparation-report.json'):
                 doc = json.loads(report.read_text())
                 if doc['status'] != 'PASS':
@@ -177,9 +187,37 @@ def acceptance(language, history_python):
         c.finish(language)
 
 
+def unit_gate():
+    """Cheap hosted regression before downloading/rebuilding large workbenches."""
+    assert os.environ.get('RUNNER_ENVIRONMENT') == 'github-hosted'
+    actual = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    assert actual == os.environ['GITHUB_SHA']
+    target = ROOT / 'u en'
+    subprocess.run(['git', 'clone', '--no-hardlinks', '--no-local', str(ROOT), str(target)], check=True)
+    c = Check(target, 'unit-gate')
+    c.report['actual_candidate_commit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=target, text=True).strip()
+    assert c.report['actual_candidate_commit'] == actual
+    try:
+        venv = target / '.audit/gate-env'
+        c.run('gate-venv', [sys.executable, '-m', 'venv', venv])
+        py = venv / 'bin/python'
+        c.run('gate-locked-tools', [py, '-m', 'pip', 'install', '--only-binary=:all:', '--require-hashes', '-r', 'locks/ci-tools.txt'])
+        c.run('gate-install', [py, '-m', 'pip', 'install', '--no-build-isolation', '--no-deps', target])
+        c.run('gate-source-unit', [py, '-B', 'tools/run_regression.py', '--suite', 'unit', '--output-root', '.audit/gate-unit'])
+        units = json.loads((target / '.audit/gate-unit/unit-results.json').read_text())
+        assert units['status'] == 'PASS' and all(x['status'] == 'PASS' for x in units['cases'])
+        c.report['source_unit'] = {'status': units['status'], 'tests': units['tests'], 'skips': 0}
+    except Exception as exc:
+        c.errors.append(type(exc).__name__)
+        raise
+    finally:
+        c.finish('unit-gate')
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--bootstrap', action='store_true')
+    p.add_argument('--unit-only', action='store_true')
     p.add_argument('--language', choices=('en', 'zh'))
     p.add_argument('--history-python')
     args = p.parse_args()
@@ -192,6 +230,8 @@ def main():
             raise
         finally:
             c.finish('bootstrap-' + platform.python_version())
+    elif args.unit_only:
+        unit_gate()
     else:
         acceptance(args.language, args.history_python)
 
