@@ -133,7 +133,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "048d89da940f036161e7a4db750dae5accd77bd512f8df4ecb25ba8f802e105a",
+      "release_sha256": "b1ef3f6b7aa2793798dcdfea1ff7d686cd4766c0598d2cd7670b1106edbdb96b",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {
@@ -213,8 +213,8 @@
       "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
       "source_sha256": "eb84827b75f8019164fd6268419852434f22786edbb9082816554c1dad527aa2",
       "baseline_sha256": "eb84827b75f8019164fd6268419852434f22786edbb9082816554c1dad527aa2",
-      "release_sha256": "6dbd99014722919b7bfa35b04b5f52934a4bfa78b99dfbf787f7e26233d24c61",
-      "reason": "Wait for the validated dockerd process to exit after PID-file removal before allowing restart; no Docker configuration or production isolation change."
+      "release_sha256": "bb2a2ba00711cab6c86e8a661846f646cefea4c11936b8f5b3121bc7ec875f68",
+      "reason": "Outer daemon lifecycle only: wait for process exit and bounded API readiness, reject nonempty storage mismatches; preserve isolation and frozen business code."
     },
     {
       "destination": "scripts/verify_history.sh",
@@ -245,7 +245,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "8a68e0b863539f3e4678ac31f4ac3ef8e8250cef16ed3229d92bf852fa7f9c08",
+      "release_sha256": "763e95f1795fad203888857f71970e4a3b274b20ebe72b1982b5113c690671e1",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {

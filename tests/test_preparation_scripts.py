@@ -253,12 +253,16 @@ class PreparationScriptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'retirement'):
             effective_provenance(corrupted)
 
-    def test_docker_stop_waits_for_process_after_pidfile_disappears(self):
+    def _docker_module(self):
         import importlib.util
         sys.path.insert(0, str(ROOT / 'scripts'))
         spec = importlib.util.spec_from_file_location('preparation_project_docker', ROOT / 'scripts/project_docker.py')
         docker = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(docker)
+        return docker
+
+    def test_docker_stop_waits_for_process_after_pidfile_disappears(self):
+        docker = self._docker_module()
         storage = self.base / 'daemon'
         storage.mkdir()
         pidfile = storage / 'docker.pid'
@@ -281,6 +285,42 @@ class PreparationScriptTests(unittest.TestCase):
                 patch.object(docker.time, 'sleep', side_effect=sleep):
             docker.main()
         self.assertEqual(waits, [0.1, 0.1])
+
+    def test_docker_start_retries_empty_root(self):
+        docker = self._docker_module()
+        responses = [docker.subprocess.CompletedProcess([], 0, ''),
+                     docker.subprocess.CompletedProcess([], 0, str(self.base / 'data'))]
+        with patch.object(docker.subprocess, 'run', side_effect=responses), \
+                patch.object(docker.time, 'sleep') as sleep:
+            result = docker.wait_for_daemon(['docker'], self.base)
+        self.assertEqual(result, {'empty_responses': 1, 'timeout_responses': 0})
+        sleep.assert_called_once_with(1)
+
+    def test_docker_start_retries_api_timeout(self):
+        docker = self._docker_module()
+        responses = [docker.subprocess.TimeoutExpired(['docker'], 5),
+                     docker.subprocess.CompletedProcess([], 0, str(self.base / 'data'))]
+        with patch.object(docker.subprocess, 'run', side_effect=responses), \
+                patch.object(docker.time, 'sleep') as sleep:
+            result = docker.wait_for_daemon(['docker'], self.base)
+        self.assertEqual(result, {'empty_responses': 0, 'timeout_responses': 1})
+        sleep.assert_called_once_with(1)
+
+    def test_docker_start_rejects_other_nonempty_root(self):
+        docker = self._docker_module()
+        with patch.object(docker.subprocess, 'run', return_value=docker.subprocess.CompletedProcess([], 0, str(self.base / 'other'))), \
+                patch.object(docker.time, 'sleep') as sleep:
+            with self.assertRaisesRegex(ValueError, 'daemon root mismatch'):
+                docker.wait_for_daemon(['docker'], self.base)
+        sleep.assert_not_called()
+
+    def test_docker_start_empty_root_deadline_fails_closed(self):
+        docker = self._docker_module()
+        with patch.object(docker.subprocess, 'run', return_value=docker.subprocess.CompletedProcess([], 0, '')) as run, \
+                patch.object(docker.time, 'sleep'):
+            with self.assertRaisesRegex(RuntimeError, 'API did not become ready'):
+                docker.wait_for_daemon(['docker'], self.base)
+        self.assertEqual(run.call_count, 30)
 
 
 if __name__ == '__main__':

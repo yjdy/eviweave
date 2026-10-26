@@ -9,6 +9,27 @@ import time
 from runtime_support import PROJECT, local_path, write_json
 
 
+def wait_for_daemon(command, root):
+    """Require a ready API and the selected storage identity before proceeding."""
+    readiness = {'empty_responses': 0, 'timeout_responses': 0}
+    for _ in range(30):
+        try:
+            result = subprocess.run([*command, 'info', '--format', '{{.DockerRootDir}}'],
+                                    capture_output=True, text=True, timeout=5)
+        except subprocess.TimeoutExpired:
+            readiness['timeout_responses'] += 1
+        else:
+            if result.returncode == 0:
+                reported = result.stdout.strip()
+                if reported:
+                    if Path(reported).resolve() != root / 'data':
+                        raise ValueError('daemon root mismatch')
+                    return readiness
+                readiness['empty_responses'] += 1
+        time.sleep(1)
+    raise RuntimeError('project Docker API did not become ready in time')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action', choices=['start', 'stop', 'info'])
@@ -93,16 +114,8 @@ def main():
                               *[key+'='+environment[key] for key in ('DOCKER_TMPDIR','TMPDIR','HOME','XDG_CONFIG_HOME')],
                               'dockerd', '--config-file', str(root/'daemon.json')],
                              stdout=log, stderr=log, stdin=subprocess.DEVNULL, start_new_session=True)
-        for _ in range(30):
-            result = subprocess.run([*command, 'info', '--format', '{{.DockerRootDir}}'], capture_output=True, text=True, timeout=5)
-            if result.returncode == 0:
-                if Path(result.stdout.strip()).resolve() != root/'data':
-                    print(json.dumps({'check': 'daemon_root', 'empty': not result.stdout.strip(),
-                                      'absolute': Path(result.stdout.strip()).is_absolute()}), flush=True)
-                    raise ValueError('daemon root mismatch')
-                break
-            time.sleep(1)
-        else: raise RuntimeError('project daemon failed; inspect '+str(root/'daemon.log'))
+        readiness = wait_for_daemon(command, root)
+        print(json.dumps({'check': 'daemon_readiness', **readiness}), flush=True)
     subprocess.run([*command, 'info', '--format', '{"root": "{{.DockerRootDir}}", "version": "{{.ServerVersion}}"}'], check=True)
 
 

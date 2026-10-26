@@ -61,6 +61,17 @@ class Check:
         self.report['commands'].append({'name': name, 'returncode': result.returncode,
                                         'seconds': round(time.monotonic() - started, 2)})
         print(json.dumps(self.report['commands'][-1]), flush=True)
+        if name.startswith('daemon-cycle-start-') or name == 'start-for-synthetic':
+            for line in (self.out / (name + '.log')).read_text(errors='replace').splitlines():
+                if line.startswith('{'):
+                    try:
+                        doc = json.loads(line)
+                    except ValueError:
+                        continue
+                    if doc.get('check') == 'daemon_readiness':
+                        counts = {k: doc.get(k) for k in ('empty_responses', 'timeout_responses')}
+                        assert all(type(v) is int and 0 <= v <= 30 for v in counts.values())
+                        self.report.setdefault('daemon_readiness', []).append({'step': name, **counts})
         if result.returncode:
             self.errors.append(name)
             diagnostics = []
