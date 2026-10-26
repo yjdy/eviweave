@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "scope": "Automatic event-source package CI and opt-in serial full acceptance; no change to original v0.1.0 assets",
+  "source_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+  "baseline_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+  "source_identity_note": "Append-only provenance. source_sha256 binds the preceding effective content; release_sha256 denotes candidate bytes, not publication. Self hash is external.",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce"
+  },
+  "files": [
+    {
+      "destination": ".github/workflows/preparation.yml",
+      "source_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+      "source_sha256": "97fb2fd866dd921742ee92175b5582cda815053f77c35be011363e5bed1bc1f3",
+      "baseline_sha256": "97fb2fd866dd921742ee92175b5582cda815053f77c35be011363e5bed1bc1f3",
+      "release_sha256": "5f8bca62b8f32e0602cec5612829970d136f490a5f951ba77e5727153c204217",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+      "source_sha256": "2916ab9aa1efb586c780fc3d6b08498cbb54958af5379a2dd19bd755ee8323f7",
+      "baseline_sha256": "2916ab9aa1efb586c780fc3d6b08498cbb54958af5379a2dd19bd755ee8323f7",
+      "release_sha256": "e287e66ea3f2a5421315ff05a7706ca4fd7d7e63d00ce05afb1337bb8416f4ca",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+      "source_sha256": "8f1b190c408ba0b32f8cf6d59fbef4943a98ebb22cc88dc309a5ba442fb46dbe",
+      "baseline_sha256": "8f1b190c408ba0b32f8cf6d59fbef4943a98ebb22cc88dc309a5ba442fb46dbe",
+      "release_sha256": "5ca4a02eff06083b95d8109b80f05e0a7c39abc22804ad6334e007dcf295ceec",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "cloud_checks/current.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "472f2fedfa855530388151e7ef1d5b7d5b853dee6729cc6a60a3859db0dcec5a",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "provenance/main-ci.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "6294c137d78b4bd35f328330ac558531be449003c5f3659d8b9f0795fba80f1a",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "tests/test_current_ci.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "87b315dce2e63e7146ef0361912d541fd31ff3e39e4a0b961bda7942a44e4a14",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "16ef243f2a75b7798f58839823255e8a5ebeaf3a",
+      "source_sha256": "f33a81849be73f82a84e9b6df00015d768dafa0352356912d70795e0d0030d3b",
+      "baseline_sha256": "f33a81849be73f82a84e9b6df00015d768dafa0352356912d70795e0d0030d3b",
+      "release_sha256": "694dbca618fdf812bea30c0172fb12096d927c50ed4724d7eaf73e31663dcb84",
+      "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
+    }
+  ]
+}

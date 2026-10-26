@@ -25,12 +25,14 @@ def effective_provenance(members):
                'isolation-baseline', 'unified-baseline', 'observability-baseline', 'bugfix-baseline')
     retained = newest['retained_provenance']
     overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json',
-                     'provenance/preparation-scripts-baseline.json')
+                     'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json')
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
     if overlay_names[2] in members and overlay_names[1] not in members:
         raise ValueError('script provenance requires retained documentation overlay')
+    if overlay_names[3] in members and overlay_names[2] not in members:
+        raise ValueError('main CI provenance requires retained script overlay')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
@@ -219,6 +221,10 @@ def main():
                                     'tests/test_preparation_scripts.py', 'provenance/preparation-scripts.md',
                                     '.github/workflows/preparation.yml', 'cloud_checks/preparation.py'}
                 require(required_scripts.issubset(members), 'sdist contains preparation entries, verification and source records')
+            if 'provenance/main-ci-baseline.json' in members:
+                required_ci = {'provenance/main-ci-baseline.json', 'provenance/main-ci.md',
+                               'cloud_checks/current.py', 'tests/test_current_ci.py'}
+                require(required_ci.issubset(members), 'sdist contains current CI and source records')
             for name in required_documentation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current public documentation '+name)
             for name, expected_sha in effective_provenance(members).items():

@@ -34,7 +34,9 @@ EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSp
 
 ### 当前说明与发布版本
 
-本页按已完成的发布与云端验收更新。v0.1.0 标签、安装包和历史来源材料保留原字节，其中部分文件仍使用发布准备时的表述。实际发布状态、云端结果与提交绑定见 [Release 正文及附件](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)。下文三个准备入口由当前开发分支提供，托管执行记录见[准备脚本工作流](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml)；它们未包含在已发布的 v0.1.0 标签或安装包中。
+本页按已完成的发布与云端验收更新。v0.1.0 标签、安装包和历史来源材料保留原字节，其中部分文件仍使用发布准备时的表述。实际发布状态、云端结果与提交绑定见 [Release 正文及附件](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)。下文三个准备入口由当前 main 源码提供，托管执行记录见[准备脚本工作流](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml)；它们未包含在已发布的 v0.1.0 标签或安装包中。
+
+main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包级适用测试、普通安装、sdist→wheel、安装后测试、来源和双语文档。包级矩阵使用 CPython **3.10.22、3.12.3、3.13.16**；七项宿主档案测试不适用于3.10，在3.12/3.13上仍为必需项。手动运行准备脚本工作流并选择 `full=true`，即可在包级矩阵通过后串行执行双语工作台、历史评分及合成恢复验收。默认 `full=false`；轻量通过不代表完整运行环境验收通过。
 
 ## 2. 安装与准备
 

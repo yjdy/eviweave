@@ -34,7 +34,9 @@ Public materials allow verification of historical predictions and the public-set
 
 ### This guide and the released version
 
-This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The development branch provides the three preparation entries below; see the [preparation workflow](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml) for hosted execution records. They are absent from the published v0.1.0 tag and packages.
+This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The current main source checkout provides the three preparation entries below; see the [preparation workflow](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml) for hosted execution records. They are absent from the published v0.1.0 tag and packages.
+
+Main pushes and pull requests to main run lightweight checks of their event commit: package-scope tests, ordinary installation, sdist-to-wheel builds, installed tests, provenance and bilingual documentation. The package matrix uses CPython **3.10.22, 3.12.3, 3.13.16**; the seven host-profile cases do not apply to 3.10 and remain mandatory on 3.12/3.13. Manually run the preparation workflow with `full=true` for serial bilingual workbench, historical-score and synthetic-recovery acceptance after the package matrix passes. The default is `full=false`; a lightweight pass does not certify full runtime acceptance.
 
 ## 2. Installation and preparation
 
