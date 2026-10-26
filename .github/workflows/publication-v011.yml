@@ -1,0 +1,79 @@
+name: v0.1.1 publication and anonymous verification
+on:
+  push:
+    branches: [codex/v0.1.1-publication]
+permissions:
+  contents: read
+concurrency:
+  group: v0.1.1-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    permissions:
+      actions: read
+      contents: write
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/home .audit/cache
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: eviweave-v0.1.1-candidate
+          run-id: 40287161893
+          github-token: ${{ github.token }}
+          path: .audit/frozen
+      - name: Bind original assets verify remote bytes and publish
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 -B cloud_checks/publication_v011.py publish
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v011-publication-receipt
+          path: public-results/publication-publish.json
+          if-no-files-found: error
+          retention-days: 90
+  anonymous:
+    needs: publish
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - name: Anonymous full downloads tag identity installations and startup checks
+        run: >-
+          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
+          "$(id -u)" "$(id -g)" "$(command -v python)" -B
+          cloud_checks/publication_v011.py anonymous
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: v011-anonymous-receipt
+          path: public-results/*.json
+          if-no-files-found: error
+          retention-days: 90
