@@ -1,0 +1,184 @@
+name: v0.1.1 candidate acceptance
+on:
+  push:
+    branches: [codex/v0.1.1-release]
+permissions:
+  contents: read
+concurrency:
+  group: v0.1.1-candidate-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  primary:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/host-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/host-home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - name: Build and test primary candidate from event source
+        run: >-
+          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
+          "$(id -u)" "$(id -g)" "$(command -v python)" -B
+          cloud_checks/release_candidate.py primary
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-receipt-primary
+          path: public-results/preparation-*.json
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-primary
+          path: .audit/primary/*
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
+  packages:
+    needs: primary
+    runs-on: ubuntu-22.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.10.22', '3.12.3', '3.13.16']
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/host-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/host-home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: candidate-primary
+          path: .audit/primary-download
+      - name: Test source builds and unchanged primary wheel and sdist
+        run: >-
+          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
+          "$(id -u)" "$(id -g)" "$(command -v python)" -B
+          cloud_checks/release_candidate.py matrix
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-receipt-packages-${{ matrix.python }}
+          path: public-results/preparation-*.json
+          if-no-files-found: error
+          retention-days: 90
+  full:
+    needs: packages
+    runs-on: ubuntu-22.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - python: '3.12.3'
+            language: en
+          - python: '3.13.16'
+            language: zh
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/host-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/host-home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - name: Record history interpreter
+        run: echo "HISTORY_PYTHON=$(command -v python)" >> "$GITHUB_ENV"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - name: Run exact README commands history scoring and isolated synthetic recovery
+        run: >-
+          sudo -E env PATH="$PATH" LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+          unshare --mount --fork /usr/bin/python3 cloud_checks/namespace.py
+          "$(id -u)" "$(id -g)" "$(command -v python)" -B
+          cloud_checks/preparation.py --language '${{ matrix.language }}' --history-python "$HISTORY_PYTHON"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-receipt-full-${{ matrix.language }}
+          path: public-results/preparation-*.json
+          if-no-files-found: error
+          retention-days: 90
+  freeze:
+    needs: [primary, packages, full]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      AGENT_TOOLSDIRECTORY: ${{ github.workspace }}/.audit/host-python
+      RUNNER_TEMP: ${{ github.workspace }}/.audit/tmp
+      HOME: ${{ github.workspace }}/.audit/host-home
+      XDG_CACHE_HOME: ${{ github.workspace }}/.audit/cache
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - run: mkdir -p .audit/tmp .audit/host-python .audit/host-home .audit/cache
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12.3'
+      - run: python -B cloud_checks/preparation.py --bootstrap
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: candidate-primary
+          path: .audit/primary-download
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          pattern: candidate-receipt-*
+          path: .audit/receipts
+      - name: Bind passing receipts and freeze exactly five candidate assets
+        run: python -B cloud_checks/release_candidate.py freeze
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: eviweave-v0.1.1-candidate
+          path: release-candidate/*
+          if-no-files-found: error
+          retention-days: 90
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-review-summary
+          path: |
+            public-results/candidate-assets.json
+            release-candidate/cloud-verification.json
+            release-candidate/release-manifest.json
+            release-candidate/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 90

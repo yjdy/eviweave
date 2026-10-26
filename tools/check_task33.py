@@ -37,7 +37,8 @@ def private_environment(root):
 
 
 def snapshot(task, config, evaluation):
-    modules = json.loads((PROJECT / 'provenance/extraction-manifest.json').read_text())['files']
+    from verify_release import project_business_manifest
+    modules = project_business_manifest(PROJECT)
     sources = {}
     for entry in modules:
         sha = digest(PROJECT / entry['destination'])

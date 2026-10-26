@@ -9,6 +9,7 @@ recursive-include tests *.py
 recursive-include tools *.py
 recursive-include scripts *.py *.sh
 include .github/workflows/p5-cloud.yml .github/workflows/preparation.yml
+include .github/workflows/release-candidate.yml
 recursive-include cloud_checks *.py *.json
 include docker/Dockerfile.workbench docker/.dockerignore
 include docker/Dockerfile.public-workbench

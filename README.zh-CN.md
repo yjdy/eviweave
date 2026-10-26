@@ -34,13 +34,13 @@ EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSp
 
 ### 当前说明与发布版本
 
-本页按已完成的发布与云端验收更新。v0.1.0 标签、安装包和历史来源材料保留原字节，其中部分文件仍使用发布准备时的表述。实际发布状态、云端结果与提交绑定见 [Release 正文及附件](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)。下文三个准备入口由当前 main 源码提供，托管执行记录见[准备脚本工作流](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml)；它们未包含在已发布的 v0.1.0 标签或安装包中。
+本指南描述 **v0.1.1 维护候选**：源码检出和源码包包含三个准备脚本、外层 daemon 修复、当前源码 CI 及更新后的文档；wheel 提供业务包和两个 CLI。实际发布状态及日期以在线 [Releases](https://github.com/yjdy/eviweave/releases) 为准。[原 v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)、标签、安装包及来源材料保留原字节，三个脚本未包含在其原安装包中。历史评分继续下载原 v0.1.0 证据。详见[维护范围及来源](provenance/v0.1.1.md)。
 
 main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包级适用测试、普通安装、sdist→wheel、安装后测试、来源和双语文档。包级矩阵使用 CPython **3.10.22、3.12.3、3.13.16**；七项宿主档案测试不适用于3.10，在3.12/3.13上仍为必需项。手动运行准备脚本工作流并选择 `full=true`，即可在包级矩阵通过后串行执行双语工作台、历史评分及合成恢复验收。默认 `full=false`；轻量通过不代表完整运行环境验收通过。
 
 ## 2. 安装与准备
 
-使用下述新脚本需要包含三个入口的开发分支源码，当前尚无包含它们的新发行包。复验原始发布版本可从 **v0.1.0 源码或源码包**开始，并使用[原有准备工具](provenance/public-preparation.md)。单独安装 wheel 可以取得业务包和 `eviweave` / `dataspace-baselines` 两个命令入口；完整复现还需要源码中的脚本、资源锁和验证工具。下载入口为 [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)，本项目未发布到 PyPI。
+下述脚本需要 **v0.1.1 候选源码检出或源码包**。仅需业务包及 `eviweave` / `dataspace-baselines` 两个 CLI 时可安装 wheel；脚本、资源锁和验证工具由源码包提供。候选尚未发布时，从经审阅的候选分支和云端资产获取，不假设发布链接已经存在。复验 **v0.1.0** 时使用原始源码及[原有准备工具](provenance/public-preparation.md)。已发布版本见 [GitHub Releases](https://github.com/yjdy/eviweave/releases)，本项目未发布到 PyPI。
 
 ### 2.1 环境准备
 
@@ -72,7 +72,7 @@ main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包�
 
 4. 成功后，查看终端给出的 `.audit/preparation/.../preparation-report.json`，再按第 2.3 节显式选择档案和模型配置。
 
-当前开发分支提供以下准备入口，实际验收范围以工作流逐项记录为准。`--check-only` 不联网、不写文件，也不验证免密权限或沙箱能力；实际准备时才执行这些检查。
+v0.1.1 源码提供以下准备入口，实际验收范围以工作流逐项记录为准。`--check-only` 不联网、不写文件，也不验证免密权限或沙箱能力；实际准备时才执行这些检查。
 
 默认创建 `.venv-experiment`、`.local/profiles/public-host.json`、`.local/config-v6/offline-public-host.yaml`，并将 Codex、工作台和独立 daemon 存储放在 `.runtimes/prepared/`。准备只执行离线 doctor，不下载评分材料或完整题目数据。
 

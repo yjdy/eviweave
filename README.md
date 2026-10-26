@@ -34,13 +34,13 @@ Public materials allow verification of historical predictions and the public-set
 
 ### This guide and the released version
 
-This page reflects completed publication and cloud acceptance. The v0.1.0 tag, packages, and historical provenance materials retain their original bytes; some files still use preparation-time wording. See the [Release body and assets](https://github.com/yjdy/eviweave/releases/tag/v0.1.0) for actual publication status, cloud results, and commit binding. The current main source checkout provides the three preparation entries below; see the [preparation workflow](https://github.com/yjdy/eviweave/actions/workflows/preparation.yml) for hosted execution records. They are absent from the published v0.1.0 tag and packages.
+This guide describes the **v0.1.1 maintenance candidate**. Its source checkout and source distribution include the three preparation scripts, outer daemon fixes, current-source CI and updated documentation. The wheel supplies the business package and both CLI aliases. Publication status and dates are authoritative in the online [Releases](https://github.com/yjdy/eviweave/releases). The [original v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0), tag, packages and provenance retain their original bytes; the three scripts are absent from those original packages. Historical scoring continues to download the original v0.1.0 evidence. See [maintenance scope and provenance](provenance/v0.1.1.md).
 
 Main pushes and pull requests to main run lightweight checks of their event commit: package-scope tests, ordinary installation, sdist-to-wheel builds, installed tests, provenance and bilingual documentation. The package matrix uses CPython **3.10.22, 3.12.3, 3.13.16**; the seven host-profile cases do not apply to 3.10 and remain mandatory on 3.12/3.13. Manually run the preparation workflow with `full=true` for serial bilingual workbench, historical-score and synthetic-recovery acceptance after the package matrix passes. The default is `full=false`; a lightweight pass does not certify full runtime acceptance.
 
 ## 2. Installation and preparation
 
-The new scripts require a development checkout containing all three entries; no new distribution containing them is available yet. To reproduce the original release, start with the **v0.1.0 source checkout or source distribution** and use the [original preparation tools](provenance/public-preparation.md). A wheel supplies the business package and the `eviweave` / `dataspace-baselines` CLI aliases. Full reproduction also needs the scripts, resource locks, and verification tools in the source distribution. Download from the [GitHub Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0); this project has not been published to PyPI.
+Use the **v0.1.1 candidate source checkout or source distribution** for the scripts below. Install the wheel when only the business package and `eviweave` / `dataspace-baselines` CLI aliases are needed; scripts, resource locks and verification tools require the source distribution. Until the candidate is published, obtain it from the reviewed candidate branch and cloud artifacts, not from an assumed release URL. To reproduce **v0.1.0**, use its original source and [original preparation tools](provenance/public-preparation.md). Released downloads are listed on [GitHub Releases](https://github.com/yjdy/eviweave/releases); this project has not been published to PyPI.
 
 ### 2.1 Environment preparation
 
@@ -72,7 +72,7 @@ Prepare the environment in four steps:
 
 4. On success, inspect the reported `.audit/preparation/.../preparation-report.json`, then explicitly select the profile and model configuration as described in section 2.3.
 
-The development branch provides these preparation entries; the workflow records the actual scope of acceptance. `--check-only` neither connects to the network nor writes files, and does not certify passwordless privileges or sandbox capability. Actual preparation checks those capabilities.
+The v0.1.1 source provides these preparation entries; the workflow records the actual scope of acceptance. `--check-only` neither connects to the network nor writes files, and does not certify passwordless privileges or sandbox capability. Actual preparation checks those capabilities.
 
 Defaults are `.venv-experiment`, `.local/profiles/public-host.json`, and `.local/config-v6/offline-public-host.yaml`, with Codex, workbench, and independent daemon storage under `.runtimes/prepared/`. Preparation runs only the offline doctor; it does not download scoring materials or the complete dataset.
 

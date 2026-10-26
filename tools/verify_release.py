@@ -18,6 +18,39 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+VERSION_LAYER = 'provenance/v0.1.1-baseline.json'
+VERSION_FILE = 'src/dataspace_baselines/__init__.py'
+VERSION_EXCEPTION = {'old': '__version__ = "0.1.0"', 'new': '__version__ = "0.1.1"'}
+
+
+def project_business_manifest(project):
+    members = {p.relative_to(project).as_posix(): p.read_bytes() for p in (project/'provenance').glob('*.json')}
+    entries = json.loads(members['provenance/extraction-manifest.json'])['files']
+    return business_manifest(members, {e['destination']: (project/e['destination']).read_bytes() for e in entries})
+
+
+def business_manifest(members, content):
+    """Resolve 22 digests and prove the sole version exception byte for byte."""
+    original = json.loads(members['provenance/extraction-manifest.json'])['files']
+    latest = effective_provenance(members)
+    result = []
+    for original_entry in original:
+        entry = dict(original_entry)
+        name = entry['destination']
+        raw = content[name]
+        if VERSION_LAYER in members and name == VERSION_FILE:
+            old, new = (VERSION_EXCEPTION[k].encode() for k in ('old', 'new'))
+            if raw.count(new) != 1 or old in raw or digest(raw.replace(new, old, 1)) != entry['release_sha256']:
+                raise ValueError('version exception changes bytes outside the single declaration')
+        elif latest[name] != entry['release_sha256']:
+            raise ValueError('frozen business digest override')
+        entry['release_sha256'] = latest[name]
+        if digest(raw) != entry['release_sha256']:
+            raise ValueError('business content digest mismatch: ' + name)
+        result.append(entry)
+    return result
+
+
 def effective_provenance(members):
     """Validate the new overlay against retained history, then resolve latest hashes."""
     newest = json.loads(members['provenance/config-rounding-baseline.json'])
@@ -25,7 +58,7 @@ def effective_provenance(members):
                'isolation-baseline', 'unified-baseline', 'observability-baseline', 'bugfix-baseline')
     retained = newest['retained_provenance']
     overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json',
-                     'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json')
+                     'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json', VERSION_LAYER)
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
@@ -33,6 +66,8 @@ def effective_provenance(members):
         raise ValueError('script provenance requires retained documentation overlay')
     if overlay_names[3] in members and overlay_names[2] not in members:
         raise ValueError('main CI provenance requires retained script overlay')
+    if VERSION_LAYER in members and overlay_names[3] not in members:
+        raise ValueError('version provenance requires retained main CI overlay')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
@@ -55,6 +90,9 @@ def effective_provenance(members):
         latest[name] = entry['release_sha256']
     previous_names = historical_names | {'provenance/config-rounding-baseline.json'}
     for overlay_name, layer in overlays:
+        if overlay_name == VERSION_LAYER and (layer['source_commit'] != 'f8fb3f68dce167a15e6d07f8d94a806d27ae0b10'
+                                              or layer['baseline_commit'] != layer['source_commit']):
+            raise ValueError('maintenance predecessor commit mismatch')
         if (set(layer['retained_provenance']) != previous_names
                 or any(digest(members[name]) != value for name, value in layer['retained_provenance'].items())):
             raise ValueError('retained provenance set/digest mismatch in ' + overlay_name)
@@ -69,13 +107,20 @@ def effective_provenance(members):
             del latest[name]
         for entry in layer['files']:
             name = entry['destination']
-            if name in seen or name.startswith('src/') or name in previous_names or name in overlay_names:
+            version_exception = (overlay_name == VERSION_LAYER and name == VERSION_FILE
+                                 and entry.get('version_only') == VERSION_EXCEPTION)
+            if (name in seen or (name.startswith('src/') and not version_exception)
+                    or name in previous_names or name in overlay_names):
                 raise ValueError('invalid or duplicate P5 provenance override')
             if (entry['source_sha256'] != latest.get(name) or
                     entry['source_commit'] != (layer['source_commit'] if name in latest else None)):
                 raise ValueError('P5 provenance source mismatch: ' + name)
+            if overlay_name == VERSION_LAYER and name in latest and entry['baseline_sha256'] != entry['source_sha256']:
+                raise ValueError('maintenance baseline source mismatch: ' + name)
             seen.add(name)
             latest[name] = entry['release_sha256']
+        if overlay_name == VERSION_LAYER and VERSION_FILE not in seen:
+            raise ValueError('version declaration exception missing')
         previous_names |= {overlay_name} | {name for name in seen
                                             if name.startswith('provenance/') and name.endswith('.json')}
     return latest
@@ -90,7 +135,9 @@ def main():
     args = parser.parse_args()
     root = args.project.resolve()
     manifest = json.loads((root/'provenance/extraction-manifest.json').read_text())
-    expected = {str(PurePosixPath(e['destination']).relative_to('src')):e for e in manifest['files']}
+    provenance = {p.relative_to(root).as_posix(): p.read_bytes() for p in (root/'provenance').glob('*.json')}
+    resolved = business_manifest(provenance, {e['destination']: (root/e['destination']).read_bytes() for e in manifest['files']})
+    expected = {str(PurePosixPath(e['destination']).relative_to('src')):e for e in resolved}
     checks = []
     def require(condition, detail):
         if not condition:
@@ -157,6 +204,7 @@ def main():
             source = {n:data for n,data in members.items() if n.startswith('dataspace_baselines/') and n.endswith('.py')}
             metadata_name = next(n for n in members if n.endswith('.dist-info/METADATA'))
             metadata = Parser().parsestr(members[metadata_name].decode())
+            require(metadata['Version'] == '0.1.1', 'wheel version 0.1.1')
             require(metadata.get_all('Requires-Dist') == ['PyYAML<7,>=6'],'wheel runtime dependency is only PyYAML>=6,<7')
             require(metadata['Requires-Python'] == '>=3.10','Python floor is 3.10')
             entrypoints = members[next(n for n in members if n.endswith('/entry_points.txt'))].decode()
@@ -225,6 +273,9 @@ def main():
                 required_ci = {'provenance/main-ci-baseline.json', 'provenance/main-ci.md',
                                'cloud_checks/current.py', 'tests/test_current_ci.py'}
                 require(required_ci.issubset(members), 'sdist contains current CI and source records')
+            require({VERSION_LAYER, 'provenance/v0.1.1.md', 'cloud_checks/release_candidate.py',
+                     '.github/workflows/release-candidate.yml', 'tests/test_maintenance_release.py'}.issubset(members),
+                    'sdist contains maintenance source layer and candidate verification')
             for name in required_documentation:
                 require(members[name] == (root/name).read_bytes(), 'sdist current public documentation '+name)
             for name, expected_sha in effective_provenance(members).items():
@@ -267,7 +318,7 @@ def main():
     installed_root = Path(dataspace_baselines.__file__).resolve().parent
     require(root/'src/dataspace_baselines' != installed_root,'installed wheel used outside source tree')
     require(installed_root.is_relative_to(root/'.audit'),'isolated installation remains inside project')
-    require(dataspace_baselines.__version__ == importlib.metadata.version('eviweave') == '0.1.0','installed version 0.1.0')
+    require(dataspace_baselines.__version__ == importlib.metadata.version('eviweave') == '0.1.1','installed version 0.1.1')
     imports = []
     for info in pkgutil.walk_packages(dataspace_baselines.__path__,dataspace_baselines.__name__+'.'):
         if info.name.endswith('.__main__'):

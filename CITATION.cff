@@ -1,11 +1,10 @@
 cff-version: 1.2.0
 message: >-
-  Please cite EviWeave when using this software. Version 0.1.0 is prepared
-  but unreleased; the repository-code URL is the intended publication location,
-  not a claim that a public repository or release already exists.
+  Please cite EviWeave when using this software. Publication status and dates
+  are recorded in the online GitHub Release for the cited version.
 type: software
 title: 'EviWeave — Evidence-Guided Data Agents'
-version: 0.1.0
+version: 0.1.1
 authors:
   - family-names: Yuan
     given-names: Jun

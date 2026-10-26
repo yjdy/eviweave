@@ -1,18 +1,22 @@
 # Changelog / 更新记录
 
-## 0.1.0 — Unreleased / 待发布
+## 0.1.1 — Candidate / 候选
 
-The first version preserves the historical relation-v6 + simple-fixes-v1 baseline with Codex 0.145.0, Qwen3.8-Flash and Responses. It is prepared locally; no release date, final commit or final package checksum is assigned here.
+Maintenance candidate; publication date is not assigned. Actual publication status and date are recorded in the online Release.
+维护候选，尚未指定发布日期；实际发布状态及日期以在线 Release 为准。
 
-首版保留历史 relation-v6 + simple-fixes-v1、Codex 0.145.0、Qwen3.8-Flash 和 Responses。当前为本地准备状态；未指定发布日期、最终提交或最终包摘要。
+- Three preparation scripts for environment setup, scoring resources and historical verification; scripts and locks ship in the source distribution. 三个准备脚本覆盖环境、评分资源和历史核验；脚本及锁文件由源码包提供。
+- Outer project daemon shutdown waits for process exit and startup checks API readiness; production isolation is preserved. 外层项目 daemon 停止等待进程退出，启动检查 API 就绪；保留生产隔离。
+- Automatic current-source package CI on main/PR, opt-in serial bilingual runtime acceptance, and clearer bilingual README. main/PR 自动检查当前源码，按需串行双语运行验收，并改善双语 README。
+- Package, runtime declaration, both CLI aliases and citation use 0.1.1. The only business-source change is the version declaration; the other 21 business files and all 17 verbatim files remain unchanged. 包、运行时版本声明、两个 CLI 及引用统一为 0.1.1；业务源码仅改版本声明，其余 21 个业务文件和全部 17 个原样保护文件不变。
+- Append-only provenance retains the preceding 19 JSON records. Historical evidence links the original v0.1.0 assets; no new model capability or experiment score is introduced. 追加来源层，保留此前 19 份 JSON；历史证据继续引用原 v0.1.0 附件，不新增模型能力或实验成绩。
 
-- Standalone MIT package and two CLI aliases, with 22 whitelisted business modules and 17 verbatim protected files. 独立 MIT 包及两个 CLI 别名，22 个白名单业务模块、17 个原样保护文件。
-- Fixed public resource acquisition, independent workbench rebuild, explicit Linux x86_64 / CPython 3.12 or 3.13 host profiles and locked installation. 固定公开资源获取、独立工作台重建、显式 Linux x86_64 / CPython 3.12 或 3.13 宿主档案和锁定安装。
-- Unified single/batch/repeat/resume workflow, immutable experiment identity, offline scoring and versioned reports. 统一单题/批次/重复/续跑、不可变实验身份、离线评分和版本报告。
-- Final authentication failure stops dispatch/cancels in-flight work after the task returns; failed execution evidence participates in integrity checks. 当前任务返回后确认最终鉴权失败即停派并取消在途；失败执行证据纳入完整性检查。
-- Strict outer configuration validation, separate physical-request import identities, read-only legacy cost analysis and exact per-request rounding (`decimal-quantum-v2`). 严格外层配置校验、独立物理请求导入身份、旧费用分析只读和精确逐请求舍入。
-- Bilingual usage and experiment notes, citation metadata and pending Release materials; the original P4 evidence ZIP is retained byte for byte. 双语使用/实验说明、引用和待发布材料；P4 证据 ZIP 原字节保留。
+## 0.1.0 — 2026-10-24
 
-Complete online cost collection is UNSUPPORTED_G1; executable unified v2, EviWeave Controlled, formal reports and PDF remain future work. Full clean-checkout/final candidate acceptance and remote publication are still pending. See [release notes](RELEASE_NOTES.md).
+Published at 2026-10-24T09:00:29Z. The original [Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0), tag, packages and provenance remain unchanged.
+已于上述时间发布；原 Release、标签、安装包及来源材料保持原字节。
 
-完整在线费用采集为 UNSUPPORTED_G1；可执行统一 v2、EviWeave Controlled、正式报告和 PDF 属未来工作。完整干净检出/最终候选验收及远程发布仍待执行，见[发布说明](RELEASE_NOTES.md)。
+- Historical relation-v6 + simple-fixes-v1, Codex 0.145.0, Qwen3.8-Flash and Responses; MIT standalone package, unified run/resume, offline scoring and offline cost analysis. 历史 V6、独立 MIT 包、统一运行/续跑、离线评分及费用分析。
+- Original P4 evidence preserves the fixed historical prediction selection and score boundaries. 原 P4 证据保留固定历史预测选择及成绩边界。
+
+G1 online collection, EviWeave Controlled and a formal report remain future work. G1 在线采集、Controlled 及正式报告仍为未来工作。

@@ -176,6 +176,8 @@ def packages():
     subprocess.run(['git', 'clone', '--no-hardlinks', '--no-local', str(ROOT), str(target)], check=True)
     cloud = load('current_preparation_cloud', ROOT / 'cloud_checks/preparation.py')
     check = cloud.Check(target, 'packages-' + sys.version.split()[0])
+    check.env['SOURCE_DATE_EPOCH'] = subprocess.check_output(
+        ['git', 'show', '-s', '--format=%ct', 'HEAD'], cwd=target, text=True).strip()
     check.report.update(bound)
     check.report['full_validation'] = 'REQUESTED' if full_requested(os.environ.get('GITHUB_EVENT_NAME'), os.environ.get('EVIWEAVE_CI_FULL') == 'true') else 'NOT_REQUESTED'
     try:

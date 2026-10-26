@@ -107,10 +107,10 @@ def resolved(path):
 
 def source_identity():
     import dataspace_baselines
+    from verify_release import project_business_manifest
     installed = Path(dataspace_baselines.__file__).resolve().parent
-    lock = read(PROJECT / 'provenance/extraction-manifest.json')
     files = {}
-    for entry in lock['files']:
+    for entry in project_business_manifest(PROJECT):
         digest = sha(PROJECT / entry['destination'])
         if digest != entry['release_sha256']:
             raise ValueError('frozen business source changed: ' + entry['destination'])
@@ -119,7 +119,7 @@ def source_identity():
             raise ValueError('installed business module differs from frozen source: ' + str(relative))
         files[entry['destination']] = digest
     for filename in ('experiment.py', 'experiment_config.py', 'experiment_store.py', 'experiment_scheduler.py',
-                     'experiment_verify.py', 'environment_lock.py', 'standalone.py', 'host_profile.py', 'public_resources.py'):
+                     'experiment_verify.py', 'environment_lock.py', 'standalone.py', 'host_profile.py', 'public_resources.py', 'verify_release.py'):
         files['tools/' + filename] = sha(PROJECT / 'tools' / filename)
     return files
 

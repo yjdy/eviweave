@@ -1,0 +1,178 @@
+{
+  "schema_version": 1,
+  "scope": "v0.1.1 maintenance candidate; version-only business exception, no publication",
+  "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+  "baseline_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+  "source_identity_note": "Append-only; predecessor and candidate bytes are separate. Self SHA-256 is external; release_sha256 does not assert publication.",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce"
+  },
+  "files": [
+    {
+      "destination": ".github/workflows/release-candidate.yml",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "11c3ac25ac6c10b1ba4fda4ac3b31f3f57b3ffe2a5981b4143028c6aa0f77d5f",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "CHANGELOG.md",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "b8fea120893b047a81945db0a392c46cf1683f407c9bfe4b27296275a494e2f7",
+      "baseline_sha256": "b8fea120893b047a81945db0a392c46cf1683f407c9bfe4b27296275a494e2f7",
+      "release_sha256": "e1f0fd671511e41947abfcaa3423f0542a6f9d92ac7a6cf13acb7b7dd5256f2c",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "CITATION.cff",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "bae12b5716f285bb9d21ebb549fefba38f0c3c6f7bb95fb06ebc1f517eacd3d7",
+      "baseline_sha256": "bae12b5716f285bb9d21ebb549fefba38f0c3c6f7bb95fb06ebc1f517eacd3d7",
+      "release_sha256": "1c3c06d681309456d737c843d2b7b03c58cbc1f4b465e575a41fa9dd62f307ac",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "98f5ebb5172e2561b48d5155bd6cef166ebc88a1d994635afb282e255504d4b2",
+      "baseline_sha256": "98f5ebb5172e2561b48d5155bd6cef166ebc88a1d994635afb282e255504d4b2",
+      "release_sha256": "81b0e5ed3de26d74febad4f6ad8814e9bc82c436fe10a9601dfa1411b40d4d9a",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "README.md",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "e287e66ea3f2a5421315ff05a7706ca4fd7d7e63d00ce05afb1337bb8416f4ca",
+      "baseline_sha256": "e287e66ea3f2a5421315ff05a7706ca4fd7d7e63d00ce05afb1337bb8416f4ca",
+      "release_sha256": "8b5347016be14de5f0048f85ef9b3b0d06d319e294541f51f6a27277c3870806",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "README.zh-CN.md",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "5ca4a02eff06083b95d8109b80f05e0a7c39abc22804ad6334e007dcf295ceec",
+      "baseline_sha256": "5ca4a02eff06083b95d8109b80f05e0a7c39abc22804ad6334e007dcf295ceec",
+      "release_sha256": "291ae0b0c9d13921a3cb53bbd36b1f3de76e25a4a972b7940de708551e7edb2a",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "RELEASE_NOTES.md",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "3395600dee2d758d48039e8a6eddee47d18f472a5640a91da690dbed4d5310de",
+      "baseline_sha256": "3395600dee2d758d48039e8a6eddee47d18f472a5640a91da690dbed4d5310de",
+      "release_sha256": "af1c359fdc44b5d6727eb23e1ecfa26453dc65f104ae8f933483dc9116e5a1cd",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "ROADMAP.md",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "9146aa2b9b64913c544c3e57d9f922c982ad87171689021842b5833d9765337f",
+      "baseline_sha256": "9146aa2b9b64913c544c3e57d9f922c982ad87171689021842b5833d9765337f",
+      "release_sha256": "61163cf925b8febf62b13adb9fc18548ef398f6e878545738a09f5e6b2f3ecf4",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "cloud_checks/current.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "a2a088abef7a05c4e9cb3b46c1031784c71d762d07ae27ee00cfb03623b5d7e9",
+      "baseline_sha256": "a2a088abef7a05c4e9cb3b46c1031784c71d762d07ae27ee00cfb03623b5d7e9",
+      "release_sha256": "9cdca7b881b4352af249151b1b76c805a66c25881aeccfcffa7c649ec02790a9",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "cloud_checks/release_candidate.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "20d32e0df41091d6871f8cd6fd8070b23dba30dd67439068a3d9e6a8756fea20",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "provenance/v0.1.1.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "15ca7a68b18215331ca42fa744bf63c0ba14dfc00c7b1fedccd38279adaa0792",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "pyproject.toml",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "e74b8ef4c74efd412c83269497af4fe3b1326913f2ffb16ed9741631c30c94bc",
+      "baseline_sha256": "e74b8ef4c74efd412c83269497af4fe3b1326913f2ffb16ed9741631c30c94bc",
+      "release_sha256": "af5ed5bdd49f53fc434684592f19b1a3e53551061c73adb138afa9f7932a05d7",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "src/dataspace_baselines/__init__.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "7c54986cae477cc88ebf5ae205ce4b139a6decf879c145232ace4486f80d5397",
+      "baseline_sha256": "7c54986cae477cc88ebf5ae205ce4b139a6decf879c145232ace4486f80d5397",
+      "release_sha256": "b81ef0277363e1c565fc3b85cc5e9d831144bc6a57e47e039288aea04d209c7d",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification.",
+      "version_only": {
+        "old": "__version__ = \"0.1.0\"",
+        "new": "__version__ = \"0.1.1\""
+      }
+    },
+    {
+      "destination": "tests/test_maintenance_release.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "release_sha256": "6f79627ecfc7dc8bb0bb6961c68199200c2691d666cb5f8dc66908a4212eabd9",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "tools/check_installation.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "c794b7b9c75f4ecadb7d797309182db88ee0e6ed5b182558107ac2f996e2bfac",
+      "baseline_sha256": "c794b7b9c75f4ecadb7d797309182db88ee0e6ed5b182558107ac2f996e2bfac",
+      "release_sha256": "053751a5edc53cdab3b2294bb77d5304343f0903b35517ce2345d18b83f049f1",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "tools/check_task33.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "0bf5e4025d26610614907539e90130829ba45a524ff0728546150c68ed3a5c03",
+      "baseline_sha256": "0bf5e4025d26610614907539e90130829ba45a524ff0728546150c68ed3a5c03",
+      "release_sha256": "0fcbd800475076153ef3f374f33eb76d4b3a17edb4b94ea7c9a6f733eaf42599",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "a767838bb81783fe3d57c300008664f5eb8a75845b54b997b55e68f1635748b4",
+      "baseline_sha256": "a767838bb81783fe3d57c300008664f5eb8a75845b54b997b55e68f1635748b4",
+      "release_sha256": "d022405b5cd19c3364ae3844ddf925fd4ffc3660ae3d9f330d47a6ca9a90c219",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "f8fb3f68dce167a15e6d07f8d94a806d27ae0b10",
+      "source_sha256": "694dbca618fdf812bea30c0172fb12096d927c50ed4724d7eaf73e31663dcb84",
+      "baseline_sha256": "694dbca618fdf812bea30c0172fb12096d927c50ed4724d7eaf73e31663dcb84",
+      "release_sha256": "932fadc9a0eb248bce4a9cdcc6d559c3d355eda5ce4565474aecb8303c31e323",
+      "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
+    }
+  ]
+}
