@@ -12,9 +12,9 @@ import sys
 import tarfile
 
 import current
-from preparation import Check
 
 ROOT = Path(__file__).resolve().parents[1]
+Check = current.load('release_preparation_cloud', ROOT / 'cloud_checks/preparation.py').Check
 VERSION = '0.1.1'
 PYTHONS = ('3.10.22', '3.12.3', '3.13.16')
 PACKAGES = ('eviweave-0.1.1-py3-none-any.whl', 'eviweave-0.1.1.tar.gz')

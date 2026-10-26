@@ -103,7 +103,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "20d32e0df41091d6871f8cd6fd8070b23dba30dd67439068a3d9e6a8756fea20",
+      "release_sha256": "c30ad9db3dd4034572f5b2b35f92d4252bc160648d725e27244ebdeb9084e126",
       "reason": "Maintenance 0.1.1 metadata, strict version exception resolution, bilingual scope, or hosted candidate construction and verification."
     },
     {
