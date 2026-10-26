@@ -31,7 +31,7 @@ class CurrentCITests(unittest.TestCase):
 
     def test_full_must_be_opt_in_and_require_package_matrix(self):
         for changed in (self.workflow().replace('default: false', 'default: true', 1),
-                        self.workflow().replace(ci.FULL_GUARD, "${{ always() }}", 1),
+                        self.workflow().replace("    if: " + ci.FULL_GUARD, "    if: ${{ always() }}", 1),
                         self.workflow().replace('needs: unit-gate', 'needs: nothing', 1)):
             with self.assertRaises(ValueError):
                 ci.validate_workflow(changed)
