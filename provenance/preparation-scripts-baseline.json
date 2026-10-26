@@ -133,7 +133,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "3746fa7c4523cfd20c56d6faabfd47393c4e4f555f88a0e9d470a9ade589e83b",
+      "release_sha256": "048d89da940f036161e7a4db750dae5accd77bd512f8df4ecb25ba8f802e105a",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {
@@ -213,7 +213,7 @@
       "source_commit": "024a8dcfd4c2d5f6ad196da630400591aa2a5b58",
       "source_sha256": "eb84827b75f8019164fd6268419852434f22786edbb9082816554c1dad527aa2",
       "baseline_sha256": "eb84827b75f8019164fd6268419852434f22786edbb9082816554c1dad527aa2",
-      "release_sha256": "2f58a58270e32adcf786b684f0d9531d4c6fc8a3c2317c67cbcd678cfed43fd2",
+      "release_sha256": "6dbd99014722919b7bfa35b04b5f52934a4bfa78b99dfbf787f7e26233d24c61",
       "reason": "Wait for the validated dockerd process to exit after PID-file removal before allowing restart; no Docker configuration or production isolation change."
     },
     {

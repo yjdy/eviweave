@@ -96,7 +96,10 @@ def main():
         for _ in range(30):
             result = subprocess.run([*command, 'info', '--format', '{{.DockerRootDir}}'], capture_output=True, text=True, timeout=5)
             if result.returncode == 0:
-                if Path(result.stdout.strip()).resolve() != root/'data': raise ValueError('daemon root mismatch')
+                if Path(result.stdout.strip()).resolve() != root/'data':
+                    print(json.dumps({'check': 'daemon_root', 'empty': not result.stdout.strip(),
+                                      'absolute': Path(result.stdout.strip()).is_absolute()}), flush=True)
+                    raise ValueError('daemon root mismatch')
                 break
             time.sleep(1)
         else: raise RuntimeError('project daemon failed; inspect '+str(root/'daemon.log'))

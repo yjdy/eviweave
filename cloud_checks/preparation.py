@@ -65,7 +65,7 @@ class Check:
             self.errors.append(name)
             diagnostics = []
             for line in (self.out / (name + '.log')).read_text(errors='replace').splitlines():
-                exception = re.match(r'^(\w+(?:Error|Exception)): (.*)$', line)
+                exception = re.match(r'^(?:\w+\.)*(\w+(?:Error|Exception)|TimeoutExpired): (.*)$', line)
                 if exception:
                     diagnostics.append({'error_type': exception[1], 'error': safe_error(exception[2])})
                 if line.startswith('{'):
@@ -73,6 +73,9 @@ class Check:
                         doc = json.loads(line)
                     except ValueError:
                         continue
+                    if doc.get('check') == 'daemon_root':
+                        diagnostics.append({'check': 'daemon_root', 'empty': doc.get('empty') is True,
+                                            'absolute': doc.get('absolute') is True})
                     if doc.get('status') in ('FAIL', 'INTERRUPTED'):
                         diagnostics.append({'status': doc['status'], 'error': safe_error(str(doc.get('error', '')))})
             self.report.setdefault('failure_diagnostics', {})[name] = diagnostics
