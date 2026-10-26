@@ -45,7 +45,8 @@ class Redirect(urllib.request.HTTPRedirectHandler):
 def request(endpoint, auth=False, method='GET', data=None, binary=False):
     url = endpoint if endpoint.startswith('https://') else API + endpoint
     headers = {'User-Agent': 'EviWeave-v0.1.1-publication',
-               'Accept': 'application/octet-stream' if binary else 'application/vnd.github+json'}
+               'Accept': ('application/octet-stream' if binary and '/releases/assets/' in url
+                          else 'application/vnd.github+json')}
     if auth:
         headers['Authorization'] = 'Bearer ' + os.environ['GITHUB_TOKEN']
     if data is not None:
