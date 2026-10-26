@@ -245,7 +245,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "14d9bca18ee49cb73141118223fc2061d125c8c82b77857f356ec89ff2a489c8",
+      "release_sha256": "8a68e0b863539f3e4678ac31f4ac3ef8e8250cef16ed3229d92bf852fa7f9c08",
       "reason": "Provide or verify credential-free preparation, hosted acceptance, packaging and documentation without changing frozen business behavior."
     },
     {

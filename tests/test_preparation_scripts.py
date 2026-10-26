@@ -276,7 +276,7 @@ class PreparationScriptTests(unittest.TestCase):
             if len(waits) == 2:
                 (proc / 'status').write_text('State:\tZ (zombie)\n')
         with patch.object(docker, 'Path', side_effect=path), \
-                patch.object(docker.sys, 'argv', ['project_docker.py', 'stop', '--storage-root', str(storage)]), \
+                patch.object(sys, 'argv', ['project_docker.py', 'stop', '--storage-root', str(storage)]), \
                 patch.object(docker.subprocess, 'run', side_effect=lambda *a, **kw: pidfile.unlink()), \
                 patch.object(docker.time, 'sleep', side_effect=sleep):
             docker.main()
