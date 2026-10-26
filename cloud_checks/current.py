@@ -213,7 +213,7 @@ def packages():
         check.run('wheel-from-sdist', [source_py, '-m', 'build', '--wheel', '--no-isolation', '--outdir', archives, source])
         wheel_py = venv('wheel-env')
         check.run('wheel-install', [wheel_py, '-m', 'pip', 'install', '--no-deps', next(archives.glob('*.whl'))])
-        check.run('wheel-install-check', [wheel_py, '-B', source / 'tools/check_installation.py', '--output', build / 'wheel-install.json'])
+        check.run('wheel-install-check', [wheel_py, '-B', target / 'tools/check_installation.py', '--output', build / 'wheel-install.json'])
         units('installed-unit', wheel_py, source)
         check.run('release-provenance', [wheel_py, '-B', 'tools/verify_release.py', '--git-scope', 'head', '--archive-root', archives, '--output', build / 'release-verification.json'])
         verification = json.loads((build / 'release-verification.json').read_text())

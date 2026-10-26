@@ -54,7 +54,7 @@
       "source_commit": null,
       "source_sha256": null,
       "baseline_sha256": null,
-      "release_sha256": "472f2fedfa855530388151e7ef1d5b7d5b853dee6729cc6a60a3859db0dcec5a",
+      "release_sha256": "a2a088abef7a05c4e9cb3b46c1031784c71d762d07ae27ee00cfb03623b5d7e9",
       "reason": "Current-source hosted CI, explicit applicability and full-validation policy, bilingual status and source/package verification."
     },
     {
