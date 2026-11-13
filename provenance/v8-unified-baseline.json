@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "scope": "V8 PDF reader and unified experiment integration",
+  "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+  "baseline_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533"
+  },
+  "files": [
+    {
+      "destination": "MANIFEST.in",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "81b0e5ed3de26d74febad4f6ad8814e9bc82c436fe10a9601dfa1411b40d4d9a",
+      "baseline_sha256": "81b0e5ed3de26d74febad4f6ad8814e9bc82c436fe10a9601dfa1411b40d4d9a",
+      "release_sha256": "aa1bf283ecf4a2ebc477d37d0cf307a1c46b5e4a1d174feb2ec7717403027ca1",
+      "reason": "Include the V8 tool documentation in source archives."
+    },
+    {
+      "destination": "tests/test_pdf_reader.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "b7576b0c633898c4f08480b71252b1fa1c94012cc15fab60c2f9ca8d33572d34",
+      "release_sha256": "b7576b0c633898c4f08480b71252b1fa1c94012cc15fab60c2f9ca8d33572d34",
+      "reason": "Cover PDF reading and evidence locators."
+    },
+    {
+      "destination": "tests/test_run_v8_pdf.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "afc36afc3aad32f0d99ba241501d34efc6efd64508e6cb6ffb2f287fd0e009a2",
+      "release_sha256": "afc36afc3aad32f0d99ba241501d34efc6efd64508e6cb6ffb2f287fd0e009a2",
+      "reason": "Cover the V8 harness and mounts."
+    },
+    {
+      "destination": "tests/test_unified_experiment.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "9829d3091aa148d4c92bdaf74103301954776e4ceba4ff97ea1edaeb048e3263",
+      "baseline_sha256": "9829d3091aa148d4c92bdaf74103301954776e4ceba4ff97ea1edaeb048e3263",
+      "release_sha256": "4bf331afac0735b04a82cbbaed9d12548dee53546ce4b3d9d03377d87cadda6a",
+      "reason": "Verify that pre-V8 manifests can resume without weakening other identity checks."
+    },
+    {
+      "destination": "tests/test_v8_semantic_review.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "1695471d8f04546bd30a5ee1971eed4e52bdfc5b850fa3f78882ee8aee08db4f",
+      "release_sha256": "1695471d8f04546bd30a5ee1971eed4e52bdfc5b850fa3f78882ee8aee08db4f",
+      "reason": "Cover V8 review and CSV diagnostics."
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "435c46842e8b1e9c55d2135643d8105b4a2d4a2d9864d5d132b4edbcc44b2c4b",
+      "baseline_sha256": "435c46842e8b1e9c55d2135643d8105b4a2d4a2d9864d5d132b4edbcc44b2c4b",
+      "release_sha256": "eafac97b9db5db708ba30bcfc4d972d0fb00e0351e1e20e78c716de04195f040",
+      "reason": "Select the experiment version and restore it on resume and verify."
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "d022405b5cd19c3364ae3844ddf925fd4ffc3660ae3d9f330d47a6ca9a90c219",
+      "baseline_sha256": "d022405b5cd19c3364ae3844ddf925fd4ffc3660ae3d9f330d47a6ca9a90c219",
+      "release_sha256": "bc64eb23ae16772003baa1b30d8dab7f3dd21b69c3d1c1a91e12c673dd73d719",
+      "reason": "Record V8 source, runner and Poppler identity and recognize the preceding V6 manifest."
+    },
+    {
+      "destination": "tools/experiment_scheduler.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "f2e1843fc2e752650c1ffbd83e317bec8b04f1d19936c7b374aac3c78c7adb54",
+      "baseline_sha256": "f2e1843fc2e752650c1ffbd83e317bec8b04f1d19936c7b374aac3c78c7adb54",
+      "release_sha256": "bd67843d452ca61bed9b6f152d57132dfea6e6dbedc1b5d60a13d772e9e7823f",
+      "reason": "Dispatch the selected runner through the common scheduler."
+    },
+    {
+      "destination": "tools/experiment_verify.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "d81ca0325e9756b50144a3d81eebadaa8815842a3c2e6ca121055760a67b4d31",
+      "baseline_sha256": "d81ca0325e9756b50144a3d81eebadaa8815842a3c2e6ca121055760a67b4d31",
+      "release_sha256": "bd07ddea7d2d6969016faf58bd95c4b22eaa84e11d316364793a65d5db4e74f5",
+      "reason": "Verify V8 runner identity and include review diagnostics in offline results."
+    },
+    {
+      "destination": "tools/pdf_reader.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "e209ab6624d6da4f3736f8b3ada4e39088dfe56d23712740b21b7dc16b2fe1bc",
+      "release_sha256": "b7140ccf5f394d2eb5435420ae2a9d963f218a451f9ef0d5e5d34d792f9f2f8b",
+      "reason": "Document PDF reading and unified V8 commands."
+    },
+    {
+      "destination": "tools/pdf_reader.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "237afc33416816bb0475f872ca34c70d8d4945148fe744d319b7aa6510f50381",
+      "release_sha256": "237afc33416816bb0475f872ca34c70d8d4945148fe744d319b7aa6510f50381",
+      "reason": "Provide V8 PDF extraction and source verification."
+    },
+    {
+      "destination": "tools/run_v8.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "7177512a75109b3cd51d34212ac9af161bb822786ab108f89b416e2afdab5764",
+      "release_sha256": "7177512a75109b3cd51d34212ac9af161bb822786ab108f89b416e2afdab5764",
+      "reason": "Provide the V8 runner and pre-export checks."
+    },
+    {
+      "destination": "tools/v8_semantic_review.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": "7ee499b4593884c04ddc5e89ba328b1d18f92316c7e91e272704593ddd7c2320",
+      "release_sha256": "7ee499b4593884c04ddc5e89ba328b1d18f92316c7e91e272704593ddd7c2320",
+      "reason": "Provide the V8 review contract."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "7948b5511beb0f517e7fb710aaa7a67f839aa395",
+      "source_sha256": "932fadc9a0eb248bce4a9cdcc6d559c3d355eda5ce4565474aecb8303c31e323",
+      "baseline_sha256": "932fadc9a0eb248bce4a9cdcc6d559c3d355eda5ce4565474aecb8303c31e323",
+      "release_sha256": "da23358d290444ba117bdbcf0285032ad15a2ebb4e333fe4b2ca5ee20dea20e6",
+      "reason": "Resolve the append-only V8 provenance layer after existing layers."
+    }
+  ]
+}

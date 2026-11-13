@@ -486,6 +486,25 @@ class UnifiedTests(unittest.TestCase):
             args=cli.parser().parse_args(['run','--resume','--output',str(self.experiment),*flag])
             with self.assertRaises(ValueError): cli.execute(args)
 
+    def test_pre_v8_manifest_can_resume_and_still_rejects_unrelated_drift(self):
+        prepared = self.prepared((1,))
+        before = {**prepared['identity'], 'source': {**prepared['identity']['source'], **cfg.LEGACY_V6_ENTRY_POINTS}}
+        doc = sched.initialize(self.experiment, {**prepared, 'identity': before})
+        sched.add_plan(self.experiment, doc, [1], 1, prepared['inputs'])
+        args = cli.parser().parse_args(['run', '--resume', '--yes', '--output', str(self.experiment)])
+        with patch.object(sched, 'production_runner') as old_runner, patch.object(cli, 'confirm'):
+            old_runner.return_value = FakeRunner()
+
+            def offline(*args, **kwargs):
+                return sched.schedule(*args, **kwargs, doctor_fn=lambda c, d: None, live=False)
+
+            self.assertEqual(cli.execute(args, prepare_fn=lambda *a: prepared, schedule_fn=offline,
+                                         verify_fn=lambda root: ver.verify(root, scorer=lambda *a: {'passed': True})), 0)
+            old_runner.assert_called_once()
+        self.assertEqual(store.load(self.experiment)['identity'], before)
+        changed = {**prepared['identity'], 'environment_sha256': '0' * 64}
+        self.assertFalse(cfg.same_identity(before, changed))
+
     def test_lock_snapshot_tampering_blocks_offline_verify(self):
         self.initialize(tasks=(1,))
         store.write(self.experiment/'resources/environment-lock.json',{'tampered':True})

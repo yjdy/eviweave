@@ -20,6 +20,19 @@ python3 tools/pdf_reader.py find document.json '档案171'
 python3 -B tools/run_v8.py --config CONFIG.yaml --task-dir TASK_DIR --run-dir RUN_DIR
 ```
 
+## 统一实验入口
+
+新实验用 `--version v8` 选择 V8，省略版本时默认 V6。安装、配置、数据和评分资源沿用统一实验入口的准备流程。
+
+```sh
+./scripts/experiment.sh check --version v8 --tasks 33
+./scripts/experiment.sh run --version v8 --scope public60 --output .audit/public60-v8
+./scripts/experiment.sh run --resume --output .audit/public60-v8 --yes
+./scripts/experiment.sh verify --version v8 --experiment .audit/public60-v8
+```
+
+`check` 检查本地资源，不调用模型。`run` 会调用模型。`run --resume` 从实验记录恢复版本并补跑未完成的尝试。`verify` 用实验内的评分快照离线验收，`summary.json` 同时列出各次尝试的语义核对状态。续跑和验收都可用 `--version v8` 核对实验版本。此前用本地批次脚本创建的目录继续沿用对应脚本。
+
 ### 导出前语义核对
 
 所有 V8 任务在同一次会话中核对取数表与记录粒度、统计范围、字段、排序和输出列。模型写好候选行后，将题干和原件支持的要求、实际选择和证据位置记入 `output/semantic-review.json`，再调用工作台内的本地核对脚本。脚本比较所记录的选择，供当前会话在导出前修正有证据的冲突。无法定论的选择记为 `uncertain`。

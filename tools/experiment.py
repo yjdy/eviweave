@@ -9,8 +9,8 @@ from pathlib import Path
 import subprocess
 import sys
 
-from experiment_config import defaults, prepare, tasks_for
-from experiment_scheduler import add_plan, doctor, initialize, plan_for, run_environment, schedule
+from experiment_config import defaults, experiment_version, prepare, prepare_v8, same_identity, tasks_for
+from experiment_scheduler import add_plan, initialize, plan_for, run_environment, schedule
 from experiment_store import (attempts, exclude_output, fingerprint, load, locked, output_path,
                               uid, read, registered_inputs)
 from experiment_verify import report_target, verify
@@ -22,6 +22,7 @@ def parser():
     sub = p.add_subparsers(dest='command', required=True)
     for name in ('check', 'run'):
         q = sub.add_parser(name)
+        q.add_argument('--version', choices=('v6', 'v8'), help='experiment version; new runs default to v6')
         q.add_argument('--config', type=Path)
         q.add_argument('--dataset', type=Path)
         q.add_argument('--evaluation-root', type=Path)
@@ -37,6 +38,7 @@ def parser():
             q.add_argument('--resume', action='store_true')
             q.add_argument('--yes', action='store_true')
     v = sub.add_parser('verify')
+    v.add_argument('--version', choices=('v6', 'v8'), help='require this version in the saved experiment')
     v.add_argument('--experiment', type=Path, required=True)
     v.add_argument('--output', type=Path)
     from cost_cli import add_parser
@@ -75,12 +77,16 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
     if args.command == 'verify':
         root = output_path(args.experiment)
         if (root / 'observation.json').is_file():
+            if args.version:
+                raise ValueError('--version requires a unified experiment directory')
             from cost_cli import execute as cost_execute
             args.command, args.cost_command = 'cost', 'verify'
             return cost_execute(args)
         if not root.is_dir():
             raise ValueError('experiment directory missing')
-        load(root)  # Validate before creating a lock file in an unrelated directory.
+        saved = load(root)  # Validate before creating a lock file in an unrelated directory.
+        if args.version and args.version != experiment_version(saved['identity']):
+            raise ValueError('--version differs from the saved experiment')
         target = report_target(args.output, root) if args.output and plain(args.output) != root else None
         with locked(root):
             if target:
@@ -102,6 +108,8 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
                                   environment_verifier=lambda c: verify_environment(c, doc=selected))
         else:
             prepared = prepare_fn(config, dataset, evaluation, tasks)
+        if args.version == 'v8':
+            prepare_v8(prepared)
         from public_resources import audit_root
         diagnostic = audit_root() / 'experiments' / ('check-' + uid())
         diagnostic.mkdir(parents=True)
@@ -116,22 +124,31 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
             if not all(c.ok for c in checks):
                 raise RuntimeError('local environment check failed: ' + str(diagnostic))
         present = bool(os.environ.get('EVIWEAVE_API_KEY', '').strip())
-        print(json.dumps({'status': 'PASS' if present else 'MISSING_KEY', 'tasks': tasks, 'repeat': repeat,
-                          'api_key_present': present, 'service_auth': 'NOT_TESTED', 'model_calls': 0,
-                          'profile': prepared['environment']['profile_id'], 'diagnostics': str(diagnostic)}))
+        result = {'status': 'PASS' if present else 'MISSING_KEY', 'tasks': tasks, 'repeat': repeat,
+                  'api_key_present': present, 'service_auth': 'NOT_TESTED', 'model_calls': 0,
+                  'profile': prepared['environment']['profile_id'], 'diagnostics': str(diagnostic)}
+        if args.version == 'v8':
+            result['version'] = 'v8'
+        print(json.dumps(result))
         return 0 if present else 2
     if args.resume:
         if not args.output or any(getattr(args, n) is not None for n in ('scope', 'tasks', 'repeat', 'config', 'dataset', 'evaluation_root', 'environment_profile')):
             raise ValueError('--resume requires --output and restores original tasks/repeat/configuration/data')
         root = output_path(args.output)
         before = load(root)
+        version = experiment_version(before['identity'])
+        if args.version and args.version != version:
+            raise ValueError('--version differs from the saved experiment')
         plan = plan_for(root, before)
         config, dataset, evaluation = (Path(before['paths'][n]) for n in ('config', 'dataset', 'evaluation'))
         tasks, repeat = plan['tasks'], plan['repeat']
     else:
+        version = args.version or 'v6'
         config, dataset, evaluation, tasks, repeat = parameters(args)
         root = output_path(args.output or PROJECT / '.audit/experiments' / uid(), [config, dataset, evaluation])
         before = load(root) if root.exists() and any(root.iterdir()) else None
+        if before and experiment_version(before['identity']) != version:
+            raise ValueError('experiment version differs; use --resume or a new output directory')
         plan = {'tasks': tasks, 'repeat': repeat}
     registered = registered_inputs(root, before) if before else {}
     registered_tasks = sorted(set(tasks) | {int(t) for t in registered})
@@ -153,9 +170,11 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
                                   environment_verifier=lambda c: verify_environment(c, doc=selected))
         else:
             prepared = prepare_fn(config, dataset, evaluation, registered_tasks)
+    if version == 'v8':
+        prepare_v8(prepared)
     state_before = fingerprint({'doc': before, 'attempts': attempts(root, before)}) if before else None
     if before:
-        if before['identity'] != prepared['identity']:
+        if not same_identity(before['identity'], prepared['identity']):
             raise ValueError('experiment configuration/source/environment/evaluation identity differs; use a new output directory')
         if any(prepared['inputs'].get(t) != files for t, files in registered.items()):
             raise ValueError('registered input bytes changed; use a new output directory')

@@ -11,7 +11,7 @@ import shutil
 
 from experiment_store import (atomic_bytes, attempts, completed, evidence, execution_evidence, fingerprint, internal,
                               load, original, plan_for, read, select, sha, uid, write)
-from standalone import PROJECT, score as frozen_score, verify_evaluation
+from standalone import PROJECT, plain, score as frozen_score, verify_evaluation
 
 
 def usage_summary(rows):
@@ -67,7 +67,10 @@ def report_target(value, experiment):
 
 def verify(root, output=None, scorer=score_attempt):
     """Caller holds the same experiment lock used by scheduling."""
+    from experiment_config import experiment_version
+
     doc = load(root)
+    version = experiment_version(doc['identity'])
     environment = read(root / 'resources/environment-lock.json')
     if fingerprint(environment['profile']) != environment['profile_sha256']:
         raise ValueError('environment profile snapshot damaged')
@@ -81,6 +84,7 @@ def verify(root, output=None, scorer=score_attempt):
     plan = plan_for(root, doc)
     records = attempts(root, doc)
     rows, anomalies = [], []
+    semantic_reviews = {}
     available = {int(p.stem.removeprefix('task_')) for p in (evaluation / 'configs').glob('task_*.json')}
     scores = {'report_id': rid, 'evaluation': doc['identity']['evaluation'], 'attempts': {}, 'current': {}}
     selection = read(root / 'selection.json')
@@ -90,6 +94,27 @@ def verify(root, output=None, scorer=score_attempt):
     for a in records:
         directory = internal(root, a['attempt_id'])
         run, inspection = execution_evidence(root, a)
+        if version == 'v8' and inspection['status'] != 'conflict':
+            events = directory / 'events.jsonl'
+            if events.is_file():
+                with events.open() as handle:
+                    line = next((line for line in handle if line.strip()), '')
+                if line.endswith('\n') and line.strip():
+                    start = json.loads(line)
+                    if start.get('event') == 'run_started' and (
+                            start.get('harness') != 'codex-v8'
+                            or start.get('experiment_fingerprint') != doc['identity']['runner_sha256']):
+                        inspection = {'status': 'conflict', 'reasons': ['V8 runner identity mismatch']}
+            report_path = directory / 'semantic-review-result.json'
+            semantic_reviews[a['attempt_id']] = 'missing'
+            if report_path.exists() or report_path.is_symlink():
+                try:
+                    status = read(plain(report_path))['status']
+                    if status not in ('aligned', 'conflict', 'needs_review', 'missing', 'invalid'):
+                        raise ValueError('unknown semantic review status')
+                    semantic_reviews[a['attempt_id']] = status
+                except (OSError, ValueError, KeyError, TypeError):
+                    semantic_reviews[a['attempt_id']] = 'invalid'
         conflict = inspection['status'] == 'conflict'
         if conflict:
             anomalies.extend(a['attempt_id'] + ': ' + reason for reason in inspection['reasons'])
@@ -193,6 +218,9 @@ def verify(root, output=None, scorer=score_attempt):
                'environment_profile': environment['profile_id'], 'environment_sha256': doc['identity']['environment_sha256'],
                'verification_python': platform.python_version(), 'runtime_match_check': 'NOT_REQUIRED_FOR_OFFLINE_VERIFY',
                'verification_model_calls': 0}
+    if version == 'v8':
+        summary['version'] = scores['version'] = version
+        summary['semantic_reviews'] = semantic_reviews
     scores['current_plan_accuracy'] = summary['current_plan_accuracy']
     fields = ['report_id', 'plan_id', 'launch_id', 'task', 'repeat', 'slot', 'attempt_id', 'previous_attempt',
               'status', 'return_code', 'error', 'prediction_sha256', 'prediction_valid', 'passed',
