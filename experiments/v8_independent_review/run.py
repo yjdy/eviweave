@@ -21,6 +21,7 @@ import packets
 import pilot_evidence
 import repair
 import review_common as original
+import resume_legacy
 from experiment_scheduler import global_failure as scheduler_failure
 
 shared = original.shared
@@ -55,7 +56,7 @@ def setup(evaluation):
                 'historical_v8_score_sha256': shared.digest(original.HISTORICAL),
                 'code': {p.name: shared.digest(p) for p in (Path(__file__), Path(packets.__file__), Path(repair.__file__),
                          Path(light.__file__), Path(pilot_evidence.__file__), Path(original.__file__),
-                         Path(shared.__file__))}}
+                         Path(shared.__file__), Path(resume_legacy.__file__))}}
     return config, tasks, pdf, identity
 
 
@@ -85,6 +86,10 @@ def check(root, tasks, identity):
         packet = root / task.task_id / 'evidence'
         if light.signature(packet) != manifest['evidence'][task.task_id]:
             raise ValueError(f'{task.task_id} 证据包摘要发生变化')
+    import_receipt = root / 'legacy-import.json'
+    expected = manifest.get('legacy_import_sha256')
+    if expected != (shared.digest(import_receipt) if import_receipt.is_file() else None):
+        raise ValueError('旧批次导入记录摘要不一致')
 
 
 def global_failure(directory):
@@ -160,9 +165,12 @@ def candidate_runner(config):
     return runner
 
 
-def candidate_run_check(path, task, runner):
+def candidate_run_check(path, task, runner, legacy_fingerprint=None):
     start = original.first_event(path / 'events.jsonl')
-    if (start['experiment_fingerprint'] != runner.resume_fingerprint or start['task_id'] != task.task_id
+    fingerprints = {runner.resume_fingerprint}
+    if legacy_fingerprint is not None:
+        fingerprints.add(legacy_fingerprint)
+    if (start['experiment_fingerprint'] not in fingerprints or start['task_id'] != task.task_id
             or start['question'] != task.question or Path(start['workspace']) != task.context_dir):
         raise ValueError(f'{task.task_id} 候选运行身份不一致')
 
@@ -182,13 +190,13 @@ def finalize_candidate(path, task, config, initial, *, retry_service_failure=Fal
     return {**shared.checkpoint(path), 'usage': initial['usage'], 'wall_time_seconds': initial['wall_time_seconds']}
 
 
-def candidate_for(directory, task, config, reused, *, allow_new=True):
+def candidate_for(directory, task, config, reused, *, allow_new=True, legacy_fingerprint=None):
     if reused is not None:
         return original.DEFAULT_RUN / task.task_id / 'candidate', reused
     path = directory / 'candidate'
     runner = candidate_runner(config)
     if (path / 'checkpoint.json').is_file():
-        candidate_run_check(path, task, runner)
+        candidate_run_check(path, task, runner, legacy_fingerprint)
         saved = shared.read_json(path / 'checkpoint.json')
         actual = shared.checkpoint(path)
         if any(saved.get(key) != val for key, val in actual.items()):
@@ -199,17 +207,17 @@ def candidate_for(directory, task, config, reused, *, allow_new=True):
     summary = path / 'run.json'
     prior_attempt = summary.is_file()
     if summary.is_file() and global_failure(path):
-        candidate_run_check(path, task, runner)
+        candidate_run_check(path, task, runner, legacy_fingerprint)
         original.archive(path)
     if summary.is_file() and shared.read_json(summary)['status'] == 'stopped' and not (path / 'repair').exists():
-        candidate_run_check(path, task, runner)
+        candidate_run_check(path, task, runner, legacy_fingerprint)
         original.archive(path)
     if not summary.is_file():
         if path.exists():
             original.archive(path)
         print(f'{task.task_id} 生成共享候选', flush=True)
         checked_result(runner.run, task, path)
-    candidate_run_check(path, task, runner)
+    candidate_run_check(path, task, runner, legacy_fingerprint)
     if failure := global_failure(path):
         raise ValueError(f'{task.task_id}: {failure}')
     initial = shared.read_json(summary)
@@ -295,6 +303,8 @@ def summarize(root, tasks, pdf, candidates, evaluation):
 def run_all(root, config, tasks, pdf, identity):
     completed = {}
     reuse = identity['reused_checkpoints']
+    import_receipt = root / 'legacy-import.json'
+    imported = shared.read_json(import_receipt)['candidates'] if import_receipt.is_file() else {}
     try:
         for number, task in tasks.items():
             directory = root / task.task_id
@@ -307,8 +317,18 @@ def run_all(root, config, tasks, pdf, identity):
                 print(f'{task.task_id} 已挂起', flush=True)
                 continue
             previous = (directory / 'result.json').is_file()
+            legacy = imported.get(task.task_id, {})
+            fingerprint = legacy.get('fingerprint')
+            expected_csv = legacy.get('prediction_sha256')
+            if expected_csv is not None and not (directory / 'candidate/checkpoint.json').is_file():
+                if shared.digest(directory / 'candidate/output/prediction.csv') != expected_csv:
+                    raise ValueError(f'{task.task_id} 导入的候选摘要发生变化')
+                trace = legacy['trace']
+                if trace and shared.digest(directory / 'candidate' / trace['path']) != trace['sha256']:
+                    raise ValueError(f'{task.task_id} 导入的候选会话摘要发生变化')
             try:
-                source, saved = candidate_for(directory, task, config, reuse.get(task.task_id), allow_new=not previous)
+                source, saved = candidate_for(directory, task, config, reuse.get(task.task_id),
+                                              allow_new=not previous, legacy_fingerprint=fingerprint)
             except repair.CandidatePending as exc:
                 shared.write_json(pending, {'task_id': task.task_id, 'stage': 'candidate', 'reason': str(exc),
                                             'repair_attempted': (directory / 'candidate/repair').is_dir()})
@@ -329,10 +349,13 @@ def run_all(root, config, tasks, pdf, identity):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('prepare', 'check', 'run'))
+    parser.add_argument('action', choices=('prepare', 'check', 'import-legacy', 'run'))
     parser.add_argument('--output', type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument('--evaluation', type=Path, required=True, help='local frozen evaluation bundle')
+    parser.add_argument('--legacy-output', type=Path, help='stopped original public60 output directory')
     args = parser.parse_args()
+    if (args.action == 'import-legacy') != (args.legacy_output is not None):
+        parser.error('--legacy-output is required only with import-legacy')
     try:
         root = args.output.resolve()
         if root.parent != DEFAULT_OUTPUT.parent:
@@ -340,6 +363,8 @@ def main():
         if args.action == 'run' and not os.environ.get(shared.KEY, '').strip():
             raise ValueError(f'请先在终端导出 {shared.KEY}')
         config, tasks, pdf, identity = setup(args.evaluation.resolve())
+        if args.action == 'import-legacy':
+            resume_legacy.migrate(args.legacy_output.resolve(), root, config, tasks, identity)
         if args.action == 'prepare':
             root.mkdir(mode=0o700, parents=True)
         with (root / '.run.lock').open('a') as lock:
