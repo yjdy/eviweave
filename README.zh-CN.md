@@ -18,15 +18,16 @@
 
 ### DataSpace 成绩
 
-EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSpace 官方榜单中登记为 **codex-controlled + Qwen3.8-Flash**。
+DataSpace 官方榜单已收录 **EviWeave V8 + Qwen3.8-Flash**，成绩为 **336/410（81.95%）**，评测及发布日期为 **2026-11-20**，本次核验日期为 **2026-11-23**。历史 V6 方法另以 **codex-controlled + Qwen3.8-Flash** 登记。
 
 | 结果 | 分数 | 说明 |
 |---|---:|---|
-| 历史官方全量评测 | **333/410，81.22%** | 评测日期为 2026-10-21；2026-10-24 核验时并列第一 |
-| 历史公开集首轮 | **44/60** | 保留的首次运行记录 |
-| 历史公开集固定恢复后 | **45/60** | 对固定选定的历史预测进行离线评分 |
+| V8 官方全量评测 | **336/410，81.95%** | 评测日期为 2026-11-20；2026-11-23 核验 |
+| V6 历史官方全量评测 | **333/410，81.22%** | 评测日期为 2026-10-21；2026-10-24 核验时并列第一 |
+| V6 历史公开集首轮 | **44/60** | 保留的首次运行记录 |
+| V6 历史公开集固定恢复后 | **45/60** | 对固定选定的历史预测进行离线评分 |
 
-官方成绩与排名可查看 [DataSpace 榜单](https://dataspace-bench.github.io/#leaderboard)。排名会变化，上表记录的是带日期的历史结果。
+官方成绩与排名可查看 [DataSpace 榜单](https://dataspace-bench.github.io/#leaderboard)。排名会变化，上表记录的是带日期的结果。**V8 官方条目注明：提交中的公开参考集批次是在已知分数后选定的。** 因此不能将其描述为未经选择的首轮结果。榜单费用采用提交者记录的用量小计，不代表经过完整性认证的总费用。两个榜单条目记录的都是请求时的模型别名，而非不可变服务快照。V8 成绩属于该次提交，不代表之后每个源码版本均经过相同评测。
 
 **v0.1.0 已于 2026-10-24 发布。** 本版冻结历史 `relation-v6 + simple-fixes-v1`，使用 Codex **0.145.0**、**Qwen3.8-Flash** 和 Responses 协议。后续 EviWeave Controlled 将独立开发，不包含在本版中。榜单中的历史登记名与后续 Controlled 实现分别记录。
 
@@ -34,13 +35,13 @@ EviWeave 首版公开了历史 V6 方法及其复现材料。该方法在 DataSp
 
 ### 当前说明与发布版本
 
-本指南描述 **v0.1.1 维护候选**：源码检出和源码包包含三个准备脚本、外层 daemon 修复、当前源码 CI 及更新后的文档；wheel 提供业务包和两个 CLI。实际发布状态及日期以在线 [Releases](https://github.com/yjdy/eviweave/releases) 为准。[原 v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)、标签、安装包及来源材料保留原字节，三个脚本未包含在其原安装包中。历史评分继续下载原 v0.1.0 证据。详见[维护范围及来源](provenance/v0.1.1.md)。
+本指南面向基于 **v0.1.1 维护基线**的 **V8 源码分支**。V8 是方法版本，软件包版本仍为 v0.1.1。V8 功能和命令见第 3.8 节，下文保留历史 V6 的复验说明。源码检出和源码包包含三个准备脚本、外层 daemon 修复、当前源码 CI 及更新后的文档；wheel 提供业务包和两个 CLI。实际发布状态及日期以在线 [Releases](https://github.com/yjdy/eviweave/releases) 为准。[原 v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0)、标签、安装包及来源材料保留原字节，三个脚本未包含在其原安装包中。历史评分继续下载原 v0.1.0 证据。详见[维护范围及来源](provenance/v0.1.1.md)。
 
-main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包级适用测试、普通安装、sdist→wheel、安装后测试、来源和双语文档。包级矩阵使用 CPython **3.10.22、3.12.3、3.13.16**；七项宿主档案测试不适用于3.10，在3.12/3.13上仍为必需项。手动运行准备脚本工作流并选择 `full=true`，即可在包级矩阵通过后串行执行双语工作台、历史评分及合成恢复验收。默认 `full=false`；轻量通过不代表完整运行环境验收通过。
+main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包级适用测试、普通安装、sdist→wheel、安装后测试、来源和双语文档。包级矩阵使用 CPython **3.10.22、3.12.3、3.13.16**；12 项宿主档案测试不适用于3.10，在3.12/3.13上仍为必需项。手动运行准备脚本工作流并选择 `full=true`，即可在包级矩阵通过后串行执行双语工作台、历史评分及合成恢复验收。默认 `full=false`；轻量通过不代表完整运行环境验收通过。
 
 ## 2. 安装与准备
 
-下述脚本需要 **v0.1.1 候选源码检出或源码包**。仅需业务包及 `eviweave` / `dataspace-baselines` 两个 CLI 时可安装 wheel；脚本、资源锁和验证工具由源码包提供。候选尚未发布时，从经审阅的候选分支和云端资产获取，不假设发布链接已经存在。复验 **v0.1.0** 时使用原始源码及[原有准备工具](provenance/public-preparation.md)。已发布版本见 [GitHub Releases](https://github.com/yjdy/eviweave/releases)，本项目未发布到 PyPI。
+V8 流程使用**当前 V8 源码检出**；下述准备脚本由 **v0.1.1 维护源码检出或源码包**提供。仅需业务包及 `eviweave` / `dataspace-baselines` 两个 CLI 时可安装 wheel；脚本、资源锁和验证工具由源码包提供。候选尚未发布时，从经审阅的候选分支和云端资产获取，不假设发布链接已经存在。复验 **v0.1.0** 时使用原始源码及[原有准备工具](provenance/public-preparation.md)。已发布版本见 [GitHub Releases](https://github.com/yjdy/eviweave/releases)，本项目未发布到 PyPI。
 
 ### 2.1 环境准备
 
@@ -54,7 +55,7 @@ main 推送及面向 main 的 PR 自动对事件提交执行轻量检查：包�
 | 权限 | 能创建必要的 namespace 和挂载，并为项目内 daemon 启动器提供所需免密权限 |
 | 模型服务 | 运行真实实验时，提供兼容的 HTTPS Responses 端点及专用 API key |
 
-云端已验证 CPython **3.12.3、3.13.16** 的完整适用检查，以及 **3.10.22** 的包级适用检查。Python 3.10 的结果不代表完整工作台流程受到支持。macOS、Windows 和 ARM 尚未验收。
+历史维护版云端已验证 CPython **3.12.3、3.13.16** 的完整适用检查，以及 **3.10.22** 的包级适用检查。这些历史检查不能作为后续 V8 改动的验收结论。Python 3.10 的结果不代表完整工作台流程受到支持。macOS、Windows 和 ARM 尚未验收。
 
 环境安装分为四步：
 
@@ -316,6 +317,45 @@ API key 不写入模型 YAML、题目资料或公开日志。项目只使用专�
 历史模型别名没有对应的不可变服务快照；新宿主环境也拥有独立身份。因此，代码、环境检查、历史预测核验和新实验得分应分别记录。更多历史恢复、后续独立运行及证据限制见[实验说明](EXPERIMENTS.zh-CN.md)。
 
 上述实验命令退出 0 表示操作完成，不表示答案全部正确；1 表示执行、证据、评分或报告失败，2 表示参数或前置条件失败，130 表示中断。
+
+### 3.8 V8 功能与统一流程
+
+V8 在共用执行流程上增加了证据读取和 CSV 导出前核对：
+
+- **PDF 证据读取**：检索并读取指定页面，保留页码和坐标，按指定区域提表，必要时使用本地 OCR，并对照原 PDF 回查引用片段。详见 [PDF 读取器说明](tools/pdf_reader.md)。
+- **计算口径**：默认 R2 提示词要求在数据变换前区分源单位与显示精度、查找表与统计总体，以及实体计数与记录计数。
+- **导出前核对**：对照题干和证据检查取数表、统计范围、字段、排序与输出列。`semantic-review-result.json` 记录核对状态及最终 CSV 表头对照。该诊断依赖代理记录的证据，不会独立证明答案正确。
+
+使用 `--version v8` 选择 V8，直接采用 R2 提示词，无需额外选择复核版本。新运行省略版本参数时仍默认使用 V6。详见[默认提示词与身份规则](provenance/v8-prompt-r2.md)。
+
+先完成第 2 节准备，并明确选择配置和宿主档案。Codex **0.170.0** 需要单独的安装器、配置及独立宿主档案，按 [Codex 升级准备说明](provenance/codex-upgrade.md)操作。默认准备仍使用 Codex **0.145.0**；选择 V8 不会自动安装或切换客户端。
+
+先检查单题，不调用模型：
+
+```sh
+./scripts/experiment.sh check --version v8 --tasks 33
+```
+
+确认配置和预算后，新建公开参考集实验；该命令会调用模型并产生费用：
+
+```sh
+./scripts/experiment.sh run --version v8 --scope public60 --output .audit/public60-v8
+```
+
+续跑须保持原源码、提示词和运行时身份，版本从已保存的实验中恢复：
+
+```sh
+./scripts/experiment.sh run --resume --output .audit/public60-v8 --yes
+```
+
+离线核验已有实验：
+
+```sh
+./scripts/experiment.sh verify --version v8 --experiment .audit/public60-v8 \
+  --output .audit/public60-v8-verification
+```
+
+统一入口仍为 `scripts/experiment.sh`，内部调用 `tools/experiment.py`。V8 保留 `predictions/task_N/prediction.csv`、尝试历史，以及标准的 `summary.json`、`summary.csv`、`score.json` 和 `report-set.json` 输出。公开评分仍仅覆盖 60 道参考题，不能仅凭公开参考答案复算官方 336/410。旧实验需使用原检出续跑，当前提示词不会迁移旧身份。v0.1.0 证据归档用于复验历史 V6 预测，不是 V8 提交材料。
 
 ## 4. 后续计划
 

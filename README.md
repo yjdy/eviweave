@@ -18,15 +18,16 @@ The project provides:
 
 ### DataSpace results
 
-The first release publishes the historical V6 method and reproduction materials. Its official DataSpace leaderboard name is **codex-controlled + Qwen3.8-Flash**.
+The official DataSpace leaderboard lists **EviWeave V8 + Qwen3.8-Flash** at **336/410 (81.95%)**, evaluated and published on **2026-11-20**, checked on **2026-11-23**. The historical V6 method is listed separately as **codex-controlled + Qwen3.8-Flash**.
 
 | Result | Score | Meaning |
 |---|---:|---|
-| Historical official full-benchmark evaluation | **333/410, 81.22%** | Evaluated on 2026-10-21; tied first when checked on 2026-10-24 |
-| Historical public-set first pass | **44/60** | Preserved initial run record |
-| Historical public set after fixed recovery | **45/60** | Offline scoring of the fixed historical prediction selection |
+| V8 official full-benchmark evaluation | **336/410, 81.95%** | Evaluated on 2026-11-20; checked on 2026-11-23 |
+| V6 historical official full-benchmark evaluation | **333/410, 81.22%** | Evaluated on 2026-10-21; tied first when checked on 2026-10-24 |
+| V6 historical public-set first pass | **44/60** | Preserved initial run record |
+| V6 historical public set after fixed recovery | **45/60** | Offline scoring of the fixed historical prediction selection |
 
-See the [DataSpace leaderboard](https://dataspace-bench.github.io/#leaderboard) for official results. Rankings change; the table records a dated historical observation.
+See the [DataSpace leaderboard](https://dataspace-bench.github.io/#leaderboard) for official results. Rankings change; the table records dated observations. **The official V8 entry discloses that its submitted public-reference batch was selected after its score was known.** This is not an unselected first-pass result. The displayed cost uses the submitter’s recorded-usage subtotal, not a certified complete cost. Both leaderboard entries identify a requested model alias rather than an immutable service snapshot. The V8 score belongs to that submission, not to an evaluation of every later source revision.
 
 **v0.1.0 was released on 2026-10-24.** It freezes the historical `relation-v6 + simple-fixes-v1` baseline with Codex **0.145.0**, **Qwen3.8-Flash**, and the Responses protocol. EviWeave Controlled will be developed separately and is outside this release. The historical leaderboard name and the future Controlled implementation are recorded separately.
 
@@ -34,13 +35,13 @@ Public materials allow verification of historical predictions and the public-set
 
 ### This guide and the released version
 
-This guide describes the **v0.1.1 maintenance candidate**. Its source checkout and source distribution include the three preparation scripts, outer daemon fixes, current-source CI and updated documentation. The wheel supplies the business package and both CLI aliases. Publication status and dates are authoritative in the online [Releases](https://github.com/yjdy/eviweave/releases). The [original v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0), tag, packages and provenance retain their original bytes; the three scripts are absent from those original packages. Historical scoring continues to download the original v0.1.0 evidence. See [maintenance scope and provenance](provenance/v0.1.1.md).
+This guide covers the **V8 source branch**, built on the **v0.1.1 maintenance baseline**. V8 is the method version; the package version remains v0.1.1. For V8 features and commands, see section 3.8. The historical V6 reproduction instructions remain available below. Its source checkout and source distribution include the three preparation scripts, outer daemon fixes, current-source CI and updated documentation. The wheel supplies the business package and both CLI aliases. Publication status and dates are authoritative in the online [Releases](https://github.com/yjdy/eviweave/releases). The [original v0.1.0 Release](https://github.com/yjdy/eviweave/releases/tag/v0.1.0), tag, packages and provenance retain their original bytes; the three scripts are absent from those original packages. Historical scoring continues to download the original v0.1.0 evidence. See [maintenance scope and provenance](provenance/v0.1.1.md).
 
-Main pushes and pull requests to main run lightweight checks of their event commit: package-scope tests, ordinary installation, sdist-to-wheel builds, installed tests, provenance and bilingual documentation. The package matrix uses CPython **3.10.22, 3.12.3, 3.13.16**; the seven host-profile cases do not apply to 3.10 and remain mandatory on 3.12/3.13. Manually run the preparation workflow with `full=true` for serial bilingual workbench, historical-score and synthetic-recovery acceptance after the package matrix passes. The default is `full=false`; a lightweight pass does not certify full runtime acceptance.
+Main pushes and pull requests to main run lightweight checks of their event commit: package-scope tests, ordinary installation, sdist-to-wheel builds, installed tests, provenance and bilingual documentation. The package matrix uses CPython **3.10.22, 3.12.3, 3.13.16**; the 12 host-profile cases do not apply to 3.10 and remain mandatory on 3.12/3.13. Manually run the preparation workflow with `full=true` for serial bilingual workbench, historical-score and synthetic-recovery acceptance after the package matrix passes. The default is `full=false`; a lightweight pass does not certify full runtime acceptance.
 
 ## 2. Installation and preparation
 
-Use the **v0.1.1 candidate source checkout or source distribution** for the scripts below. Install the wheel when only the business package and `eviweave` / `dataspace-baselines` CLI aliases are needed; scripts, resource locks and verification tools require the source distribution. Until the candidate is published, obtain it from the reviewed candidate branch and cloud artifacts, not from an assumed release URL. To reproduce **v0.1.0**, use its original source and [original preparation tools](provenance/public-preparation.md). Released downloads are listed on [GitHub Releases](https://github.com/yjdy/eviweave/releases); this project has not been published to PyPI.
+Use the **current V8 source checkout** for the V8 workflow; the **v0.1.1 maintenance source checkout or source distribution** supplies the preparation scripts below. Install the wheel when only the business package and `eviweave` / `dataspace-baselines` CLI aliases are needed; scripts, resource locks and verification tools require the source distribution. Until the candidate is published, obtain it from the reviewed candidate branch and cloud artifacts, not from an assumed release URL. To reproduce **v0.1.0**, use its original source and [original preparation tools](provenance/public-preparation.md). Released downloads are listed on [GitHub Releases](https://github.com/yjdy/eviweave/releases); this project has not been published to PyPI.
 
 ### 2.1 Environment preparation
 
@@ -54,7 +55,7 @@ The full workflow requires:
 | Permissions | Required namespace and mount capabilities, plus passwordless permission for the project-local daemon launcher |
 | Model service | A compatible HTTPS Responses endpoint and dedicated API key for real experiments |
 
-Cloud acceptance covered the full applicable checks on CPython **3.12.3 and 3.13.16**, and applicable package checks on **3.10.22**. Python 3.10 results do not establish support for the full workbench workflow. macOS, Windows, and ARM have not been accepted.
+Historical maintenance cloud acceptance covered the full applicable checks on CPython **3.12.3 and 3.13.16**, and applicable package checks on **3.10.22**. These historical checks do not certify later V8 changes. Python 3.10 results do not establish support for the full workbench workflow. macOS, Windows, and ARM have not been accepted.
 
 Prepare the environment in four steps:
 
@@ -316,6 +317,45 @@ The public historical evidence ZIP contains selected traces and cannot serve dir
 The historical model alias has no saved immutable service snapshot, and rebuilt host environments have independent identities. Record code, environment checks, historical prediction verification, and new experiment scores separately. See [Experiments](EXPERIMENTS.md) for historical recovery, later independent runs, and evidence limits.
 
 For the experiment commands above, exit 0 means the operation completed, not that all answers are correct. Exit 1 indicates execution, evidence, scoring, or report failure; 2 indicates an argument or prerequisite failure; 130 indicates interruption.
+
+### 3.8 V8 features and unified workflow
+
+V8 extends the shared execution workflow with evidence reading and review before CSV export:
+
+- **PDF evidence**: search and read selected pages, preserve page and coordinate information, extract tables from specified regions, use local OCR when needed, and check quoted excerpts against the original PDF. See the [PDF reader reference](tools/pdf_reader.md).
+- **Calculation rules**: the default R2 prompt distinguishes source units from display precision, lookup tables from the requested population, and entity counts from record counts before transformations begin.
+- **Pre-export review**: compare the source table, scope, fields, order, and output columns against the question and evidence. `semantic-review-result.json` records these checks and the final CSV header comparison. This diagnostic depends on the agent’s recorded evidence; it does not independently prove answer correctness.
+
+Select V8 with `--version v8`; it uses the R2 prompt directly, with no separate review selector. Omitting the version on a new run still selects V6. See the [default prompt and identity rules](provenance/v8-prompt-r2.md).
+
+Complete section 2 first and explicitly select the intended configuration and host profile. Codex **0.170.0** requires its separate installer, configuration and independent host profile; follow the [Codex upgrade preparation](provenance/codex-upgrade.md). The default preparation retains Codex **0.145.0**; selecting V8 does not install or switch the client automatically.
+
+Check one task without model calls:
+
+```sh
+./scripts/experiment.sh check --version v8 --tasks 33
+```
+
+After reviewing the configuration and budget, start a new public-reference experiment; this command calls the model and incurs costs:
+
+```sh
+./scripts/experiment.sh run --version v8 --scope public60 --output .audit/public60-v8
+```
+
+Resume with the original source, prompt and runtime identity; the saved experiment restores its version:
+
+```sh
+./scripts/experiment.sh run --resume --output .audit/public60-v8 --yes
+```
+
+Verify the saved experiment offline:
+
+```sh
+./scripts/experiment.sh verify --version v8 --experiment .audit/public60-v8 \
+  --output .audit/public60-v8-verification
+```
+
+The shared entry remains `scripts/experiment.sh`, backed by `tools/experiment.py`. V8 retains `predictions/task_N/prediction.csv`, attempt history, and the standard `summary.json`, `summary.csv`, `score.json`, and `report-set.json` outputs. Public scoring still covers only 60 reference tasks; the official 336/410 cannot be recomputed with public references alone. Older experiments must resume from their original checkout; the current prompt does not migrate their identities. The v0.1.0 evidence archive verifies historical V6 predictions, not the V8 submission.
 
 ## 4. Future work
 
