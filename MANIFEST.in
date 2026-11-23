@@ -7,6 +7,7 @@ exclude configs/local* configs/*.local.*
 recursive-include provenance *.json *.md
 recursive-include tests *.py
 recursive-include tools *.py
+include tools/pdf_reader.md
 recursive-include scripts *.py *.sh
 include .github/workflows/p5-cloud.yml .github/workflows/preparation.yml
 include .github/workflows/release-candidate.yml

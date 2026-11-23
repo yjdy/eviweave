@@ -97,6 +97,23 @@ class CurrentCITests(unittest.TestCase):
         for name, expected in latest.items():
             self.assertEqual(hashlib.sha256((ROOT / name).read_bytes()).hexdigest(), expected, name)
 
+    def test_r2_default_retires_only_the_duplicate_helper(self):
+        members = {p.relative_to(ROOT).as_posix(): p.read_bytes() for p in (ROOT / 'provenance').glob('*.json')}
+        name = 'provenance/v8-r2-default-baseline.json'
+        layer = json.loads(members[name])
+        latest = effective_provenance(members)
+        self.assertNotIn('tools/v8_semantic_review_r2.py', latest)
+        self.assertEqual(latest['tools/v8_semantic_review.py'],
+                         'c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f')
+        for key, value in (('destination', 'tools/run_v8.py'), ('source_sha256', '0' * 64)):
+            bad = copy.deepcopy(layer)
+            bad['removed_files'][0][key] = value
+            with self.assertRaisesRegex(ValueError, 'retirement'):
+                effective_provenance(dict(members, **{name: json.dumps(bad).encode()}))
+        old = 'provenance/v8-upgrade-integration-baseline.json'
+        with self.assertRaisesRegex(ValueError, 'retained provenance'):
+            effective_provenance(dict(members, **{old: members[old] + b'\n'}))
+
     def test_ci_source_rejects_old_layer_tampering_and_wrong_predecessor(self):
         members = {p.relative_to(ROOT).as_posix(): p.read_bytes() for p in (ROOT / 'provenance').glob('*.json')}
         old = 'provenance/preparation-scripts-baseline.json'

@@ -97,7 +97,7 @@ def validate(doc):
     fields = ('format_version', 'kind', 'profile_id', 'scope', 'online_collection', 'dependency_profile',
               'dependency_lock_sha256', 'python', 'host', 'packages', 'tools', 'runtime')
     mapping(doc, fields, 'root')
-    if (type(doc['format_version']) is not int or doc['format_version'] != 2 or doc['kind'] != 'independent-host'
+    if (type(doc['format_version']) is not int or doc['format_version'] not in (2, 3) or doc['kind'] != 'independent-host'
             or doc['scope'] != 'local-offline-capability; model-service-not-tested'
             or doc['online_collection'] != 'UNSUPPORTED_G1' or type(doc['profile_id']) is not str
             or not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,63}', doc['profile_id'])):
@@ -126,8 +126,14 @@ def validate(doc):
         if type(e['version']) is not str or not e['version'] or len(e['version']) > 256 or '\0' in e['version']:
             raise ValueError('invalid tool version')
     runtime = doc['runtime']
-    mapping(runtime, ('kind', 'resource_lock_sha256', 'codex_root', 'workbench_root', 'docker_host', 'image',
-                      'codex_inventory', 'workbench_inventory'), 'runtime')
+    runtime_fields = ('kind', 'resource_lock_sha256', 'codex_root', 'workbench_root', 'docker_host', 'image',
+                      'codex_inventory', 'workbench_inventory')
+    if doc['format_version'] == 3:
+        runtime_fields += ('codex_release_sha256',)
+        from codex_upgrade import RELEASE_LOCK
+        if runtime.get('codex_release_sha256') != sha(RELEASE_LOCK):
+            raise ValueError('experimental Codex release lock differs')
+    mapping(runtime, runtime_fields, 'runtime')
     from public_resources import LOCK, private_path
     if runtime['kind'] != 'independent-public-rebuild' or runtime['resource_lock_sha256'] != sha(LOCK):
         raise ValueError('independent runtime source lock differs')
@@ -174,12 +180,18 @@ def runtime_check(doc, config=None):
         if inventory(root) != r[key]:
             raise ValueError('independent runtime full contents differ')
     fixed = read(LOCK)['codex']
+    version = '0.145.0'
+    if doc['format_version'] == 3:
+        from codex_upgrade import verify_runtime, VERSION, RELEASE_LOCK
+        verify_runtime(codex)
+        fixed = read(RELEASE_LOCK)
+        version = VERSION
     if sha(codex / 'vendor/x86_64-unknown-linux-musl/bin/codex') != fixed['binary_sha256']:
-        raise ValueError('Codex binary differs from fixed 0.145.0')
+        raise ValueError('Codex binary differs from selected release')
     if config is not None:
         options = config.harnesses['codex'].options
-        configured = plain(str(options['runtime_path']).replace('{version}', '0.145.0'))
-        if (str(options.get('version')) != '0.145.0' or configured != codex / 'vendor/x86_64-unknown-linux-musl'
+        configured = plain(str(options['runtime_path']).replace('{version}', version))
+        if (str(options.get('version')) != version or configured != codex / 'vendor/x86_64-unknown-linux-musl'
                 or plain(config.workbench.rootfs_path) != workbench / 'rootfs' or config.workbench.image != r['image']):
             raise ValueError('configuration paths/image differ from selected independent runtime')
     os.environ['DOCKER_HOST'] = r['docker_host']
@@ -222,7 +234,7 @@ def capability(doc, output):
     return report
 
 
-def collect(name, codex, workbench, target):
+def collect(name, codex, workbench, target, codex_version='0.145.0'):
     from public_resources import LOCK, private_path, verify_workbench
     sys.path.insert(0, str(PROJECT / 'scripts'))
     from runtime_support import inventory
@@ -240,6 +252,12 @@ def collect(name, codex, workbench, target):
                       'codex_root': str(codex), 'workbench_root': str(workbench),
                       'image': receipt['image'], 'docker_host': receipt['docker_host'],
                       'codex_inventory': inventory(codex), 'workbench_inventory': inventory(workbench)}
+    if codex_version == '0.170.0':
+        from codex_upgrade import RELEASE_LOCK
+        doc['format_version'] = 3
+        doc['runtime']['codex_release_sha256'] = sha(RELEASE_LOCK)
+    elif codex_version != '0.145.0':
+        raise ValueError('unsupported Codex version')
     validate(doc); runtime_check(doc)
     write(target, doc)
     return doc
@@ -251,6 +269,7 @@ def main(argv=None):
     c = sub.add_parser('collect')
     c.add_argument('--name', required=True)
     c.add_argument('--codex-root', type=Path, required=True)
+    c.add_argument('--codex-version', choices=('0.145.0', '0.170.0'), default='0.145.0')
     c.add_argument('--workbench-root', type=Path, required=True)
     c.add_argument('--output', type=Path, required=True)
     c = sub.add_parser('config', help='write a fresh private config for this independent runtime, retaining the placeholder endpoint')
@@ -266,11 +285,11 @@ def main(argv=None):
     args = p.parse_args(argv)
     try:
         if args.action == 'collect':
-            doc = collect(args.name, args.codex_root, args.workbench_root, args.output)
+            doc = collect(args.name, args.codex_root, args.workbench_root, args.output, args.codex_version)
             print(json.dumps({'status': 'CANDIDATE', 'profile_sha256': fingerprint(doc), 'selected': False}))
         elif args.action in ('check', 'config', 'doctor'):
             doc = load_profile(args.profile)
-            if doc['format_version'] != 2: raise ValueError('check expects an independent candidate')
+            if doc['format_version'] not in (2, 3): raise ValueError('check expects an independent candidate')
             if args.action == 'config':
                 from public_resources import private_path
                 target = private_path(args.output)
@@ -280,6 +299,8 @@ def main(argv=None):
                 raw = yaml.safe_load((PROJECT / 'configs/codex.example.yaml').read_text())
                 raw['experiment']['workbench'].update(rootfs_path=doc['runtime']['workbench_root'] + '/rootfs', image=doc['runtime']['image'])
                 raw['harnesses']['codex']['runtime_path'] = doc['runtime']['codex_root'] + '/vendor/x86_64-unknown-linux-musl'
+                if doc['format_version'] == 3:
+                    raw['harnesses']['codex']['version'] = '0.170.0'
                 write(target, raw)  # JSON is valid YAML; no secrets or service endpoint introduced.
                 print(json.dumps({'status': 'PASS', 'config': str(target), 'model_calls': 0}))
                 return 0

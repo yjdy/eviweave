@@ -11,6 +11,68 @@ from experiment_store import fingerprint, read, sha
 from standalone import PROJECT, plain, read_lock, verify_evaluation
 
 
+# The unified V6 entry points immediately before V8 was added. Existing V6
+# manifests carry these hashes and have no version field.
+LEGACY_V6_ENTRY_POINTS = {
+    'tools/experiment.py': '435c46842e8b1e9c55d2135643d8105b4a2d4a2d9864d5d132b4edbcc44b2c4b',
+    'tools/experiment_config.py': 'd022405b5cd19c3364ae3844ddf925fd4ffc3660ae3d9f330d47a6ca9a90c219',
+    'tools/experiment_scheduler.py': 'f2e1843fc2e752650c1ffbd83e317bec8b04f1d19936c7b374aac3c78c7adb54',
+    'tools/experiment_verify.py': 'd81ca0325e9756b50144a3d81eebadaa8815842a3c2e6ca121055760a67b4d31',
+    'tools/verify_release.py': '932fadc9a0eb248bce4a9cdcc6d559c3d355eda5ce4565474aecb8303c31e323',
+}
+
+
+def experiment_version(identity):
+    version = identity.get('version', 'v6')
+    if version not in ('v6', 'v8'):
+        raise ValueError('unsupported experiment version')
+    return version
+
+
+def same_identity(previous, current):
+    if previous == current:
+        return True
+    if experiment_version(previous) != 'v6' or experiment_version(current) != 'v6':
+        return False
+    # Require the complete old source set, configuration, data and environment.
+    old_source = {**current['source'], **LEGACY_V6_ENTRY_POINTS}
+    return previous == {**current, 'source': old_source}
+
+
+def prepare_version(prepared, version):
+    if version == 'v8':
+        prepare_v8(prepared)
+    elif str(prepared['config'].harnesses['codex'].options.get('version')) == '0.170.0':
+        raise ValueError('Codex 0.170.0 is experimental; explicitly select --version v8')
+
+
+def prepare_v8(prepared):
+    from run_v8 import (IMPORTED_POPPLER_DATA, REQUIRED_CMAP, build_v8_harness)
+
+    config = prepared['config']
+    runner = build_v8_harness(config)
+    builtin = config.workbench.rootfs_path / 'usr/share/poppler' / REQUIRED_CMAP
+    imported = IMPORTED_POPPLER_DATA / REQUIRED_CMAP
+    poppler = 'workbench'
+    if not builtin.is_file():
+        needs_pdf = any(Path(name).parts[0] == 'context' and Path(name).suffix.casefold() == '.pdf'
+                        for files in prepared['inputs'].values() for name in files)
+        if not imported.is_file() and needs_pdf:
+            raise FileNotFoundError(f'V8 requires local Poppler mapping data at {IMPORTED_POPPLER_DATA}')
+        poppler = None
+        if imported.is_file():
+            files = {p.relative_to(IMPORTED_POPPLER_DATA).as_posix(): sha(plain(p))
+                     for p in sorted(IMPORTED_POPPLER_DATA.rglob('*')) if p.is_file() or p.is_symlink()}
+            poppler = fingerprint(files)
+    identity = prepared['identity']
+    identity['source'].update({f'tools/{name}': sha(PROJECT / 'tools' / name)
+                               for name in ('run_v8.py', 'pdf_reader.py', 'v8_semantic_review.py')})
+    identity.update(version='v8', runner_sha256=runner.resume_fingerprint, poppler_data=poppler)
+    if 'codex_upgrade' in runner.resume_identity:
+        identity['source']['tools/codex_upgrade.py'] = sha(PROJECT / 'tools/codex_upgrade.py')
+        identity['codex_upgrade'] = runner.resume_identity['codex_upgrade']
+
+
 def tasks_for(scope=None, tasks=None):
     if tasks is not None:
         if scope is not None or not tasks or any(type(t) is not int or t < 1 or t > 410 for t in tasks):

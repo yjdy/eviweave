@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "scope": "User-authorized default V8 R2 prompt; no selector, no historical experiment migration",
+  "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+  "baseline_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/codex-0.170.0-lock.json": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533",
+    "provenance/v8-unified-baseline.json": "c55b2ebc0d6fb4e25f8897c9330b9e59aa3769b9d0efd9de1bb72088a2a8bbf6",
+    "provenance/v8-upgrade-integration-baseline.json": "e9e8a761d3dbfa9313731ae0b295bb1732c621a3dfd8a6ef29195acd50c2f242"
+  },
+  "removed_files": [
+    {
+      "destination": "tools/v8_semantic_review_r2.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f",
+      "reason": "User requested one default V8 prompt; verified R2 bytes now occupy tools/v8_semantic_review.py."
+    }
+  ],
+  "files": [
+    {
+      "destination": "provenance/v8-prompt-r2.md",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "3ccc8797742782a904892c30b33c164f7f67fcfe592cd5a4bb8965a2776e26d0",
+      "baseline_sha256": "3ccc8797742782a904892c30b33c164f7f67fcfe592cd5a4bb8965a2776e26d0",
+      "release_sha256": "d203f037eecd4d86b210469b0c5b18ef4b2b98bc6db6174040d8e4f944cd4d92",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tests/test_current_ci.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "5de1fc7727f555d27109890e638b549f8b5fd63bc9304b25168845cc8c41ef2c",
+      "baseline_sha256": "5de1fc7727f555d27109890e638b549f8b5fd63bc9304b25168845cc8c41ef2c",
+      "release_sha256": "a8464a267ae363ce5d2bc5a44c79ba3be4121d3ae08c9fecfdf33a85aa4a6080",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tests/test_run_v8_pdf.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "2c32258192af9c9f5d23aad60ddde61421c04d4dacaaaa0b5ca7e6fe632f40b3",
+      "baseline_sha256": "2c32258192af9c9f5d23aad60ddde61421c04d4dacaaaa0b5ca7e6fe632f40b3",
+      "release_sha256": "d4404a8b4dba3a96efe2e4e29f2623dd5b0e0abb63b14fa05de83bca7e15e94b",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tests/test_unified_experiment.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "03122a4a60e41f87a9a1951af7b85134d3e074f2934c5f05975906bee9279a4b",
+      "baseline_sha256": "03122a4a60e41f87a9a1951af7b85134d3e074f2934c5f05975906bee9279a4b",
+      "release_sha256": "379888c800ec065c17b637f94f652038ce8ddbba1dea9244414e113051be34d8",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "2b0b8ab1c7dcfea3ecd306855341775e44821aa0f546dd025d64e29ce2929502",
+      "baseline_sha256": "2b0b8ab1c7dcfea3ecd306855341775e44821aa0f546dd025d64e29ce2929502",
+      "release_sha256": "00e255f4bda4d9ed2ed069e6fded75b95be18fb925d056f3e721d38d61c791bc",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "23991c3edcea2966e48817c5a585f1b63040642fab409be7f274dde851dd637f",
+      "baseline_sha256": "23991c3edcea2966e48817c5a585f1b63040642fab409be7f274dde851dd637f",
+      "release_sha256": "9605bed491d9778a71a6e7c8866c0c124933095a3c4b9c526d96b760e632c2a9",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tools/experiment_scheduler.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "13c5d535ab62c08f38702c95a33b4d41c34e60c4ae19fabb8845908c1b3262b6",
+      "baseline_sha256": "13c5d535ab62c08f38702c95a33b4d41c34e60c4ae19fabb8845908c1b3262b6",
+      "release_sha256": "bd67843d452ca61bed9b6f152d57132dfea6e6dbedc1b5d60a13d772e9e7823f",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tools/run_v8.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "552a2254f902252b342e7b5e6800b6808bbc08deb6cf736acd4f9dca65396b54",
+      "baseline_sha256": "552a2254f902252b342e7b5e6800b6808bbc08deb6cf736acd4f9dca65396b54",
+      "release_sha256": "3ce821464807bd1c6bbe45ed28bab4689a8ad9e2ce657799180f3d07f17bc76b",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    },
+    {
+      "destination": "tools/v8_semantic_review.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "7ee499b4593884c04ddc5e89ba328b1d18f92316c7e91e272704593ddd7c2320",
+      "baseline_sha256": "7ee499b4593884c04ddc5e89ba328b1d18f92316c7e91e272704593ddd7c2320",
+      "release_sha256": "c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification.",
+      "copied_from": {
+        "commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+        "path": "tools/v8_semantic_review_r2.py",
+        "sha256": "c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f"
+      }
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "fe5da2dfcde32a4f8ac09c2913729f9e2f6584dc",
+      "source_sha256": "2ace3920406172bb4ad3a869f30bc8418496ce873c1500cf94212a14982090d1",
+      "baseline_sha256": "2ace3920406172bb4ad3a869f30bc8418496ce873c1500cf94212a14982090d1",
+      "release_sha256": "e6c7347a00a1266ca64459c75dd9473250b8c1a1c36964e79cc38877e5a88f4e",
+      "reason": "Make verified R2 the sole V8 prompt, remove selector wiring, and preserve unified entry/output and strict source identity; update focused regression and retirement verification."
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "version": "0.170.0",
+  "package": "@openai/codex",
+  "platform_package": "0.170.0-linux-x64",
+  "metadata_url": "https://registry.npmjs.org/@openai/codex/0.170.0-linux-x64",
+  "url": "https://registry.npmjs.org/@openai/codex/-/codex-0.170.0-linux-x64.tgz",
+  "integrity": "sha512-6cCZJaZL17tiTAvhd1Pirt8vsV1dP8CfG94+IHygUO4m24oYLQrIInJJLyKzcMv/uUonbu1dF2JmcXhA/s5bsg==",
+  "sha256": "67c4bccce8e6c3a2b9ae0e586750e0efac7e0b8cd85e6b4734ad474317d2cc32",
+  "binary": "vendor/x86_64-unknown-linux-musl/bin/codex",
+  "binary_sha256": "880819aab735adcf16f36cd628940b9f1e652a36c01d10a5d32f83cc84902971",
+  "contents": {
+    "README.md": {
+      "mode": 420,
+      "sha256": "ba4e1f69ff48386e72a9c5e1edaf76aad64a475c2d51af79ccba6d1128261ba7"
+    },
+    "package.json": {
+      "mode": 420,
+      "sha256": "cf2100ef126663cae9a5898b3717872a40a6c6ff49e7d55aec42797a3b348e56"
+    },
+    "vendor": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/bin": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/bin/codex": {
+      "mode": 493,
+      "sha256": "880819aab735adcf16f36cd628940b9f1e652a36c01d10a5d32f83cc84902971"
+    },
+    "vendor/x86_64-unknown-linux-musl/bin/codex-code-mode-host": {
+      "mode": 493,
+      "sha256": "ffc1ad7023864bfc209c408887d6834a8f644201eff4432fb9558b7f1c40e9dc"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-package.json": {
+      "mode": 420,
+      "sha256": "fd91828267e3c49cee4fb0627f5e517e6afb2d66c4ce08140400d9a835000870"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-path": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-path/rg": {
+      "mode": 493,
+      "sha256": "e62198eb19b136b88c330af83647b5a962cb99b6b1f066758568f12de1974849"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/bwrap": {
+      "mode": 493,
+      "sha256": "15fd5f2673d2e1c2f80e34e5108462fd014f5e8bbc7b0731f1ab23d1ff1ac140"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/NOTICE.md": {
+      "mode": 420,
+      "sha256": "40097a1799441051aa0b6645cdc819cceb19be73cdd265eb602aa2b15e0b1f48"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/bin": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/bin/codex-voice-host": {
+      "mode": 493,
+      "sha256": "20ecb77cbb2609729c80bb04f72cca308eeb6640ce394d01dc088c961c714786"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstapp.so": {
+      "mode": 493,
+      "sha256": "3578adba0516decf46d03c2c4066d4201bc4aaa1664f55e491dbf5091410a429"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstaudioconvert.so": {
+      "mode": 493,
+      "sha256": "e7dfabe274159175e00aa9737b413d96f64ae9e5eb5a995fd5251723b0cd2b3c"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstaudioresample.so": {
+      "mode": 493,
+      "sha256": "09259b0a8d51623bd1340e3b01c180d0de3d1bcf0eccc686232f57560123b53e"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstcoreelements.so": {
+      "mode": 493,
+      "sha256": "be4a16b875e7ea12bb746607b21cf351033f39cf9bd2335a3b0c7d9b2b6f6c9e"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstopus.so": {
+      "mode": 493,
+      "sha256": "72fbb86e2c873fe594da81e227c6ea2bf5529b9c01c7ef1617a827ba2a3f47d9"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstrtp.so": {
+      "mode": 493,
+      "sha256": "07a60888fdbebdbf36cffc65ec446384fa5fb93c02b5e6451500f4929dfee0c7"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/gstreamer-1.0/libgstrtpmanager.so": {
+      "mode": 493,
+      "sha256": "12f2f1c813dbbb5ff5acd8bf3ee613a577f8cae14b95a40e87360083a24e1fcc"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libffi.so.8": {
+      "mode": 493,
+      "sha256": "9343712fef5adb7f0d00b6f9c96d3b76c7eaed0ff3f96b1db665c221e68c2c7c"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgio-2.0.so.0": {
+      "mode": 493,
+      "sha256": "b93d3c9a450345f57dbe059858d1fb343cac763e7e095e42d0c09fe1a05f1a7a"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libglib-2.0.so.0": {
+      "mode": 493,
+      "sha256": "2fb6c47ae68ab65adad58ce1a0f4ca4d9bd66d7fe1b357204cb6626109944f22"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgmodule-2.0.so.0": {
+      "mode": 493,
+      "sha256": "a8c2625fced7e630902cc03a68469220e49adf1f3364547a79b5934dc672a577"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgobject-2.0.so.0": {
+      "mode": 493,
+      "sha256": "6f4884f9a6f8dbb8e11e9d028217c6b71f153f677c1e54654221ca887033bc92"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstallocators-1.0.so.0": {
+      "mode": 493,
+      "sha256": "9a246100487466cb4aea627dd44ee5722b957083ab1fd3b61b97dd9d18f6e87a"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstapp-1.0.so.0": {
+      "mode": 493,
+      "sha256": "34b04223d083273dbdee8ff011dda275331aee8e0769b16e2546268b7d0499e7"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstaudio-1.0.so.0": {
+      "mode": 493,
+      "sha256": "4b6edf53be2aba332ce235e1d403a51e2cee09110d8dec291b21caecd01a80b1"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstbase-1.0.so.0": {
+      "mode": 493,
+      "sha256": "b7afe6d1252e1d7717c5a15a94add10d8f4d55db250542968f32e5b77d5fcf03"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstnet-1.0.so.0": {
+      "mode": 493,
+      "sha256": "44fecd97ce4876c36e1ad5358339b043a8d77f8030bb9689739616a000aef8fa"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstpbutils-1.0.so.0": {
+      "mode": 493,
+      "sha256": "8eacf4c29a6a60fc8e55386107ea45e490c15cb6608a5a9af7cc4ed7ffab26f1"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstreamer-1.0.so.0": {
+      "mode": 493,
+      "sha256": "b5380aac158cd27a6237f8bf5fdf5895941a5b027c2788e7376be7c0f3a05af2"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstrtp-1.0.so.0": {
+      "mode": 493,
+      "sha256": "f85814c4044be77fe571d3c7bbbea1d2d180749a924a44aec49ff122eaf9f811"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgsttag-1.0.so.0": {
+      "mode": 493,
+      "sha256": "b5ec70728816ef71879ad013a979f04c3693c94ab3f081971ad6aebc96533ef6"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libgstvideo-1.0.so.0": {
+      "mode": 493,
+      "sha256": "ff09f9a6be1ef592c3abb3224483cad43b34102a423328d379561481f1c0b6fd"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libintl.so.8": {
+      "mode": 493,
+      "sha256": "52508cf6dadff7cc431dd76d1f36754eb4184f56a49f93442f1a48bcb240df20"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libopus.so.0": {
+      "mode": 493,
+      "sha256": "03974febe0e96c57cf41173eb409a12c77273fd005825606fe2df3640b20519b"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libpcre2-8.so.0": {
+      "mode": 493,
+      "sha256": "6d589f935f093df4fbcebf01b7f8afa997378f4a4ac5fd0a76e0c5f604af64b7"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/lib/libz.so.1": {
+      "mode": 493,
+      "sha256": "7088b2cc0f2812f6617666d851bd779925de4350a87ef0a288bbedda87e76083"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses": {
+      "mode": 509,
+      "directory": true
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/LGPL-2.1.txt": {
+      "mode": 420,
+      "sha256": "ad2eec519ebd4b5df86ea84dff24ae3bfa2edea846a703b58902dd221ae375db"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/Opus.txt": {
+      "mode": 420,
+      "sha256": "01e1167d54a096d123cf6dfbbeb19587278845c6481d2d66d545669846079551"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/PCRE2.md": {
+      "mode": 420,
+      "sha256": "197d8a73ffee0d6b09adba2f9c677b5f5aede24edf89258a68e48248d010d811"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/libffi.txt": {
+      "mode": 420,
+      "sha256": "17b64dc60f3b6897a60f971e288b973f655c2edcdf08b25f3c3dd5549857881c"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/proxy-libintl.txt": {
+      "mode": 420,
+      "sha256": "d245807f90032872d1438d741ed21e2490e1175dc8aa3afa5ddb6c8e529b58e5"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/sljit.txt": {
+      "mode": 420,
+      "sha256": "5f216505c0f6ea3273caec89e766eef93cdeb7bbb0c429f9360116d7c938feeb"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/licenses/zlib.txt": {
+      "mode": 420,
+      "sha256": "e32ff4e00d9d94930537635291da39e7e612703334bf6fde8c7f1686fe8a45a2"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/manifest.json": {
+      "mode": 420,
+      "sha256": "63fea962934b380a063156dab69eeb0513d5e5fb2d6b95df5d9e69ff25a88098"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/runtime.json": {
+      "mode": 493,
+      "sha256": "ecd9346ed25426ec5cf140b87586f6f7cdb7bf37a74b7212f4a24809fa83aa88"
+    },
+    "vendor/x86_64-unknown-linux-musl/codex-resources/voice/sources.json": {
+      "mode": 420,
+      "sha256": "5613f37012effc3e28cdad52a7c88b9098aaaf7aae43f3cb7199f55ffbb15908"
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "scope": "Formal V8 code for main; nine local independent-review experiment files excluded",
+  "source_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+  "baseline_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/codex-0.170.0-lock.json": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533",
+    "provenance/v8-r2-default-baseline.json": "0633ef04e40c6b4feaefe8b8c35305f9686edd346793ac9e24805d6fa0c64c17",
+    "provenance/v8-unified-baseline.json": "c55b2ebc0d6fb4e25f8897c9330b9e59aa3769b9d0efd9de1bb72088a2a8bbf6",
+    "provenance/v8-upgrade-integration-baseline.json": "e9e8a761d3dbfa9313731ae0b295bb1732c621a3dfd8a6ef29195acd50c2f242"
+  },
+  "excluded_experiments": {
+    "source_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+    "files": {
+      "experiments/v8_independent_review/README.md": "38009a478b54ef7a64c6b8b87daae136b4c7ea8fd96ed01553531f7b3ba41a02",
+      "experiments/v8_independent_review/candidate.py": "1c2918c546795f26530850d6b07f893fe52555d8302034824604af5a12d58e9e",
+      "experiments/v8_independent_review/light_review.py": "411e409e16f6e192672f00e0b2666e402b9a280f6d6ccb1e1d053c776097e03c",
+      "experiments/v8_independent_review/packets.py": "1c1ed6364c25502601cbfde793461c60489b59c198c427260b6cd91fa92845c5",
+      "experiments/v8_independent_review/pilot_evidence.py": "c422e4412abac89dc7c24aa9c5bc51e6fc34ddcf976dc3d27e5df1849182966c",
+      "experiments/v8_independent_review/repair.py": "fb1246ca51cd446d21368498c37129b7ac22a73395c162460e751c97271d6555",
+      "experiments/v8_independent_review/resume_legacy.py": "c5a417813de9f6d643fea2cde80795fb61fd8a37eb61d8709ea5ffc626170997",
+      "experiments/v8_independent_review/review_common.py": "7d03d42c6c3ed3791bb2aaf1b318cec238b0a864bebc693b20a07c1797e4d2bc",
+      "experiments/v8_independent_review/run.py": "df055f7429898514c64262d990a94659b3f1c2ee53f61d148991bd850360c590"
+    },
+    "reason": "Retain originals on codex/v8; omit from main candidate and its new history."
+  },
+  "files": [
+    {
+      "destination": "tools/codex_upgrade_probe.py",
+      "source_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+      "source_sha256": "fab175189497f0cba1a560d901bb7efd94614406fcf24309b3d4c4e17ee19dd6",
+      "baseline_sha256": "fab175189497f0cba1a560d901bb7efd94614406fcf24309b3d4c4e17ee19dd6",
+      "release_sha256": "516375410795e0c1dcb26c63a11f2a40447d9798f87d7d0ebb08fd3e9faf73ed",
+      "reason": "Remove offline diagnostic dependency on excluded experiment helper while preserving completed-turn usage checks; regress and enforce main integration scope."
+    },
+    {
+      "destination": "tests/test_codex_upgrade.py",
+      "source_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+      "source_sha256": "8c953127d4acf147e1d36267a0b9a0c3c3126f549366cecb2480d60bfd642788",
+      "baseline_sha256": "8c953127d4acf147e1d36267a0b9a0c3c3126f549366cecb2480d60bfd642788",
+      "release_sha256": "393e29b721681bfeacc1a083e2ef27e145872ea84d6ae35faa270d62a8c18db3",
+      "reason": "Remove offline diagnostic dependency on excluded experiment helper while preserving completed-turn usage checks; regress and enforce main integration scope."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "3b57d4a5aead0df5e51e58f2ca0b6f8692ce95df",
+      "source_sha256": "e6c7347a00a1266ca64459c75dd9473250b8c1a1c36964e79cc38877e5a88f4e",
+      "baseline_sha256": "e6c7347a00a1266ca64459c75dd9473250b8c1a1c36964e79cc38877e5a88f4e",
+      "release_sha256": "dea050b19f233c7a4bfa96601a3b194cf6743f93451f6d7c4a57e3dbe16820ad",
+      "reason": "Remove offline diagnostic dependency on excluded experiment helper while preserving completed-turn usage checks; regress and enforce main integration scope."
+    }
+  ]
+}

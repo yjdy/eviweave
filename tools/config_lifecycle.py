@@ -7,7 +7,7 @@ import subprocess
 import time
 
 
-def read_config(command, environment, output):
+def read_config(command, environment, output, expected_version='0.145.0'):
     output.mkdir(parents=True, exist_ok=True)
     (output / "command.json").write_text(json.dumps(command, indent=2) + "\n")
     messages = [
@@ -70,7 +70,7 @@ def read_config(command, environment, output):
             result = request(messages[2], 2)
             assert (
                 initial["codexHome"] == "/mnt/home/.codex"
-                and "/0.145.0 " in initial["userAgent"]
+                and ('/' + expected_version + ' ') in initial["userAgent"]
             )
             (output / "response.json").write_text(
                 json.dumps(result, ensure_ascii=False, indent=2) + "\n"

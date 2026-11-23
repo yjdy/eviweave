@@ -486,10 +486,131 @@ class UnifiedTests(unittest.TestCase):
             args=cli.parser().parse_args(['run','--resume','--output',str(self.experiment),*flag])
             with self.assertRaises(ValueError): cli.execute(args)
 
+    def test_pre_v8_manifest_can_resume_and_still_rejects_unrelated_drift(self):
+        prepared = self.prepared((1,))
+        before = {**prepared['identity'], 'source': {**prepared['identity']['source'], **cfg.LEGACY_V6_ENTRY_POINTS}}
+        doc = sched.initialize(self.experiment, {**prepared, 'identity': before})
+        sched.add_plan(self.experiment, doc, [1], 1, prepared['inputs'])
+        args = cli.parser().parse_args(['run', '--resume', '--yes', '--output', str(self.experiment)])
+        with patch.object(sched, 'production_runner') as old_runner, patch.object(cli, 'confirm'):
+            old_runner.return_value = FakeRunner()
+
+            def offline(*args, **kwargs):
+                return sched.schedule(*args, **kwargs, doctor_fn=lambda c, d: None, live=False)
+
+            self.assertEqual(cli.execute(args, prepare_fn=lambda *a: prepared, schedule_fn=offline,
+                                         verify_fn=lambda root: ver.verify(root, scorer=lambda *a: {'passed': True})), 0)
+            old_runner.assert_called_once()
+        self.assertEqual(store.load(self.experiment)['identity'], before)
+        changed = {**prepared['identity'], 'environment_sha256': '0' * 64}
+        self.assertFalse(cfg.same_identity(before, changed))
+
     def test_lock_snapshot_tampering_blocks_offline_verify(self):
         self.initialize(tasks=(1,))
         store.write(self.experiment/'resources/environment-lock.json',{'tampered':True})
         with self.assertRaisesRegex(ValueError,'environment lock'): self.verify()
+
+
+    def test_unified_r2_check_run_resume_and_offline_report(self):
+        import run_v8
+        from types import SimpleNamespace
+        runners = []
+        class V8FakeRunner(FakeRunner):
+            def __init__(self):
+                super().__init__(['wall_time_exhausted', 'submitted'] if not runners else [])
+                self.resume_identity = {'fixture_review': 'default-r2'}
+                self.resume_fingerprint = store.fingerprint(self.resume_identity)
+
+            def run(self, task, root):
+                super().run(task, root)
+                path = root / 'events.jsonl'
+                lines = path.read_text().splitlines()
+                first = json.loads(lines[0])
+                first.update(harness='codex-v8', experiment_fingerprint=self.resume_fingerprint)
+                path.write_text('\n'.join([json.dumps(first), *lines[1:]]) + '\n')
+
+        def factory(config):
+            runner = V8FakeRunner()
+            # Prepare and dispatch both build runners; only count dispatches below.
+            return runner
+
+        def schedule(root, doc, plan, config, dataset, resume=False):
+            with patch.object(run_v8, 'build_v8_harness', side_effect=lambda c, **kw: dispatch(c, **kw)):
+                return sched.schedule(root, doc, plan, config, dataset, resume=resume,
+                                      doctor_fn=lambda c, o: None, live=False)
+
+        def dispatch(config, **kwargs):
+            runner = factory(config, **kwargs)
+            runners.append(runner)
+            return runner
+
+        def prepare(config, dataset, evaluation, tasks):
+            return self.prepared(tasks)
+
+        def verify(root):
+            return ver.verify(root, scorer=lambda e, p, t, o: {'task_id': f'task_{t}', 'passed': True})
+
+        args = ['--version', 'v8', '--tasks', '1', '2',
+                '--config', str(self.config), '--dataset', str(self.dataset),
+                '--evaluation-root', str(self.evaluation)]
+        with patch.object(run_v8, 'build_v8_harness', side_effect=factory), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'), \
+             patch('dataspace_baselines.doctor.run_doctor', return_value=[
+                 SimpleNamespace(name='fixture', ok=True, detail='offline', skipped=False)]), \
+             patch.dict(os.environ, {'EVIWEAVE_API_KEY': 'artificial-never-sent'}):
+            self.assertEqual(cli.execute(cli.parser().parse_args(['check', *args]), prepare_fn=prepare), 0)
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'run', *args, '--output', str(self.experiment)]),
+                prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 1)
+            original = store.load(self.experiment)
+            self.assertNotIn('v8_review', original['identity'])
+            self.assertIn('tools/v8_semantic_review.py', original['identity']['source'])
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'run', '--resume', '--yes', '--output', str(self.experiment)]),
+                prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 0)
+        self.assertEqual([t for runner in runners for t, _ in runner.calls], ['task_1', 'task_2', 'task_1'])
+        self.assertEqual(store.load(self.experiment)['identity'], original['identity'])
+        with patch.object(run_v8, 'build_v8_harness', side_effect=AssertionError('verify must be offline')):
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'verify', '--experiment', str(self.experiment)]), verify_fn=verify), 0)
+        for filename in ('experiment.json', 'summary.json', 'summary.csv', 'score.json', 'report-set.json'):
+            self.assertTrue((self.experiment / filename).is_file(), filename)
+        report = store.read(self.experiment / 'summary.json')
+        self.assertEqual(report['integrity'], 'PASS')
+        self.assertEqual(report['version'], 'v8')
+        self.assertEqual(report['history_attempts'], 3)
+        self.assertEqual(len(list((self.experiment / 'predictions').glob('*/prediction.csv'))), 2)
+
+    def test_default_prompt_identity_and_removed_selector(self):
+        from types import SimpleNamespace
+        import run_v8
+        for command in ('check', 'run'):
+            with self.assertRaises(SystemExit):
+                cli.parser().parse_args([command, '--version', 'v8', '--v8-review', 'r2'])
+        runner = SimpleNamespace(resume_fingerprint='fixture', resume_identity={})
+        with patch.object(run_v8, 'build_v8_harness', return_value=runner), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'):
+            prepared = self.prepared()
+            cfg.prepare_version(prepared, 'v8')
+        identity = prepared['identity']
+        self.assertNotIn('v8_review', identity)
+        self.assertNotIn('tools/v8_semantic_review_r2.py', identity['source'])
+        self.assertEqual(identity['source']['tools/v8_semantic_review.py'],
+                         'c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f')
+        old = json.loads(json.dumps(identity))
+        old['source']['tools/v8_semantic_review.py'] = '0' * 64
+        self.assertFalse(cfg.same_identity(old, identity))
+        # A valid saved manifest with a previous source identity cannot resume.
+        prepared['identity'] = old
+        doc = sched.initialize(self.experiment, prepared)
+        sched.add_plan(self.experiment, doc, [1, 2], 1, prepared['inputs'])
+        before = store.fingerprint(store.load(self.experiment))
+        with patch.object(run_v8, 'build_v8_harness', return_value=runner), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'), \
+             self.assertRaisesRegex(ValueError, 'identity differs'):
+            cli.execute(cli.parser().parse_args(['run', '--resume', '--yes', '--output', str(self.experiment)]),
+                        prepare_fn=lambda *args: self.prepared())
+        self.assertEqual(store.fingerprint(store.load(self.experiment)), before)
 
 
 class EnvironmentLockTests(unittest.TestCase):

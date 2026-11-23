@@ -24,6 +24,15 @@ HOST_ONLY = {
         'test_valid_independent_profile_cannot_remove_checks_or_add_hooks',
     )
 }
+HOST_ONLY |= {
+    'test_codex_upgrade.UpgradeTests.' + name for name in (
+        'test_new_profile_is_explicit_and_old_profile_still_valid',
+        'test_new_profile_rejects_lock_drift_and_schema_downgrade',
+        'test_new_profile_load_and_dependency_lock_unchanged',
+        'test_format3_keeps_runtime_and_namespace_validation',
+        'test_format2_cannot_silently_select_new_runtime',
+    )
+}
 FULL_GUARD = "${{ github.event_name == 'workflow_dispatch' && inputs.full }}"
 
 

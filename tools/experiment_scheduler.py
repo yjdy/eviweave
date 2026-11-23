@@ -121,7 +121,7 @@ def doctor(config, output):
         raise RuntimeError('global environment/sandbox check failed; see doctor.json')
 
 
-def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=production_runner,
+def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=None,
              doctor_fn=doctor, live=True):
     """Caller holds the experiment lock. Internal injection exists only for offline tests."""
     records = repair(root, doc)
@@ -218,7 +218,17 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=prod
         launch_root.mkdir(parents=True)
         with run_environment(launch_root, live=live):
             doctor_fn(config, launch_root)
-            runner = runner_factory(config)
+            if runner_factory is None:
+                from experiment_config import experiment_version
+                if experiment_version(doc['identity']) == 'v8':
+                    from run_v8 import build_v8_harness
+                    runner = build_v8_harness(config)
+                    if runner.resume_fingerprint != doc['identity']['runner_sha256']:
+                        raise ValueError('V8 runner differs from the saved experiment identity')
+                else:
+                    runner = production_runner(config)
+            else:
+                runner = runner_factory(config)
             if stopped.is_set():
                 runner.cancel()
             with ThreadPoolExecutor(max_workers=config.concurrency) as pool:

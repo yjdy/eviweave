@@ -67,7 +67,8 @@ def install(python, environment_profile=None, cache_dir=None):
     run([str(python), '-B', '-m', 'pip', 'install', '--no-index', '--no-deps', '--no-build-isolation', str(PROJECT)])
     run([str(python), '-B', '-c', 'import sys; sys.path.insert(0,sys.argv[1]); import environment_lock as e; e.verify(runtime=False,doc=e.profile(sys.argv[2]))', str(PROJECT / 'tools'), str(snapshot)])
     write(marker, {'profile_sha256': fingerprint(doc)})
-    config = PROJECT / '.local/config-v6/codex.yaml'
+    config = PROJECT / ('.local/config-v8-codex-0170/codex.yaml' if doc['format_version'] == 3
+                        else '.local/config-v6/codex.yaml')
     if not config.exists():
         # PyYAML is available in the target, not necessarily in bootstrap Python.
         script = ('import sys,json; from pathlib import Path; import yaml; '
@@ -76,13 +77,15 @@ def install(python, environment_profile=None, cache_dir=None):
                   'r["experiment"]["workbench"]["rootfs_path"]=sys.argv[4]; '
                   'r["experiment"]["workbench"]["image"]=sys.argv[6]; '
                   'r["harnesses"]["codex"]["runtime_path"]=sys.argv[5]; '
+                  'r["harnesses"]["codex"]["version"]=sys.argv[7]; '
                   'target=Path(sys.argv[3]); target.parent.mkdir(parents=True,exist_ok=True); '
                   'target.open("x").write(yaml.safe_dump(r,allow_unicode=True))')
         runtime = doc.get('runtime', {})
-        workbench = (runtime['workbench_root'] + '/rootfs' if doc['format_version'] == 2 else str(PROJECT / '.runtimes/data-workbench-1.0/rootfs'))
-        codex = (runtime['codex_root'] + '/vendor/x86_64-unknown-linux-musl' if doc['format_version'] == 2 else str(PROJECT / '.runtimes/codex-{version}/platform-package/vendor/x86_64-unknown-linux-musl'))
+        workbench = (runtime['workbench_root'] + '/rootfs' if doc['format_version'] in (2, 3) else str(PROJECT / '.runtimes/data-workbench-1.0/rootfs'))
+        codex = (runtime['codex_root'] + '/vendor/x86_64-unknown-linux-musl' if doc['format_version'] in (2, 3) else str(PROJECT / '.runtimes/codex-{version}/platform-package/vendor/x86_64-unknown-linux-musl'))
         image = runtime.get('image', 'dataspace-workbench:1.0')
-        run([str(python), '-B', '-c', script, str(PROJECT), str(snapshot), str(config), workbench, codex, image])
+        version = '0.170.0' if doc['format_version'] == 3 else '0.145.0'
+        run([str(python), '-B', '-c', script, str(PROJECT), str(snapshot), str(config), workbench, codex, image, version])
     print('Python package installed with locked dependencies. Edit .local/env.sh, then run scripts/experiment.sh check. Runtime/data/service authentication were not installed or tested.')
 
 
