@@ -83,7 +83,7 @@ def check_host(doc):
 
 
 def check_runtime(config, doc):
-    if doc.get('format_version') == 2:
+    if doc.get('format_version') in (2, 3):
         from host_profile import runtime_check, capability
         from public_resources import audit_root
         from experiment_store import uid
@@ -121,7 +121,7 @@ def check_runtime(config, doc):
 
 def verify(config=None, runtime=True, doc=None):
     doc = doc or profile()
-    if doc.get('format_version') == 2:
+    if doc.get('format_version') in (2, 3):
         from host_profile import validate
         validate(doc)
     check_python(doc)

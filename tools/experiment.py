@@ -9,7 +9,7 @@ from pathlib import Path
 import subprocess
 import sys
 
-from experiment_config import defaults, experiment_version, prepare, prepare_v8, same_identity, tasks_for
+from experiment_config import defaults, experiment_version, prepare, prepare_version, same_identity, tasks_for
 from experiment_scheduler import add_plan, initialize, plan_for, run_environment, schedule
 from experiment_store import (attempts, exclude_output, fingerprint, load, locked, output_path,
                               uid, read, registered_inputs)
@@ -23,6 +23,8 @@ def parser():
     for name in ('check', 'run'):
         q = sub.add_parser(name)
         q.add_argument('--version', choices=('v6', 'v8'), help='experiment version; new runs default to v6')
+        q.add_argument('--v8-review', choices=('legacy', 'r2'),
+                       help='V8 review instructions; new runs default to legacy, resume restores the saved choice')
         q.add_argument('--config', type=Path)
         q.add_argument('--dataset', type=Path)
         q.add_argument('--evaluation-root', type=Path)
@@ -108,8 +110,7 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
                                   environment_verifier=lambda c: verify_environment(c, doc=selected))
         else:
             prepared = prepare_fn(config, dataset, evaluation, tasks)
-        if args.version == 'v8':
-            prepare_v8(prepared)
+        prepare_version(prepared, args.version or 'v6', args.v8_review)
         from public_resources import audit_root
         diagnostic = audit_root() / 'experiments' / ('check-' + uid())
         diagnostic.mkdir(parents=True)
@@ -150,6 +151,12 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
         if before and experiment_version(before['identity']) != version:
             raise ValueError('experiment version differs; use --resume or a new output directory')
         plan = {'tasks': tasks, 'repeat': repeat}
+    review = args.v8_review
+    if before and version == 'v8':
+        saved_review = before['identity'].get('v8_review', 'legacy')
+        if review is not None and review != saved_review:
+            raise ValueError('--v8-review differs from the saved experiment')
+        review = saved_review
     registered = registered_inputs(root, before) if before else {}
     registered_tasks = sorted(set(tasks) | {int(t) for t in registered})
     if before and prepare_fn is prepare:
@@ -170,8 +177,7 @@ def execute(args, prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify):
                                   environment_verifier=lambda c: verify_environment(c, doc=selected))
         else:
             prepared = prepare_fn(config, dataset, evaluation, registered_tasks)
-    if version == 'v8':
-        prepare_v8(prepared)
+    prepare_version(prepared, version, review)
     state_before = fingerprint({'doc': before, 'attempts': attempts(root, before)}) if before else None
     if before:
         if not same_identity(before['identity'], prepared['identity']):

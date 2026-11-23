@@ -1,11 +1,14 @@
-import hashlib
+import sys
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
+
+import hashlib
 import tempfile
 from types import SimpleNamespace
 import unittest
 from unittest.mock import Mock, patch
 
-from tools import run_v8
+import run_v8
 from dataspace_baselines.runners.native_cli import NativeCliInvocation
 
 
@@ -80,6 +83,43 @@ class RunV8PdfTests(unittest.TestCase):
                           "--ro-bind", str(imported), "/usr/share/poppler", "--remount-ro", "/usr/share"])
         with self.assertRaises(FileNotFoundError):
             run_v8.poppler_mounts(self.share, self.root / "missing")
+
+    def test_r2_and_legacy_runners_keep_separate_prompts_mounts_and_cleanup(self):
+        import v8_semantic_review_r2 as r2
+        def base_runner(*args):
+            return SimpleNamespace(invocation_factory=Mock(return_value=self.base),
+                                   resume_identity={}, cleanup=None)
+        with patch.object(run_v8, 'build_harness', side_effect=base_runner):
+            revised = run_v8.build_v8_harness(self.config, review='r2')
+            legacy = run_v8.build_v8_harness(self.config)
+        task = SimpleNamespace(context_dir=self.context)
+        # Invoke R2 after building legacy: choosing one must not change the other.
+        for runner, module in ((revised, r2), (legacy, run_v8.semantic_review)):
+            invocation = runner.invocation_factory(task, self.root, self.root)
+            self.assertEqual(invocation.command[-1], 'V6 prompt' + module.INSTRUCTIONS)
+            self.assertIn(str(Path(module.__file__).resolve()), invocation.command)
+            with patch.object(module, 'record_review') as record:
+                runner.cleanup(self.root)
+                record.assert_called_once_with(self.root)
+        self.assertNotEqual(revised.resume_identity, legacy.resume_identity)
+        self.assertEqual(hashlib.sha256(Path(r2.__file__).read_bytes()).hexdigest(),
+                         'c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f')
+        cmap = self.share / 'poppler' / run_v8.REQUIRED_CMAP
+        cmap.parent.mkdir(parents=True); cmap.touch()
+        (self.context / 'document.pdf').touch()
+        invocation = revised.invocation_factory(task, self.root, self.root)
+        self.assertEqual(invocation.command[-1], 'V6 prompt' + run_v8.PDF_INSTRUCTIONS + r2.INSTRUCTIONS)
+
+    def test_review_choice_and_changed_review_bytes_are_rejected(self):
+        with self.assertRaisesRegex(ValueError, 'review selection'):
+            run_v8.build_v8_harness(self.config, review='unknown')
+        review = self.root / 'legacy-review.py'
+        review.write_text('original fixture')
+        with patch.object(run_v8, 'REVIEW_PATH', review):
+            runner = self.wrapped()
+        review.write_text('changed fixture')
+        with self.assertRaisesRegex(ValueError, 'changed after'):
+            runner.invocation_factory(SimpleNamespace(context_dir=self.context), self.root, self.root)
 
 
 if __name__ == "__main__":

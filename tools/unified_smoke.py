@@ -97,10 +97,12 @@ def main():
     if args.environment_profile:
         from environment_lock import profile
         selected = profile(args.environment_profile)
-        if selected['format_version'] != 2:
+        if selected['format_version'] not in (2, 3):
             raise ValueError('explicit synthetic profile must describe an independent runtime')
         raw['experiment']['workbench'].update(rootfs_path=selected['runtime']['workbench_root'] + '/rootfs', image=selected['runtime']['image'])
         raw['harnesses']['codex']['runtime_path'] = selected['runtime']['codex_root'] + '/vendor/x86_64-unknown-linux-musl'
+        if selected['format_version'] == 3:
+            raw['harnesses']['codex']['version'] = '0.170.0'
     config_path = output / 'config.yaml'
     write(config_path, raw)
     dataset = output / 'dataset'

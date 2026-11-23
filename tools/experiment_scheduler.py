@@ -222,7 +222,7 @@ def schedule(root, doc, plan, config, dataset, resume=False, runner_factory=None
                 from experiment_config import experiment_version
                 if experiment_version(doc['identity']) == 'v8':
                     from run_v8 import build_v8_harness
-                    runner = build_v8_harness(config)
+                    runner = build_v8_harness(config, review=doc['identity'].get('v8_review', 'legacy'))
                     if runner.resume_fingerprint != doc['identity']['runner_sha256']:
                         raise ValueError('V8 runner differs from the saved experiment identity')
                 else:

@@ -61,7 +61,8 @@ def effective_provenance(members):
     retained = newest['retained_provenance']
     v8_layer = 'provenance/v8-unified-baseline.json'
     overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json',
-                     'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json', VERSION_LAYER, v8_layer)
+                     'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json', VERSION_LAYER, v8_layer,
+                     'provenance/v8-upgrade-integration-baseline.json')
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
@@ -73,6 +74,8 @@ def effective_provenance(members):
         raise ValueError('version provenance requires retained main CI overlay')
     if v8_layer in members and VERSION_LAYER not in members:
         raise ValueError('V8 provenance requires retained maintenance overlay')
+    if 'provenance/v8-upgrade-integration-baseline.json' in members and v8_layer not in members:
+        raise ValueError('V8 upgrade integration requires retained V8 provenance')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')

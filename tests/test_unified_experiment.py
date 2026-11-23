@@ -511,6 +511,105 @@ class UnifiedTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'environment lock'): self.verify()
 
 
+    def test_unified_r2_check_run_resume_and_offline_report(self):
+        import run_v8
+        from types import SimpleNamespace
+        selected = []
+        runners = []
+        class V8FakeRunner(FakeRunner):
+            def __init__(self, review):
+                super().__init__(['wall_time_exhausted', 'submitted'] if not runners else [])
+                self.resume_identity = {'fixture_review': review}
+                self.resume_fingerprint = store.fingerprint(self.resume_identity)
+
+            def run(self, task, root):
+                super().run(task, root)
+                path = root / 'events.jsonl'
+                lines = path.read_text().splitlines()
+                first = json.loads(lines[0])
+                first.update(harness='codex-v8', experiment_fingerprint=self.resume_fingerprint)
+                path.write_text('\n'.join([json.dumps(first), *lines[1:]]) + '\n')
+
+        def factory(config, *, review='legacy'):
+            selected.append(review)
+            runner = V8FakeRunner(review)
+            # Prepare and dispatch both build runners; only count dispatches below.
+            return runner
+
+        def schedule(root, doc, plan, config, dataset, resume=False):
+            with patch.object(run_v8, 'build_v8_harness', side_effect=lambda c, **kw: dispatch(c, **kw)):
+                return sched.schedule(root, doc, plan, config, dataset, resume=resume,
+                                      doctor_fn=lambda c, o: None, live=False)
+
+        def dispatch(config, **kwargs):
+            runner = factory(config, **kwargs)
+            runners.append(runner)
+            return runner
+
+        def prepare(config, dataset, evaluation, tasks):
+            return self.prepared(tasks)
+
+        def verify(root):
+            return ver.verify(root, scorer=lambda e, p, t, o: {'task_id': f'task_{t}', 'passed': True})
+
+        args = ['--version', 'v8', '--v8-review', 'r2', '--tasks', '1', '2',
+                '--config', str(self.config), '--dataset', str(self.dataset),
+                '--evaluation-root', str(self.evaluation)]
+        with patch.object(run_v8, 'build_v8_harness', side_effect=factory), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'), \
+             patch('dataspace_baselines.doctor.run_doctor', return_value=[
+                 SimpleNamespace(name='fixture', ok=True, detail='offline', skipped=False)]), \
+             patch.dict(os.environ, {'EVIWEAVE_API_KEY': 'artificial-never-sent'}):
+            self.assertEqual(cli.execute(cli.parser().parse_args(['check', *args]), prepare_fn=prepare), 0)
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'run', *args, '--output', str(self.experiment)]),
+                prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 1)
+            original = store.load(self.experiment)
+            self.assertEqual(original['identity']['v8_review'], 'r2')
+            self.assertIn('tools/v8_semantic_review_r2.py', original['identity']['source'])
+            before = store.fingerprint(store.attempts(self.experiment, original))
+            for review in ('legacy',):
+                with self.assertRaisesRegex(ValueError, 'differs from the saved experiment'):
+                    cli.execute(cli.parser().parse_args(['run', '--resume', '--yes', '--output',
+                                str(self.experiment), '--v8-review', review]), prepare_fn=prepare)
+            self.assertEqual(store.fingerprint(store.attempts(self.experiment, original)), before)
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'run', '--resume', '--yes', '--output', str(self.experiment)]),
+                prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 0)
+        self.assertEqual(selected, ['r2'] * len(selected))
+        self.assertEqual([t for runner in runners for t, _ in runner.calls], ['task_1', 'task_2', 'task_1'])
+        self.assertEqual(store.load(self.experiment)['identity'], original['identity'])
+        with patch.object(run_v8, 'build_v8_harness', side_effect=AssertionError('verify must be offline')):
+            self.assertEqual(cli.execute(cli.parser().parse_args([
+                'verify', '--experiment', str(self.experiment)]), verify_fn=verify), 0)
+        for filename in ('experiment.json', 'summary.json', 'summary.csv', 'score.json', 'report-set.json'):
+            self.assertTrue((self.experiment / filename).is_file(), filename)
+        report = store.read(self.experiment / 'summary.json')
+        self.assertEqual(report['integrity'], 'PASS')
+        self.assertEqual(report['version'], 'v8')
+        self.assertEqual(report['history_attempts'], 3)
+        self.assertEqual(len(list((self.experiment / 'predictions').glob('*/prediction.csv'))), 2)
+
+    def test_review_selection_rejects_v6_and_preserves_default_v8_identity(self):
+        from types import SimpleNamespace
+        import run_v8
+        for choice in ('legacy', 'r2'):
+            with self.assertRaisesRegex(ValueError, '--version v8'):
+                cfg.prepare_version(self.prepared(), 'v6', choice)
+        runner = SimpleNamespace(resume_fingerprint='fixture', resume_identity={})
+        with patch.object(run_v8, 'build_v8_harness', return_value=runner), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'):
+            legacy, revised = self.prepared(), self.prepared()
+            cfg.prepare_version(legacy, 'v8')
+            cfg.prepare_version(revised, 'v8', 'r2')
+        self.assertNotIn('v8_review', legacy['identity'])
+        self.assertNotIn('tools/v8_semantic_review_r2.py', legacy['identity']['source'])
+        self.assertFalse(cfg.same_identity(legacy['identity'], revised['identity']))
+        changed = json.loads(json.dumps(revised['identity']))
+        changed['source']['tools/v8_semantic_review_r2.py'] = '0' * 64
+        self.assertFalse(cfg.same_identity(revised['identity'], changed))
+
+
 class EnvironmentLockTests(unittest.TestCase):
     def test_profile_python_binary_and_patch_drift_rejected(self):
         import platform, sysconfig

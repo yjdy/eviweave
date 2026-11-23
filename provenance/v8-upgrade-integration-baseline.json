@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "scope": "Selected V8 upgrade integration; common entry/output; no temporary experiment or data processing code",
+  "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+  "baseline_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+  "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+  "excluded_upstream_files": [
+    "tools/experiment_v8_r2.py",
+    "provenance/codex-upgrade-baseline.json"
+  ],
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533",
+    "provenance/v8-unified-baseline.json": "c55b2ebc0d6fb4e25f8897c9330b9e59aa3769b9d0efd9de1bb72088a2a8bbf6"
+  },
+  "files": [
+    {
+      "destination": "AGENTS.md",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "80d7975839586a240369bbb6d4f0602d120e7b2f13b8e0422cd2b564d415f5fd",
+      "baseline_sha256": "80d7975839586a240369bbb6d4f0602d120e7b2f13b8e0422cd2b564d415f5fd",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "97f12c0669830c9fa7529602e17f6e93aa31c16548ca021560f644fb326e3582",
+      "release_sha256": "97f12c0669830c9fa7529602e17f6e93aa31c16548ca021560f644fb326e3582",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "cloud_checks/current.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "9cdca7b881b4352af249151b1b76c805a66c25881aeccfcffa7c649ec02790a9",
+      "baseline_sha256": "9cdca7b881b4352af249151b1b76c805a66c25881aeccfcffa7c649ec02790a9",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "9cdca7b881b4352af249151b1b76c805a66c25881aeccfcffa7c649ec02790a9",
+      "release_sha256": "f8e8e42fd313718f46cef99da8d28947cf74bee1cc853b8be676a42e3b556469",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "provenance/codex-0.170.0-lock.json",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+      "release_sha256": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "provenance/codex-upgrade.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "59dff1afaab9b1c1239526668417df2b7c26e8eec4c734dcb0174f0bd38a8de8",
+      "release_sha256": "8a8036fc9937afb38131485d6e1d5876f381a628ec2736e65b4f2fe9fe264837",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "provenance/v8-prompt-r2.md",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "cb4065bea4f2ff6285fff3fa8b043e9a7772e7cc4fcd58d2bbb78e21ce4d3657",
+      "release_sha256": "3ccc8797742782a904892c30b33c164f7f67fcfe592cd5a4bb8965a2776e26d0",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "scripts/install_codex_upgrade.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "d583abaf21ab03b8d9dbaa1148c8b4c22a0dba02427406b43e6615bff0674f5c",
+      "release_sha256": "d583abaf21ab03b8d9dbaa1148c8b4c22a0dba02427406b43e6615bff0674f5c",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tests/test_codex_upgrade.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "8c953127d4acf147e1d36267a0b9a0c3c3126f549366cecb2480d60bfd642788",
+      "release_sha256": "8c953127d4acf147e1d36267a0b9a0c3c3126f549366cecb2480d60bfd642788",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tests/test_pdf_reader.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "b7576b0c633898c4f08480b71252b1fa1c94012cc15fab60c2f9ca8d33572d34",
+      "baseline_sha256": "b7576b0c633898c4f08480b71252b1fa1c94012cc15fab60c2f9ca8d33572d34",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "b7576b0c633898c4f08480b71252b1fa1c94012cc15fab60c2f9ca8d33572d34",
+      "release_sha256": "9d37937c56eebf5fcd12ad22f64f4c6a38f606b1073ab5094e11ad83b8781ac4",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tests/test_run_v8_pdf.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "afc36afc3aad32f0d99ba241501d34efc6efd64508e6cb6ffb2f287fd0e009a2",
+      "baseline_sha256": "afc36afc3aad32f0d99ba241501d34efc6efd64508e6cb6ffb2f287fd0e009a2",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "afc36afc3aad32f0d99ba241501d34efc6efd64508e6cb6ffb2f287fd0e009a2",
+      "release_sha256": "2c32258192af9c9f5d23aad60ddde61421c04d4dacaaaa0b5ca7e6fe632f40b3",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tests/test_unified_experiment.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "4bf331afac0735b04a82cbbaed9d12548dee53546ce4b3d9d03377d87cadda6a",
+      "baseline_sha256": "4bf331afac0735b04a82cbbaed9d12548dee53546ce4b3d9d03377d87cadda6a",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "4bf331afac0735b04a82cbbaed9d12548dee53546ce4b3d9d03377d87cadda6a",
+      "release_sha256": "03122a4a60e41f87a9a1951af7b85134d3e074f2934c5f05975906bee9279a4b",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tests/test_v8_semantic_review.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "1695471d8f04546bd30a5ee1971eed4e52bdfc5b850fa3f78882ee8aee08db4f",
+      "baseline_sha256": "1695471d8f04546bd30a5ee1971eed4e52bdfc5b850fa3f78882ee8aee08db4f",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "1695471d8f04546bd30a5ee1971eed4e52bdfc5b850fa3f78882ee8aee08db4f",
+      "release_sha256": "e20d1b5be04e8f3fb3624f69400b67eef304e08477af759e7d3b893adb5c3703",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/codex_upgrade.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "c690b33276c3597fe7bbde7cc024a3de8735c1f97d47c1a36af35f2296a0c2be",
+      "release_sha256": "c690b33276c3597fe7bbde7cc024a3de8735c1f97d47c1a36af35f2296a0c2be",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/codex_upgrade_probe.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "fab175189497f0cba1a560d901bb7efd94614406fcf24309b3d4c4e17ee19dd6",
+      "release_sha256": "fab175189497f0cba1a560d901bb7efd94614406fcf24309b3d4c4e17ee19dd6",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/config_lifecycle.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "5476f513e362a05ab8f03d2ed34b443766d4a13f5e2255c0e088053258e16455",
+      "baseline_sha256": "5476f513e362a05ab8f03d2ed34b443766d4a13f5e2255c0e088053258e16455",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "c07ed6a152020ab318cb71f645c88bc9cd46f03ffd362230279c02d69b6ed003",
+      "release_sha256": "c07ed6a152020ab318cb71f645c88bc9cd46f03ffd362230279c02d69b6ed003",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/environment_lock.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "16db2830117b3fc3c2b19d39a82c1c27fe4571639140026d9ecad6b53ff10b01",
+      "baseline_sha256": "16db2830117b3fc3c2b19d39a82c1c27fe4571639140026d9ecad6b53ff10b01",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "fb87ce69612c9e1c46d1585fc0122eb394a28bc23477032a1b56c858c18eafe9",
+      "release_sha256": "fb87ce69612c9e1c46d1585fc0122eb394a28bc23477032a1b56c858c18eafe9",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/experiment.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "eafac97b9db5db708ba30bcfc4d972d0fb00e0351e1e20e78c716de04195f040",
+      "baseline_sha256": "eafac97b9db5db708ba30bcfc4d972d0fb00e0351e1e20e78c716de04195f040",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "00e255f4bda4d9ed2ed069e6fded75b95be18fb925d056f3e721d38d61c791bc",
+      "release_sha256": "2b0b8ab1c7dcfea3ecd306855341775e44821aa0f546dd025d64e29ce2929502",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/experiment_config.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "bc64eb23ae16772003baa1b30d8dab7f3dd21b69c3d1c1a91e12c673dd73d719",
+      "baseline_sha256": "bc64eb23ae16772003baa1b30d8dab7f3dd21b69c3d1c1a91e12c673dd73d719",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "9605bed491d9778a71a6e7c8866c0c124933095a3c4b9c526d96b760e632c2a9",
+      "release_sha256": "23991c3edcea2966e48817c5a585f1b63040642fab409be7f274dde851dd637f",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/experiment_scheduler.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "bd67843d452ca61bed9b6f152d57132dfea6e6dbedc1b5d60a13d772e9e7823f",
+      "baseline_sha256": "bd67843d452ca61bed9b6f152d57132dfea6e6dbedc1b5d60a13d772e9e7823f",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "bd67843d452ca61bed9b6f152d57132dfea6e6dbedc1b5d60a13d772e9e7823f",
+      "release_sha256": "13c5d535ab62c08f38702c95a33b4d41c34e60c4ae19fabb8845908c1b3262b6",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/host_profile.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "a9c31fa14b65af6970ede767226817bd4e73cf9a2dab900375461f84c61ca5d1",
+      "baseline_sha256": "a9c31fa14b65af6970ede767226817bd4e73cf9a2dab900375461f84c61ca5d1",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "395b6f9308f7772412321d30df22fb4c12d14e9ff6873f784cc343ce16233d0b",
+      "release_sha256": "395b6f9308f7772412321d30df22fb4c12d14e9ff6873f784cc343ce16233d0b",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/install_environment.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "fe62bf930a32b375b450be9ad4b7bb9c9d1c0f9efe9a3549492ac6c9c1dc35d6",
+      "baseline_sha256": "fe62bf930a32b375b450be9ad4b7bb9c9d1c0f9efe9a3549492ac6c9c1dc35d6",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "ef7d4964c37b24143bfc408e41c84a09fc6f07d374f222c52e470b49044f126e",
+      "release_sha256": "ef7d4964c37b24143bfc408e41c84a09fc6f07d374f222c52e470b49044f126e",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/run_v8.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "7177512a75109b3cd51d34212ac9af161bb822786ab108f89b416e2afdab5764",
+      "baseline_sha256": "7177512a75109b3cd51d34212ac9af161bb822786ab108f89b416e2afdab5764",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "3ce821464807bd1c6bbe45ed28bab4689a8ad9e2ce657799180f3d07f17bc76b",
+      "release_sha256": "552a2254f902252b342e7b5e6800b6808bbc08deb6cf736acd4f9dca65396b54",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/unified_smoke.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "0be40a04361a6b4ce5c438ee2a05416f4c5262d808ea55b183169f66a86d685f",
+      "baseline_sha256": "0be40a04361a6b4ce5c438ee2a05416f4c5262d808ea55b183169f66a86d685f",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "d72bf44664e2b7a39f7c0e647979efce3003ed741d1332a868b1a3f00395218f",
+      "release_sha256": "d72bf44664e2b7a39f7c0e647979efce3003ed741d1332a868b1a3f00395218f",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/v8_semantic_review_r2.py",
+      "source_commit": null,
+      "source_sha256": null,
+      "baseline_sha256": null,
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f",
+      "release_sha256": "c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "cb24a1cfbbdb75e5e15cdd203777fc9fd0ce9b78",
+      "source_sha256": "da23358d290444ba117bdbcf0285032ad15a2ebb4e333fe4b2ca5ee20dea20e6",
+      "baseline_sha256": "da23358d290444ba117bdbcf0285032ad15a2ebb4e333fe4b2ca5ee20dea20e6",
+      "upstream_commit": "33710f5be2c534281464ab87558501e258572fa3",
+      "upstream_sha256": "eb11af9c40a161109efac2f349950a76ed432d9d5edb3d3a8623e31df2dfec06",
+      "release_sha256": "2ace3920406172bb4ad3a869f30bc8418496ce873c1500cf94212a14982090d1",
+      "reason": "Integrate official Codex 0.170.0 and explicit R2 selection through the existing unified lifecycle; retain frozen business files and historical source tables; fix source/CI packaging checks. Upstream bytes are copied or adapted only within the approved file whitelist."
+    }
+  ]
+}
