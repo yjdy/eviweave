@@ -514,12 +514,11 @@ class UnifiedTests(unittest.TestCase):
     def test_unified_r2_check_run_resume_and_offline_report(self):
         import run_v8
         from types import SimpleNamespace
-        selected = []
         runners = []
         class V8FakeRunner(FakeRunner):
-            def __init__(self, review):
+            def __init__(self):
                 super().__init__(['wall_time_exhausted', 'submitted'] if not runners else [])
-                self.resume_identity = {'fixture_review': review}
+                self.resume_identity = {'fixture_review': 'default-r2'}
                 self.resume_fingerprint = store.fingerprint(self.resume_identity)
 
             def run(self, task, root):
@@ -530,9 +529,8 @@ class UnifiedTests(unittest.TestCase):
                 first.update(harness='codex-v8', experiment_fingerprint=self.resume_fingerprint)
                 path.write_text('\n'.join([json.dumps(first), *lines[1:]]) + '\n')
 
-        def factory(config, *, review='legacy'):
-            selected.append(review)
-            runner = V8FakeRunner(review)
+        def factory(config):
+            runner = V8FakeRunner()
             # Prepare and dispatch both build runners; only count dispatches below.
             return runner
 
@@ -552,7 +550,7 @@ class UnifiedTests(unittest.TestCase):
         def verify(root):
             return ver.verify(root, scorer=lambda e, p, t, o: {'task_id': f'task_{t}', 'passed': True})
 
-        args = ['--version', 'v8', '--v8-review', 'r2', '--tasks', '1', '2',
+        args = ['--version', 'v8', '--tasks', '1', '2',
                 '--config', str(self.config), '--dataset', str(self.dataset),
                 '--evaluation-root', str(self.evaluation)]
         with patch.object(run_v8, 'build_v8_harness', side_effect=factory), \
@@ -565,18 +563,11 @@ class UnifiedTests(unittest.TestCase):
                 'run', *args, '--output', str(self.experiment)]),
                 prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 1)
             original = store.load(self.experiment)
-            self.assertEqual(original['identity']['v8_review'], 'r2')
-            self.assertIn('tools/v8_semantic_review_r2.py', original['identity']['source'])
-            before = store.fingerprint(store.attempts(self.experiment, original))
-            for review in ('legacy',):
-                with self.assertRaisesRegex(ValueError, 'differs from the saved experiment'):
-                    cli.execute(cli.parser().parse_args(['run', '--resume', '--yes', '--output',
-                                str(self.experiment), '--v8-review', review]), prepare_fn=prepare)
-            self.assertEqual(store.fingerprint(store.attempts(self.experiment, original)), before)
+            self.assertNotIn('v8_review', original['identity'])
+            self.assertIn('tools/v8_semantic_review.py', original['identity']['source'])
             self.assertEqual(cli.execute(cli.parser().parse_args([
                 'run', '--resume', '--yes', '--output', str(self.experiment)]),
                 prepare_fn=prepare, schedule_fn=schedule, verify_fn=verify), 0)
-        self.assertEqual(selected, ['r2'] * len(selected))
         self.assertEqual([t for runner in runners for t, _ in runner.calls], ['task_1', 'task_2', 'task_1'])
         self.assertEqual(store.load(self.experiment)['identity'], original['identity'])
         with patch.object(run_v8, 'build_v8_harness', side_effect=AssertionError('verify must be offline')):
@@ -590,24 +581,36 @@ class UnifiedTests(unittest.TestCase):
         self.assertEqual(report['history_attempts'], 3)
         self.assertEqual(len(list((self.experiment / 'predictions').glob('*/prediction.csv'))), 2)
 
-    def test_review_selection_rejects_v6_and_preserves_default_v8_identity(self):
+    def test_default_prompt_identity_and_removed_selector(self):
         from types import SimpleNamespace
         import run_v8
-        for choice in ('legacy', 'r2'):
-            with self.assertRaisesRegex(ValueError, '--version v8'):
-                cfg.prepare_version(self.prepared(), 'v6', choice)
+        for command in ('check', 'run'):
+            with self.assertRaises(SystemExit):
+                cli.parser().parse_args([command, '--version', 'v8', '--v8-review', 'r2'])
         runner = SimpleNamespace(resume_fingerprint='fixture', resume_identity={})
         with patch.object(run_v8, 'build_v8_harness', return_value=runner), \
              patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'):
-            legacy, revised = self.prepared(), self.prepared()
-            cfg.prepare_version(legacy, 'v8')
-            cfg.prepare_version(revised, 'v8', 'r2')
-        self.assertNotIn('v8_review', legacy['identity'])
-        self.assertNotIn('tools/v8_semantic_review_r2.py', legacy['identity']['source'])
-        self.assertFalse(cfg.same_identity(legacy['identity'], revised['identity']))
-        changed = json.loads(json.dumps(revised['identity']))
-        changed['source']['tools/v8_semantic_review_r2.py'] = '0' * 64
-        self.assertFalse(cfg.same_identity(revised['identity'], changed))
+            prepared = self.prepared()
+            cfg.prepare_version(prepared, 'v8')
+        identity = prepared['identity']
+        self.assertNotIn('v8_review', identity)
+        self.assertNotIn('tools/v8_semantic_review_r2.py', identity['source'])
+        self.assertEqual(identity['source']['tools/v8_semantic_review.py'],
+                         'c756d5cc302af3aac6a9d8f92de2ce7bf66448452c1842d6831f4f581b352d6f')
+        old = json.loads(json.dumps(identity))
+        old['source']['tools/v8_semantic_review.py'] = '0' * 64
+        self.assertFalse(cfg.same_identity(old, identity))
+        # A valid saved manifest with a previous source identity cannot resume.
+        prepared['identity'] = old
+        doc = sched.initialize(self.experiment, prepared)
+        sched.add_plan(self.experiment, doc, [1, 2], 1, prepared['inputs'])
+        before = store.fingerprint(store.load(self.experiment))
+        with patch.object(run_v8, 'build_v8_harness', return_value=runner), \
+             patch.object(run_v8, 'IMPORTED_POPPLER_DATA', self.root / 'absent-poppler'), \
+             self.assertRaisesRegex(ValueError, 'identity differs'):
+            cli.execute(cli.parser().parse_args(['run', '--resume', '--yes', '--output', str(self.experiment)]),
+                        prepare_fn=lambda *args: self.prepared())
+        self.assertEqual(store.fingerprint(store.load(self.experiment)), before)
 
 
 class EnvironmentLockTests(unittest.TestCase):

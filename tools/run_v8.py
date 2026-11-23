@@ -73,10 +73,7 @@ def poppler_mounts(workbench_share, imported_data):
     return mounts
 
 
-def extend_invocation(invocation, review_identity, *, pdf_identity=None, resource_mounts=(),
-                      review_module=None, review_path=None):
-    review_module = review_module or semantic_review
-    review_path = review_path or REVIEW_PATH
+def extend_invocation(invocation, review_identity, *, pdf_identity=None, resource_mounts=()):
     command = list(invocation.command)
     boundary = command.index("--")
     inner = command[boundary + 1:]
@@ -85,7 +82,7 @@ def extend_invocation(invocation, review_identity, *, pdf_identity=None, resourc
     mounts = command[:boundary]
     metadata = {**invocation.metadata, "semantic_review": review_identity}
     # The frozen workbench builder adds bind options before the inner command.
-    targets = [PurePosixPath(review_module.REVIEW_TOOL)]
+    targets = [PurePosixPath(semantic_review.REVIEW_TOOL)]
     if pdf_identity is not None:
         targets.append(PurePosixPath(READER_MOUNT))
     for i, arg in enumerate(mounts):
@@ -97,24 +94,16 @@ def extend_invocation(invocation, review_identity, *, pdf_identity=None, resourc
                     raise ValueError(f"The configured runtime bind overlaps {mount}")
     if not any(a == "--dir" and b == JAIL_RUNTIME for a, b in zip(mounts, mounts[1:])):
         mounts += ["--dir", JAIL_RUNTIME]
-    mounts += ["--ro-bind", str(review_path), review_module.REVIEW_TOOL]
+    mounts += ["--ro-bind", str(REVIEW_PATH), semantic_review.REVIEW_TOOL]
     if pdf_identity is not None:
         mounts += ["--ro-bind", str(READER_PATH), READER_MOUNT, *resource_mounts]
         metadata["pdf_reader"] = pdf_identity
         inner[-1] += PDF_INSTRUCTIONS
-    inner[-1] += review_module.INSTRUCTIONS
+    inner[-1] += semantic_review.INSTRUCTIONS
     return replace(invocation, command=tuple([*mounts, "--", *inner]), metadata=metadata)
 
 
-def build_v8_harness(config, *, review="legacy"):
-    if review == "legacy":
-        review_module = semantic_review
-        review_path = REVIEW_PATH
-    elif review == "r2":
-        import v8_semantic_review_r2 as review_module
-        review_path = Path(review_module.__file__).resolve()
-    else:
-        raise ValueError("unsupported V8 review selection")
+def build_v8_harness(config):
     if config.model.api_key_env != "EVIWEAVE_API_KEY":
         raise ValueError("V8 requires the EVIWEAVE_API_KEY credential variable")
     runner = build_harness("codex", config)
@@ -123,26 +112,25 @@ def build_v8_harness(config, *, review="legacy"):
     identity = {"sha256": hashlib.sha256(READER_PATH.read_bytes()).hexdigest(),
                 "prompt_sha256": hashlib.sha256(PDF_INSTRUCTIONS.encode()).hexdigest(),
                 "mount": READER_MOUNT}
-    review_identity = {"version": review_module.VERSION,
-                       "sha256": hashlib.sha256(review_path.read_bytes()).hexdigest(),
-                       "prompt_sha256": hashlib.sha256(review_module.INSTRUCTIONS.encode()).hexdigest()}
+    review_identity = {"version": semantic_review.VERSION,
+                       "sha256": hashlib.sha256(REVIEW_PATH.read_bytes()).hexdigest(),
+                       "prompt_sha256": hashlib.sha256(semantic_review.INSTRUCTIONS.encode()).hexdigest()}
 
     def invocation(task, run_root, output_root):
         base = original(task, run_root, output_root)
-        if hashlib.sha256(review_path.read_bytes()).hexdigest() != review_identity["sha256"]:
+        if hashlib.sha256(REVIEW_PATH.read_bytes()).hexdigest() != review_identity["sha256"]:
             raise ValueError("V8 semantic review changed after the harness was built")
         if not has_pdf(task):
-            return extend_invocation(base, review_identity, review_module=review_module, review_path=review_path)
+            return extend_invocation(base, review_identity)
         if hashlib.sha256(READER_PATH.read_bytes()).hexdigest() != identity["sha256"]:
             raise ValueError("V8 PDF reader changed after the harness was built")
         share = config.workbench.rootfs_path.resolve() / "usr/share"
         resources = poppler_mounts(share, IMPORTED_POPPLER_DATA)
-        return extend_invocation(base, review_identity, pdf_identity=identity, resource_mounts=resources,
-                                 review_module=review_module, review_path=review_path)
+        return extend_invocation(base, review_identity, pdf_identity=identity, resource_mounts=resources)
 
     def cleanup(run_root):
         try:
-            review_module.record_review(run_root)
+            semantic_review.record_review(run_root)
         finally:
             if original_cleanup is not None:
                 original_cleanup(run_root)

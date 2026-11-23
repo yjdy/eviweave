@@ -39,20 +39,18 @@ def same_identity(previous, current):
     return previous == {**current, 'source': old_source}
 
 
-def prepare_version(prepared, version, review=None):
-    if review is not None and version != 'v8':
-        raise ValueError('--v8-review requires --version v8')
+def prepare_version(prepared, version):
     if version == 'v8':
-        prepare_v8(prepared, review=review or 'legacy')
+        prepare_v8(prepared)
     elif str(prepared['config'].harnesses['codex'].options.get('version')) == '0.170.0':
         raise ValueError('Codex 0.170.0 is experimental; explicitly select --version v8')
 
 
-def prepare_v8(prepared, *, review='legacy'):
+def prepare_v8(prepared):
     from run_v8 import (IMPORTED_POPPLER_DATA, REQUIRED_CMAP, build_v8_harness)
 
     config = prepared['config']
-    runner = build_v8_harness(config, review=review)
+    runner = build_v8_harness(config)
     builtin = config.workbench.rootfs_path / 'usr/share/poppler' / REQUIRED_CMAP
     imported = IMPORTED_POPPLER_DATA / REQUIRED_CMAP
     poppler = 'workbench'
@@ -70,9 +68,6 @@ def prepare_v8(prepared, *, review='legacy'):
     identity['source'].update({f'tools/{name}': sha(PROJECT / 'tools' / name)
                                for name in ('run_v8.py', 'pdf_reader.py', 'v8_semantic_review.py')})
     identity.update(version='v8', runner_sha256=runner.resume_fingerprint, poppler_data=poppler)
-    if review == 'r2':
-        identity['v8_review'] = review
-        identity['source']['tools/v8_semantic_review_r2.py'] = sha(PROJECT / 'tools/v8_semantic_review_r2.py')
     if 'codex_upgrade' in runner.resume_identity:
         identity['source']['tools/codex_upgrade.py'] = sha(PROJECT / 'tools/codex_upgrade.py')
         identity['codex_upgrade'] = runner.resume_identity['codex_upgrade']

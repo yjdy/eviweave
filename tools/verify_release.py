@@ -21,6 +21,10 @@ def digest(data):
 VERSION_LAYER = 'provenance/v0.1.1-baseline.json'
 VERSION_FILE = 'src/dataspace_baselines/__init__.py'
 VERSION_EXCEPTION = {'old': '__version__ = "0.1.0"', 'new': '__version__ = "0.1.1"'}
+RETIREMENTS = {
+    'provenance/preparation-scripts-baseline.json': '.github/workflows/offline.yml',
+    'provenance/v8-r2-default-baseline.json': 'tools/v8_semantic_review_r2.py',
+}
 
 
 def project_business_manifest(project):
@@ -62,7 +66,8 @@ def effective_provenance(members):
     v8_layer = 'provenance/v8-unified-baseline.json'
     overlay_names = ('provenance/p5-baseline.json', 'provenance/p5-documentation-baseline.json',
                      'provenance/preparation-scripts-baseline.json', 'provenance/main-ci-baseline.json', VERSION_LAYER, v8_layer,
-                     'provenance/v8-upgrade-integration-baseline.json')
+                     'provenance/v8-upgrade-integration-baseline.json',
+                     'provenance/v8-r2-default-baseline.json')
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
@@ -76,6 +81,9 @@ def effective_provenance(members):
         raise ValueError('V8 provenance requires retained maintenance overlay')
     if 'provenance/v8-upgrade-integration-baseline.json' in members and v8_layer not in members:
         raise ValueError('V8 upgrade integration requires retained V8 provenance')
+    if ('provenance/v8-r2-default-baseline.json' in members
+            and 'provenance/v8-upgrade-integration-baseline.json' not in members):
+        raise ValueError('V8 R2 default requires retained upgrade integration provenance')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')
@@ -107,10 +115,9 @@ def effective_provenance(members):
         seen = set()
         for removed in layer.get('removed_files', []):
             name = removed['destination']
-            if (overlay_name != 'provenance/preparation-scripts-baseline.json'
-                    or name != '.github/workflows/offline.yml' or name in seen or name not in latest
+            if (name != RETIREMENTS.get(overlay_name) or name in seen or name not in latest
                     or removed['source_sha256'] != latest.get(name)):
-                raise ValueError('invalid workflow retirement provenance')
+                raise ValueError('invalid file retirement provenance')
             seen.add(name)
             del latest[name]
         for entry in layer['files']:
@@ -152,6 +159,9 @@ def main():
             raise ValueError(detail)
         checks.append(detail)
     def inspect(names, label):
+        for layer, retired in RETIREMENTS.items():
+            if layer in provenance:
+                require(retired not in names, label + ': retired file absent ' + retired)
         forbidden = {'docs','.docs','.audit','.local','.git','__pycache__','.venv','.runtimes','runs','input','output','data','controlled','relays','dataspace_agent',
                      'api-calls', 'raw', 'billing', 'checkpoints'}
         for name in names:

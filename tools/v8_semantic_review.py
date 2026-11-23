@@ -14,14 +14,29 @@ MAX_REVIEW_BYTES = 32 * 1024
 
 INSTRUCTIONS = f"""
 
-V8 pre-export semantic review ({VERSION}):
+V8 calculation and pre-export review ({VERSION}):
+Before filtering, joining, converting or counting, settle the applicable rules
+from the question and relevant evidence. Reuse evidence already read.
+- Units: Identify source and requested units separately from display precision.
+  Convert only when the units differ. A surprising magnitude warrants a check,
+  but is not enough to override a documented unit for the field. If no unit is
+  documented, infer it only from relevant evidence and retain uncertainty.
+- Scope: A lookup for codes, names or attributes does not define the population.
+  Drop unmatched objects only when the requested eligibility or grouping
+  requires the missing attribute. Apply an attachment's filter when the question
+  or applicable evidence ties it to the requested result. A tab, example or
+  export setting alone does not restrict a broader question.
+- Counting: Use the requested entity, kind or record as the counting unit.
+  Deduplicate entities or kinds by a supported identifier and retain eligible
+  rows for record counts. Do not merge by name without evidence of identity or
+  switch counting units merely to match a chart.
+
+Pre-export review:
 After preparing the candidate rows, make one comparison of the question and original evidence
 against the query, transformations and rows you actually used. Check:
 - source_table: Name the source and what one row represents. When several
   tables have similar labels, match the requested entity or event before choosing.
-- scope: Check population, period, thresholds, grouping and counting unit as
-  applicable. Apply an attachment's example or UI filter only when the question
-  or referenced evidence makes it part of the requested scope.
+- scope: Check population, period, thresholds, grouping and counting unit as applicable.
 - fields: Compare the actual field, definition, units, join keys and requested
   display form. Check the source dictionary or report when multiple names fit.
 - order: Check direction and tie-breakers where relevant. A field that defines
@@ -30,20 +45,26 @@ against the query, transformations and rows you actually used. Check:
   columns in order. Check if rows need a date or other identifier to be readable,
   and whether a field used only for filtering or sorting belongs in the answer.
 
-Correct a discrepancy when the evidence supports the change. If a choice is
-ambiguous, record the evidence and actual choice, and keep the best supported
-answer. Do this in the current session using the relevant evidence already read.
+Once existing evidence supports an answer, reuse the work already done and
+finish the review. If an unresolved conflict could change the answer, check
+only the evidence that distinguishes the alternatives in one focused pass.
+If that check leaves uncertainty, record it and use the best-supported choice.
+Reopen a settled choice only when new, relevant evidence could change the result.
+Correct calculations that conflict with the supported rule.
 Before exporting prediction.csv, write /mnt/output/{REVIEW_FILE} as UTF-8 JSON.
 Use a top-level "checks" object keyed by the five names above and a top-level
 "csv_columns" array of exact final header strings in order. Each check has
-"expected", "actual", and "evidence" keys. Use the same concise description in
-expected and actual if they are equivalent. Use null for expected if evidence
+"expected", "actual", and "evidence" keys. Describe the evidence requirement in
+expected and the operation or result you used in actual. Use the same concise
+wording only if equivalent. Do not rewrite them to obtain aligned. Use null for expected if evidence
 cannot settle the choice. Use null for both only if the check does not apply.
 In evidence, give a brief reason and a locator such as a question clause, source
-table or field, PDF page or video time. Run this local check before exporting:
+table or field, PDF page or video time. For a conflict that changes the result,
+briefly state the chosen rule and why the alternative was not used in scope
+or fields evidence. Run this local check before exporting:
   python3 {REVIEW_TOOL}
-Inspect its result. Resolve any evidence-backed conflict and update the note to
-reflect the final decision. Export normally and keep review notes out of the CSV.
+Inspect the result, make any evidence-backed correction, and update the note.
+Then export prediction.csv and end the task. Keep review notes out of the CSV.
 """
 
 
