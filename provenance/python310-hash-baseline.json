@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "scope": "Synchronize the main Python 3.10 hashing fix to codex/v8 while preserving historical experiments",
+  "source_commit": "0d958173b1abc924d537f8dcbc1151ef926690e1",
+  "baseline_commit": "0d958173b1abc924d537f8dcbc1151ef926690e1",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/codex-0.170.0-lock.json": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533",
+    "provenance/v8-r2-default-baseline.json": "0633ef04e40c6b4feaefe8b8c35305f9686edd346793ac9e24805d6fa0c64c17",
+    "provenance/v8-readme-baseline.json": "dce3918d28592f9407d7b91a13f3bb4944ea6685eb3cce7e41dfa6bc21a3329b",
+    "provenance/v8-unified-baseline.json": "c55b2ebc0d6fb4e25f8897c9330b9e59aa3769b9d0efd9de1bb72088a2a8bbf6",
+    "provenance/v8-upgrade-integration-baseline.json": "e9e8a761d3dbfa9313731ae0b295bb1732c621a3dfd8a6ef29195acd50c2f242"
+  },
+  "files": [
+    {
+      "destination": "tools/codex_upgrade.py",
+      "source_commit": "0d958173b1abc924d537f8dcbc1151ef926690e1",
+      "source_sha256": "c690b33276c3597fe7bbde7cc024a3de8735c1f97d47c1a36af35f2296a0c2be",
+      "baseline_sha256": "c690b33276c3597fe7bbde7cc024a3de8735c1f97d47c1a36af35f2296a0c2be",
+      "release_sha256": "79c79eb2ae6aa05ad9292cd34519d75293cfa178e5cd53c79b9d000813c20034",
+      "reason": "Fix actual Python 3.10 CI failure with streaming SHA-256/SHA-512 using supported APIs; register this additive provenance without changing prior layers or frozen business code."
+    },
+    {
+      "destination": "scripts/install_codex_upgrade.py",
+      "source_commit": "0d958173b1abc924d537f8dcbc1151ef926690e1",
+      "source_sha256": "d583abaf21ab03b8d9dbaa1148c8b4c22a0dba02427406b43e6615bff0674f5c",
+      "baseline_sha256": "d583abaf21ab03b8d9dbaa1148c8b4c22a0dba02427406b43e6615bff0674f5c",
+      "release_sha256": "842a915d20bf979432df8f127e74a53e4e2cb4b06d25dca4d6fcf999b9dd58f8",
+      "reason": "Fix actual Python 3.10 CI failure with streaming SHA-256/SHA-512 using supported APIs; register this additive provenance without changing prior layers or frozen business code."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "0d958173b1abc924d537f8dcbc1151ef926690e1",
+      "source_sha256": "61b59aa110bfa4db9e45bb1aa6ad82ba68152df823c583ea5ccee359550e7841",
+      "baseline_sha256": "61b59aa110bfa4db9e45bb1aa6ad82ba68152df823c583ea5ccee359550e7841",
+      "release_sha256": "76dce25ed849dfb744b9f5003bf5668cc014a8624a20fcfc254661912aa636a2",
+      "reason": "Fix actual Python 3.10 CI failure with streaming SHA-256/SHA-512 using supported APIs; register this additive provenance without changing prior layers or frozen business code."
+    }
+  ],
+  "integrated_from": {
+    "commit": "7bf470521079a91cdd257fae0180d9df56d937c6",
+    "provenance_sha256": "be6c1a096aee8cfd09d68522bb389903651f1b935a4bc218e68e6b9d418915ef"
+  }
+}
