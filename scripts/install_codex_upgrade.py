@@ -32,7 +32,10 @@ def install(runtime_root, cache, temporary):
     if sha256(archive) != lock['sha256']:
         raise ValueError('upgrade archive SHA-256 mismatch')
     with archive.open('rb') as handle:
-        integrity = 'sha512-' + base64.b64encode(hashlib.file_digest(handle, 'sha512').digest()).decode()
+        digest = hashlib.sha512()
+        for block in iter(lambda: handle.read(1024 * 1024), b''):
+            digest.update(block)
+        integrity = 'sha512-' + base64.b64encode(digest.digest()).decode()
     if integrity != lock['integrity']:
         raise ValueError('upgrade archive npm integrity mismatch')
     target = runtime_root / 'codex-0.170.0/platform-package'

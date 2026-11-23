@@ -19,7 +19,10 @@ FEATURE_OVERRIDES = {'goals': False}  # 0.145.0 did not expose automatic goal co
 
 def sha(path):
     with Path(path).open('rb') as handle:
-        return hashlib.file_digest(handle, 'sha256').hexdigest()
+        digest = hashlib.sha256()
+        for block in iter(lambda: handle.read(1024 * 1024), b''):
+            digest.update(block)
+        return digest.hexdigest()
 
 
 def contents(root):
