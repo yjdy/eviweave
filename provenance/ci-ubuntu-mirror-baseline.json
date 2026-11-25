@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "scope": "CI prerequisite mirror only; Terra excluded and frozen business code unchanged",
+  "source_commit": "5bd66db378cba84d8d588fef389d4261b3ea73b5",
+  "baseline_commit": "5bd66db378cba84d8d588fef389d4261b3ea73b5",
+  "retained_provenance": {
+    "provenance/baseline-summary.json": "478e19c744d42a65e96d02a5dbd8204e3faa61c41c89fee7da8948d06c5e8573",
+    "provenance/bugfix-baseline.json": "143cfd1bcb840ba74c4488a053e9fba04172b8110d399995fb00bb16a1850e6c",
+    "provenance/codex-0.170.0-lock.json": "28f7581edee0febc52081813d126182666f33e528f858e7088368a94324de844",
+    "provenance/config-rounding-baseline.json": "b331d1972b0345dfa33b5f667b913fadbb48810604075f8e5304a08d71ef9cb2",
+    "provenance/evaluation-lock.json": "13d2f6396c77de8da7aeb61d07d2465a22e8848c83dbf383a180c7e321bc860b",
+    "provenance/evidence-baseline.json": "658a6bb3a97f11726f3a6845e5c8624a378fe33cda999547da6825c0b197bfa4",
+    "provenance/extraction-manifest.json": "2e69e28c8dd76721a010bc04df2c900ff338880a18c3dd03a7120460ed3f40cf",
+    "provenance/isolation-baseline.json": "4ac626630c710257f70755a3d06cb23fef00f4fe89715de226ab3dbd75e81022",
+    "provenance/main-ci-baseline.json": "907ccc7e44581dc2bb1d0a9a95c34780716b0c20da3cbac7ad2b1cb84db2256e",
+    "provenance/observability-baseline.json": "1fd35bcd7b1778081aaed45f32794e906a8da9aee399e30bd4ddb6a596d3cd14",
+    "provenance/observability-contract-v1.json": "78ae55e796c2df126b5290b17acc5fca780abe7dbcd98223bd8116409a9628d8",
+    "provenance/observability-mapping-v1.json": "8baab9860b1e678f1a5fda9227ab36cd3303cc6c59d69a9901a5fba56da030f9",
+    "provenance/p5-baseline.json": "72d3d4b2a5b2bb2af54c8947eb8223f7c3494fff1454ea50bd7413d8d53ff048",
+    "provenance/p5-documentation-baseline.json": "d2b6d105c3b855ff2e8e4c48df31ebcd30588275e22d2c93b0c9674cae30ba16",
+    "provenance/preparation-scripts-baseline.json": "2bd07f9c6d3220d25829b48bab9e5ecdfa0d5054c6644b03fe3e6548be840033",
+    "provenance/public-resources-lock.json": "85837e0eee331a211960d89ede5c98e5e9ad9d162e6f4072c399d136c101f5ea",
+    "provenance/python310-hash-baseline.json": "be6c1a096aee8cfd09d68522bb389903651f1b935a4bc218e68e6b9d418915ef",
+    "provenance/regression-baseline.json": "dfe25d9314dcf1b87903f5f1a59b812340efc993cf505ec010422cba4a41ca0f",
+    "provenance/release-assets.json": "ef5a0328e50e82fdac47ce6c053515354fd636e7c6f38303c6977e09a669d8c6",
+    "provenance/runtime-baseline.json": "aafc62b5e0c7d2d7c4d0757b7e05abf1959c8e3fd3938df41ddf24e1cedf8eed",
+    "provenance/unified-baseline.json": "ec7e889f42174a56106b2761595c6ab12386c7197e2795549f746d3a4eb73dce",
+    "provenance/v0.1.1-baseline.json": "08f26802352104fdd82e12121a6d4e1785137edf151ee410cb3e6f6ef088d533",
+    "provenance/v8-main-baseline.json": "225fc571523f396884671e53add04681f645f4825d07556bcf60d22b2538e6b5",
+    "provenance/v8-r2-default-baseline.json": "0633ef04e40c6b4feaefe8b8c35305f9686edd346793ac9e24805d6fa0c64c17",
+    "provenance/v8-r2-results-baseline.json": "1ad19b0fb6a1c2235ad4d88d8ac05ac403099659f9dd7ca0b7f4f03d85253774",
+    "provenance/v8-readme-baseline.json": "7751e157cfce79e0275f463ac7a43eec77021d61ae8f9fec5d8f8d9586c72573",
+    "provenance/v8-unified-baseline.json": "c55b2ebc0d6fb4e25f8897c9330b9e59aa3769b9d0efd9de1bb72088a2a8bbf6",
+    "provenance/v8-upgrade-integration-baseline.json": "e9e8a761d3dbfa9313731ae0b295bb1732c621a3dfd8a6ef29195acd50c2f242"
+  },
+  "files": [
+    {
+      "destination": "cloud_checks/namespace.py",
+      "source_commit": "5bd66db378cba84d8d588fef389d4261b3ea73b5",
+      "source_sha256": "400134f8b373fea05cf60bf1e7241bb983ee73fef6660c11fe1f0f0ba219fc71",
+      "baseline_sha256": "400134f8b373fea05cf60bf1e7241bb983ee73fef6660c11fe1f0f0ba219fc71",
+      "release_sha256": "fc84d668d9570164d14ba840980a0fd4151357bff6e808b54dea7a4e4bc19669",
+      "reason": "Use the Ubuntu Azure archive mirror after archive.ubuntu.com returned HTTP 403; preserve the exact pinned Bubblewrap package digest, size verification, private mounts and privilege drop."
+    },
+    {
+      "destination": "tools/verify_release.py",
+      "source_commit": "5bd66db378cba84d8d588fef389d4261b3ea73b5",
+      "source_sha256": "ea012d8908c501f8e467f53d4da98b238ea1687066a2058bc12d6c43d66dfd32",
+      "baseline_sha256": "ea012d8908c501f8e467f53d4da98b238ea1687066a2058bc12d6c43d66dfd32",
+      "release_sha256": "8d83d4b95b2178489f9cbb8a0d13fd4bcfcd32fa6bd916bbeae97c7fdd8cf97e",
+      "reason": "Use the Ubuntu Azure archive mirror after archive.ubuntu.com returned HTTP 403; preserve the exact pinned Bubblewrap package digest, size verification, private mounts and privilege drop."
+    }
+  ]
+}
