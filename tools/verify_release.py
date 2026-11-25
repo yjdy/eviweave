@@ -69,7 +69,8 @@ def effective_provenance(members):
                      'provenance/v8-upgrade-integration-baseline.json',
                      'provenance/v8-r2-default-baseline.json',
                      'provenance/v8-readme-baseline.json',
-                     'provenance/python310-hash-baseline.json')
+                     'provenance/python310-hash-baseline.json',
+                     'provenance/v8-results-mirror-sync-baseline.json')
     overlays = [(name, json.loads(members[name])) for name in overlay_names if name in members]
     if overlay_names[1] in members and overlay_names[0] not in members:
         raise ValueError('documentation provenance requires retained P5 preparation overlay')
@@ -92,6 +93,9 @@ def effective_provenance(members):
     if ('provenance/python310-hash-baseline.json' in members
             and 'provenance/v8-readme-baseline.json' not in members):
         raise ValueError('Python 3.10 hashing fix requires retained README provenance')
+    if ('provenance/v8-results-mirror-sync-baseline.json' in members
+            and 'provenance/python310-hash-baseline.json' not in members):
+        raise ValueError('V8 results and mirror sync requires retained Python 3.10 provenance')
     additions = {e['destination'] for _, layer in overlays for e in layer['files']
                  if e['source_sha256'] is None}
     historical_names = {name for name in members if name.startswith('provenance/') and name.endswith('.json')

@@ -15,7 +15,7 @@ for block in metadata.split('\n\n'):
  if d.get('SHA256')=='706763714e5d19fc7ab2572a6418506e3a4a5d5960e99309707b58117e6b40cb' and d.get('Architecture')=='amd64':entries.append(d)
 assert entries,'Previously verified Ubuntu Bubblewrap prerequisite changed or unavailable'
 d=entries[0];archive=store/'bubblewrap.deb'
-with urllib.request.urlopen('https://archive.ubuntu.com/ubuntu/'+d['Filename'],timeout=120) as f:body=f.read(int(d['Size'])+1)
+with urllib.request.urlopen('https://azure.archive.ubuntu.com/ubuntu/'+d['Filename'],timeout=120) as f:body=f.read(int(d['Size'])+1)
 assert len(body)==int(d['Size']) and hashlib.sha256(body).hexdigest()==d['SHA256'];archive.write_bytes(body)
 subprocess.run(['dpkg-deb','-x',str(archive),str(store/'extracted')],check=True)
 upper=store/'usr-bin-upper';work=store/'usr-bin-work';upper.mkdir();work.mkdir();shutil.copyfile(store/'extracted/usr/bin/bwrap',upper/'bwrap');(upper/'bwrap').chmod(0o755)

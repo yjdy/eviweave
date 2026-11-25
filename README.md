@@ -18,16 +18,17 @@ The project provides:
 
 ### DataSpace results
 
-The official DataSpace leaderboard lists **EviWeave V8 + Qwen3.8-Flash** at **336/410 (81.95%)**, evaluated and published on **2026-11-20**, checked on **2026-11-23**. The historical V6 method is listed separately as **codex-controlled + Qwen3.8-Flash**.
+The official DataSpace leaderboard lists **EviWeave V8 R2 + Qwen3.8-Flash** at **339/410 (82.68%)**, evaluated on **2026-11-24**, published and checked on **2026-11-25**. The earlier V8 submission remains recorded below. The historical V6 method is listed separately as **codex-controlled + Qwen3.8-Flash**.
 
 | Result | Score | Meaning |
 |---|---:|---|
-| V8 official full-benchmark evaluation | **336/410, 81.95%** | Evaluated on 2026-11-20; checked on 2026-11-23 |
+| V8 R2 official full-benchmark evaluation | **339/410, 82.68%** | Evaluated on 2026-11-24; published and checked on 2026-11-25 |
+| Earlier V8 official full-benchmark evaluation | **336/410, 81.95%** | Evaluated on 2026-11-20; checked on 2026-11-23 |
 | V6 historical official full-benchmark evaluation | **333/410, 81.22%** | Evaluated on 2026-10-21; tied first when checked on 2026-10-24 |
 | V6 historical public-set first pass | **44/60** | Preserved initial run record |
 | V6 historical public set after fixed recovery | **45/60** | Offline scoring of the fixed historical prediction selection |
 
-See the [DataSpace leaderboard](https://dataspace-bench.github.io/#leaderboard) for official results. Rankings change; the table records dated observations. **The official V8 entry discloses that its submitted public-reference batch was selected after its score was known.** This is not an unselected first-pass result. The displayed cost uses the submitter’s recorded-usage subtotal, not a certified complete cost. Both leaderboard entries identify a requested model alias rather than an immutable service snapshot. The V8 score belongs to that submission, not to an evaluation of every later source revision.
+See the [DataSpace leaderboard](https://dataspace-bench.github.io/#leaderboard) for official results. Rankings change; the table records dated observations. **The earlier official V8 entry discloses that its submitted public-reference batch was selected after its score was known.** This is not an unselected first-pass result. The displayed cost uses the submitter’s recorded-usage subtotal, not a certified complete cost. The V8 R2 entry reports that displayed costs exclude 2 timeout attempts with unverified usage and that reconnect billing remains unresolved. These leaderboard entries identify a requested model alias rather than an immutable service snapshot. The V8 score belongs to that submission, not to an evaluation of every later source revision.
 
 **v0.1.0 was released on 2026-10-24.** It freezes the historical `relation-v6 + simple-fixes-v1` baseline with Codex **0.145.0**, **Qwen3.8-Flash**, and the Responses protocol. EviWeave Controlled will be developed separately and is outside this release. The historical leaderboard name and the future Controlled implementation are recorded separately.
 
@@ -355,7 +356,7 @@ Verify the saved experiment offline:
   --output .audit/public60-v8-verification
 ```
 
-The shared entry remains `scripts/experiment.sh`, backed by `tools/experiment.py`. V8 retains `predictions/task_N/prediction.csv`, attempt history, and the standard `summary.json`, `summary.csv`, `score.json`, and `report-set.json` outputs. Public scoring still covers only 60 reference tasks; the official 336/410 cannot be recomputed with public references alone. Older experiments must resume from their original checkout; the current prompt does not migrate their identities. The v0.1.0 evidence archive verifies historical V6 predictions, not the V8 submission.
+The shared entry remains `scripts/experiment.sh`, backed by `tools/experiment.py`. V8 retains `predictions/task_N/prediction.csv`, attempt history, and the standard `summary.json`, `summary.csv`, `score.json`, and `report-set.json` outputs. Public scoring still covers only 60 reference tasks; the official V8 R2 result of 339/410 cannot be recomputed with public references alone. Older experiments must resume from their original checkout; the current prompt does not migrate their identities. The v0.1.0 evidence archive verifies historical V6 predictions, not the V8 submission.
 
 ## 4. Future work
 
